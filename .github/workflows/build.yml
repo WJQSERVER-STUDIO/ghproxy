@@ -77,7 +77,7 @@ jobs:
       - name: 构建镜像
         uses: docker/build-push-action@v5
         with:
-          file: ./Dockerfile
+          file: ./${{ env.DOCKERFILE }}
           platforms: linux/amd64
           push: true
           tags: | 
