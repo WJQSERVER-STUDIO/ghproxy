@@ -42,7 +42,19 @@ jobs:
           path: |
             ./${{ env.OUTPUT_ARCHIVE }}
             ./${{ env.OUTPUT_BINARY }}
-
+      - name: 上传至Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          name: ${{ env.VERSION }}
+          artifacts: ./${{ env.OUTPUT_ARCHIVE }}, ./${{ env.OUTPUT_BINARY }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.VERSION }}
+          allowUpdates: true
+          prerelease: true
+        env:
+          export PATH: $PATH:/usr/local/go/bin 
+              
   docker:
     runs-on: ubuntu-latest
     needs: build
