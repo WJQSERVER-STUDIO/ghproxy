@@ -34,7 +34,7 @@ var (
 func loadConfig() {
 	var err error
 	// 初始化配置
-	cfg, err = config.LoadConfig("/data/go/config/config.yaml")
+	cfg, err = config.LoadConfig("/data/ghproxy/config/config.yaml")
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
