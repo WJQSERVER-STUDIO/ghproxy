@@ -1,1 +1,1 @@
-# ghproxy
+# golang-temp

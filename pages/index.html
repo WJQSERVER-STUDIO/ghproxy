@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Github文件加速">
+    <title>Github文件加速</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://font.sec.miui.com/font/css?family=MiSans:400,700:MiSans">
+    <style>
+        body {
+            background-color: #f8f9fac5;
+            font-family: 'Misans', Arial, sans-serif;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+        }
+
+        .container {
+            max-width: 800px;
+            text-align: center;
+            min-height: 45vh;
+        }
+
+        h1 {
+            font-weight: bold;
+            margin-bottom: 75px;
+        }
+
+        .rounded-button {
+            border-radius: 6px;
+            transition: background-color 0.3s, transform 0.2s;
+            padding: 10px 30px;
+            background-color: #39c5bb;
+            color: white;
+            border: none;
+            margin-bottom: 10px;
+        }
+
+        .rounded-button:hover {
+            background-color: #39c5bcda;
+            transform: scale(1.05);
+        }
+
+        .tips>p:first-child::before {
+            position: sticky;
+            color: #7b7b7b;
+            margin-bottom: 5px;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        pre::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 12px;
+            height: 12px;
+            background: #ff5f56;
+            border-radius: 50%;
+            box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f;
+        }
+
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 0.875em;
+
+        }
+
+        .code {
+            position: relative;
+            padding-right: 0px;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: rgba(118, 119, 121, 0.7);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            z-index: 1;
+        }
+
+        pre:hover .copy-button {
+            opacity: 1;
+        }
+
+        #visitor-info {
+            margin-top: 10px;
+            text-align: center;
+            line-height: 0.5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Github文件加速</h1>
+        <div class="form-group">
+            <input type="text" class="form-control" id="githubLinkInput" placeholder="键入Github链接">
+        </div>
+        <button class="btn rounded-button" id="formatButton">获取文件链接</button>
+
+        <div class="code" id="outputBlock">
+            <button class="copy-button" id="copyButton" onclick="copyCode(this)">Copy</button>
+            <pre id="formattedLinkOutput"></pre>
+        </div>
+        <div class="tips">
+            <p>GitHub链接带不带协议头均可，支持release、archive以及文件，转换后链接均可使用</a>。</p>
+            <p id="sizeLimitDisplay">文件大小限制: ...</p>
+        </div>
+    </div>
+
+    <script>
+        function formatGithubLink() {
+            var githubLinkInput = document.getElementById('githubLinkInput');
+            var currentHost = window.location.host;
+            var formattedLink = "";
+
+            if (githubLinkInput.value.startsWith("https://github.com/") || githubLinkInput.value.startsWith("http://github.com/")) {
+                formattedLink = "https://" + currentHost + "/github.com" + githubLinkInput.value.substring(githubLinkInput.value.indexOf("/", 8));
+            } else if (githubLinkInput.value.startsWith("github.com/")) {
+                formattedLink = "https://" + currentHost + "/" + githubLinkInput.value;
+            } else if (githubLinkInput.value.startsWith("https://raw.githubusercontent.com/") || githubLinkInput.value.startsWith("http://raw.githubusercontent.com/")) {
+                formattedLink = "https://" + currentHost + githubLinkInput.value.substring(githubLinkInput.value.indexOf("/", 7));
+            } else if (githubLinkInput.value.startsWith("raw.githubusercontent.com/")) {
+                formattedLink = "https://" + currentHost + "/" + githubLinkInput.value;
+            } else if (!githubLinkInput.value.trim()) {
+                alert('请输入有效的GitHub链接');
+            }
+            var formattedLinkOutput = document.getElementById('formattedLinkOutput');
+            formattedLinkOutput.textContent = formattedLink;
+        }
+
+        document.getElementById('formatButton').addEventListener('click', formatGithubLink);
+        document.getElementById('copyButton').addEventListener('click', function () {
+            const output = document.getElementById('formattedLinkOutput');
+            const range = document.createRange();
+            range.selectNode(output);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+            alert('链接已复制到剪贴板');
+        });
+
+        function fetchAPI() {
+            fetch(window.location.origin + '/api')
+                .then(response => response.json())
+                .then(data => {
+                    const sizeLimitDisplay = document.getElementById('sizeLimitDisplay');
+                    const sizeInMB = (data.MaxResponseBodySize / (1024 * 1024)).toFixed(0);
+                    sizeLimitDisplay.textContent = `文件大小限制: ${sizeInMB} MB`;
+                })
+                .catch(error => {
+                    console.error('Error fetching API:', error);
+
+                });
+        }
+        document.addEventListener('DOMContentLoaded', fetchAPI);
+    </script>
+</body>
+
+<footer>
+    <p>
+        Copyright &copy; 2024 WJQSERVER-STUDIO
+    </p>
+    <p>
+        GitHub仓库地址：<a
+            href="https://github.com/WJQSERVER-STUDIO/ghproxy">https://github.com/WJQSERVER-STUDIO/ghproxy</a>
+    </p>
+    <div id="visitor-info" style="text-align: center; margin-top: 15px;">
+        <p>您的IP地址: <span id="visitor-ip"></span></p>
+        <p>当前位置: <span id="visitor-country"></span> <img id="visitor-flag" src="" alt="" width="24" height="16"></p>
+    </div>
+    <script>
+        fetch('https://ip.1888866.xyz/ip-lookup')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('网络响应失败');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('visitor-ip').textContent = data.ip;
+                document.getElementById('visitor-country').textContent = data.country_name;
+                document.getElementById('visitor-flag').src = `https://flagcdn.com/w20/${data.country_code.toLowerCase()}.png`;
+            })
+            .catch(error => {
+                console.error('获取地理位置信息失败:', error);
+                const visitorInfo = document.getElementById('visitor-info');
+                visitorInfo.innerHTML = '<p>无法获取您的地理位置信息，请稍后再试。</p>';
+            });
+    </script>
+</footer>
+
+</html>

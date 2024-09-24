@@ -1,0 +1,99 @@
+{
+    debug
+    http_port 80
+    https_port 443
+    order cache before rewrite
+    cache {
+        cache_name W-Cache
+    }
+    log {
+        level INFO
+        output file /data/caddy/log/caddy.log {
+            roll_size 5MB
+            roll_keep 10
+        }            
+    }        
+}
+
+(log) {
+    log {
+        format transform `{request>headers>X-Forwarded-For>[0]:request>remote_ip} - {user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size} "{request>headers>Referer>[0]}" "{request>headers>User-Agent>[0]}"` {
+            time_format "02/Jan/2006:15:04:05 -0700"
+        }
+	    output file /data/caddy/log/{args.0}/access.log {
+	        roll_size 5MB
+	        roll_keep 10
+	        roll_keep_for 24h
+	    }
+    }
+}
+
+(error_page) {
+    handle_errors {
+	    rewrite * /{err.status_code}.html
+	    root * /data/caddy/pages/errors
+        file_server
+    }
+}
+
+(encode) {
+    encode {
+        zstd best
+        br 5 v2
+        gzip 5
+        minimum_length 512
+    }
+}
+
+(cache) {
+    cache {
+         allowed_http_verbs GET
+         stale {args.0}
+         ttl {args.1}
+    }    
+}
+
+(header_realip) {
+    header_up X-Real-IP {remote_host}	    
+	header_up X-Real-IP {http.request.header.CF-Connecting-IP}
+	header_up X-Forwarded-For {http.request.header.CF-Connecting-IP}
+	header_up X-Forwarded-Proto {http.request.header.CF-Visitor}
+}
+
+(buffer) {
+    flush_interval 2000s
+	buffer_responses
+	max_buffer_size 256k
+}
+
+(rate_limit) {
+    route /* {
+        rate_limit {remote.ip} {args.0}r/m 10000 429
+    }    
+}
+
+:80 {
+    reverse_proxy {
+        to 127.0.0.1:8080
+        import header_realip
+    }
+    import log go
+    import cache 0s 600s
+    import error_page  
+    import encode
+    route /* {
+        rate_limit {remote.ip} 60r/m 10000 429
+    }  
+    route / {
+        root /data/www
+        file_server
+        import cache 0s 24h
+    }
+    route /favicon.ico {
+        root /data/www
+        file_server
+        import cache 60s 24h
+    }
+}
+
+import /data/caddy/config.d/*

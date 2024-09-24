@@ -1,0 +1,7 @@
+port: 8080
+host: "127.0.0.1"
+sizelimit: 131072000 # 125MB
+logfilepath: "/data/ghproxy/log/ghproxy-0rtt.log"
+CorsAllowOrigins: true
+auth: true
+authtoken: "test"

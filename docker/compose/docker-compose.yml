@@ -1,0 +1,11 @@
+version: '3.9'
+services:
+    ghproxy:
+        image: 'wjqserver/ghproxy:latest'
+        restart: always
+        volumes:
+            - './ghproxy/log/run:/data/ghproxy/log'
+            - './ghproxy/log/caddy:/data/caddy/log'
+            - './ghproxy/config:/data/ghproxy/config'
+        ports:
+            - '7210:80'

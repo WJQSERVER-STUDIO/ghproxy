@@ -1,0 +1,77 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'VERSION'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      OUTPUT_BINARY: ghproxy
+      OUTPUT_ARCHIVE: ghproxy.tar.gz
+      GO_VERSION: 1.23.1
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Load VERSION
+        run: |
+          if [ -f VERSION ]; then
+            echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV
+          else
+            echo "VERSION file not found!" && exit 1
+          fi
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Build
+        run: |
+          go build -o  ${{ env.OUTPUT_BINARY }} ./main.go
+      - name: Package
+        run: |
+          tar -czvf ${{ env.OUTPUT_ARCHIVE }} ./${{ env.OUTPUT_BINARY }}
+      - name: Upload to GitHub Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.OUTPUT_BINARY }}
+          path: |
+            ./${{ env.OUTPUT_ARCHIVE }}
+            ./${{ env.OUTPUT_BINARY }}
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: build  # 确保这个作业在 build 作业完成后运行
+    env:
+      IMAGE_NAME: wjqserver/ghproxy-test  # 定义镜像名称变量
+      DOCKERFILE: docker/dockerfile/release/Dockerfile
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 构建镜像
+        uses: docker/build-push-action@v5
+        with:
+          file: ./Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: | 
+            ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+            ${{ env.IMAGE_NAME }}:latest
