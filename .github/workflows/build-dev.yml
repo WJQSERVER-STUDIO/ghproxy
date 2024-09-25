@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     env:
-      IMAGE_NAME: wjqserver/ghproxy-test
+      IMAGE_NAME: wjqserver/ghproxy
       DOCKERFILE: docker/dockerfile/dev/Dockerfile
         
     steps:

@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build  # 确保这个作业在 build 作业完成后运行
     env:
-      IMAGE_NAME: wjqserver/ghproxy-test  # 定义镜像名称变量
+      IMAGE_NAME: wjqserver/ghproxy  # 定义镜像名称变量
       DOCKERFILE: docker/dockerfile/release/Dockerfile
 
     steps:

@@ -94,6 +94,23 @@
         file_server
         import cache 60s 24h
     }
+    
+    handle_errors {
+        @redirects `{err.status_code} in [301, 302, 307]`
+        reverse_proxy @redirects {
+            header_up Location {http.response.header.Location}
+        }
+    }
+
+    route /v2* {
+        reverse_proxy https://registry-1.docker.io {
+            header_up Host registry-1.docker.io
+            header_up X-Real-IP {remote}
+            header_up X-Forwarded-For {http.request.header.X-Forwarded-For}
+            header_up X-Forwarded-Proto {scheme}
+            header_up Authorization {http.request.header.Authorization}
+        }
+    }
 }
 
 import /data/caddy/config.d/*
