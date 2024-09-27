@@ -18,7 +18,7 @@ func AuthHandler(c *gin.Context, cfg *config.Config) bool {
 
 	// 获取 auth_token 参数
 	authToken := c.Query("auth_token")
-	log("auth_token received: %s", authToken)
+	logw("auth_token received: %s", authToken)
 
 	// 验证 token
 	if authToken == "" {
