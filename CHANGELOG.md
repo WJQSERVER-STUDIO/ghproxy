@@ -1,5 +1,13 @@
 # 更新日志
 
+24w06b
+---
+- CHANGE: 优化代码结构,对main函数进行模块化,提升可读性
+- CHANGE: Docker代理功能移至DEV版本内,保证稳定性
+- ADD&CHANGE: 增加Auth(用户鉴权)模块,并改进其的错误处理与日志记录
+- CHANGE: 日志模块引入goroutine协程,提升性能 (实验性功能)
+- ADD: 将主要实现分离,作为Proxy模块,并优化代码结构
+
 v1.0.0
 ---
 - CHANGE: 项目正式发布, 并迁移至[WJQSERVER-STUDIO/ghproxy](https://github.com/WJQSERVER-STUDIO/ghproxy)
