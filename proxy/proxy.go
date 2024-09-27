@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"ghproxy/auth"
 	"ghproxy/config"
 	"ghproxy/logger"
 
@@ -25,17 +26,21 @@ var (
 	}
 )
 
-var cfg *config.Config
+// var cfg *config.Config
 var logw = logger.Logw
 
-func NoRouteHandler(config *config.Config) gin.HandlerFunc {
+func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		rawPath := strings.TrimPrefix(c.Request.URL.RequestURI(), "/")
 		re := regexp.MustCompile(`^(http:|https:)?/?/?(.*)`)
 		matches := re.FindStringSubmatch(rawPath)
 
-		rawPath = "https://" + matches[2]
+		if len(matches) < 3 {
+			c.String(http.StatusBadRequest, "Invalid URL format.")
+			return
+		}
 
+		rawPath = "https://" + matches[2]
 		matches = checkURL(rawPath)
 		if matches == nil {
 			c.String(http.StatusForbidden, "Invalid input.")
@@ -46,24 +51,22 @@ func NoRouteHandler(config *config.Config) gin.HandlerFunc {
 			rawPath = strings.Replace(rawPath, "/blob/", "/raw/", 1)
 		}
 
-		if !AuthHandler(c) {
+		if !auth.AuthHandler(c) {
 			c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
 			logw("Unauthorized request: %s", rawPath)
 			return
 		}
 
-		// 日志记录
 		logw("Request: %s %s", c.Request.Method, rawPath)
 		logw("Matches: %v", matches)
 
-		// 代理请求
 		switch {
 		case exps[0].MatchString(rawPath), exps[1].MatchString(rawPath), exps[3].MatchString(rawPath), exps[4].MatchString(rawPath):
 			logw("%s Matched - USE proxy-chrome", rawPath)
-			proxyRequest(c, rawPath, config, "chrome")
+			proxyRequest(c, rawPath, cfg, "chrome")
 		case exps[2].MatchString(rawPath):
 			logw("%s Matched - USE proxy-git", rawPath)
-			proxyRequest(c, rawPath, config, "git")
+			proxyRequest(c, rawPath, cfg, "git")
 		default:
 			c.String(http.StatusForbidden, "Invalid input.")
 			return
@@ -71,7 +74,7 @@ func NoRouteHandler(config *config.Config) gin.HandlerFunc {
 	}
 }
 
-func proxyRequest(c *gin.Context, u string, config *config.Config, mode string) {
+func proxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 	method := c.Request.Method
 	logw("%s Method: %s", u, method)
 
@@ -79,9 +82,7 @@ func proxyRequest(c *gin.Context, u string, config *config.Config, mode string) 
 
 	switch mode {
 	case "chrome":
-		client.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36").
-			SetTLSFingerprintChrome().
-			ImpersonateChrome()
+		client.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36").SetTLSFingerprintChrome().ImpersonateChrome()
 	case "git":
 		client.SetUserAgent("git/2.33.1")
 	}
@@ -93,6 +94,11 @@ func proxyRequest(c *gin.Context, u string, config *config.Config, mode string) 
 		return
 	}
 	defer c.Request.Body.Close()
+
+	if err := c.Request.Body.Close(); err != nil {
+		logw("Failed to close request body: %v", err)
+		return
+	}
 
 	// 创建新的请求
 	req := client.R().SetBody(body)
@@ -112,13 +118,12 @@ func proxyRequest(c *gin.Context, u string, config *config.Config, mode string) 
 	}
 	defer resp.Body.Close()
 
-	// 检查响应内容长度并处理重定向
-	if err := handleResponseSize(resp, config, c); err != nil {
+	if err := handleResponseSize(resp, cfg, c); err != nil {
 		logw("Error handling response size: %v", err)
 		return
 	}
 
-	copyResponseHeaders(resp, c, config)
+	copyResponseHeaders(resp, c, cfg)
 	c.Status(resp.StatusCode)
 	if _, err := io.Copy(c.Writer, resp.Body); err != nil {
 		logw("Failed to copy response body: %v", err)
@@ -140,13 +145,13 @@ func sendRequest(req *req.Request, method, url string) (*req.Response, error) {
 	}
 }
 
-func handleResponseSize(resp *req.Response, config *config.Config, c *gin.Context) error {
+func handleResponseSize(resp *req.Response, cfg *config.Config, c *gin.Context) error {
 	contentLength := resp.Header.Get("Content-Length")
 	if contentLength != "" {
 		size, err := strconv.Atoi(contentLength)
-		if err == nil && size > config.SizeLimit {
+		if err == nil && size > cfg.SizeLimit {
 			finalURL := resp.Request.URL.String()
-			c.Redirect(http.StatusMovedPermanently, finalURL)
+			c.Redirect(http.StatusTemporaryRedirect, finalURL) // 改为临时重定向
 			logw("Redirecting to %s due to size limit (%d bytes)", finalURL, size)
 			return fmt.Errorf("response size exceeds limit")
 		}
@@ -154,7 +159,7 @@ func handleResponseSize(resp *req.Response, config *config.Config, c *gin.Contex
 	return nil
 }
 
-func copyResponseHeaders(resp *req.Response, c *gin.Context, config *config.Config) {
+func copyResponseHeaders(resp *req.Response, c *gin.Context, cfg *config.Config) {
 	headersToRemove := []string{"Content-Security-Policy", "Referrer-Policy", "Strict-Transport-Security"}
 
 	for _, header := range headersToRemove {
@@ -167,7 +172,7 @@ func copyResponseHeaders(resp *req.Response, c *gin.Context, config *config.Conf
 		}
 	}
 
-	if config.CORSOrigin {
+	if cfg.CORSOrigin {
 		c.Header("Access-Control-Allow-Origin", "*")
 	} else {
 		c.Header("Access-Control-Allow-Origin", "")
@@ -175,7 +180,7 @@ func copyResponseHeaders(resp *req.Response, c *gin.Context, config *config.Conf
 }
 
 func handleError(c *gin.Context, message string) {
-	c.String(http.StatusInternalServerError, fmt.Sprintf("server error %v", message))
+	c.String(http.StatusInternalServerError, fmt.Sprintf("Server error: %v", message))
 	logw(message)
 }
 
@@ -190,7 +195,7 @@ func checkURL(u string) []string {
 	return nil
 }
 
-func AuthHandler(c *gin.Context) bool {
+/*func AuthHandler(c *gin.Context) bool {
 	// 如果身份验证未启用，直接返回 true
 	if !cfg.Auth {
 		logw("auth PASS")
@@ -208,4 +213,4 @@ func AuthHandler(c *gin.Context) bool {
 	}
 
 	return isValid
-}
+}*/
