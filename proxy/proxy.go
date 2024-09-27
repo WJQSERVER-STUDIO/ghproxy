@@ -35,7 +35,7 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 
 		rawPath = "https://" + matches[2]
 
-		matches = checkURL(rawPath)
+		matches = CheckURL(rawPath)
 		if matches == nil {
 			c.String(http.StatusForbidden, "Invalid input.")
 			return
@@ -57,10 +57,10 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 		switch {
 		case exps[0].MatchString(rawPath), exps[1].MatchString(rawPath), exps[3].MatchString(rawPath), exps[4].MatchString(rawPath):
 			logw("%s Matched - USE proxy-chrome", rawPath)
-			proxyRequest(c, rawPath, cfg, "chrome")
+			ProxyRequest(c, rawPath, cfg, "chrome")
 		case exps[2].MatchString(rawPath):
 			logw("%s Matched - USE proxy-git", rawPath)
-			proxyRequest(c, rawPath, cfg, "git")
+			ProxyRequest(c, rawPath, cfg, "git")
 		default:
 			c.String(http.StatusForbidden, "Invalid input.")
 			return
@@ -68,7 +68,7 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 	}
 }
 
-func proxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
+func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 	method := c.Request.Method
 	logw("%s Method: %s", u, method)
 
@@ -85,7 +85,7 @@ func proxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		handleError(c, fmt.Sprintf("Failed to read request body: %v", err))
+		HandleError(c, fmt.Sprintf("Failed to read request body: %v", err))
 		return
 	}
 	defer c.Request.Body.Close()
@@ -98,26 +98,26 @@ func proxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 		}
 	}
 
-	resp, err := sendRequest(req, method, u)
+	resp, err := SendRequest(req, method, u)
 	if err != nil {
-		handleError(c, fmt.Sprintf("Failed to send request: %v", err))
+		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
 	}
 	defer resp.Body.Close()
 
-	if err := handleResponseSize(resp, cfg, c); err != nil {
+	if err := HandleResponseSize(resp, cfg, c); err != nil {
 		logw("Error handling response size: %v", err)
 		return
 	}
 
-	copyResponseHeaders(resp, c, cfg)
+	CopyResponseHeaders(resp, c, cfg)
 	c.Status(resp.StatusCode)
 	if _, err := io.Copy(c.Writer, resp.Body); err != nil {
 		logw("Failed to copy response body: %v", err)
 	}
 }
 
-func sendRequest(req *req.Request, method, url string) (*req.Response, error) {
+func SendRequest(req *req.Request, method, url string) (*req.Response, error) {
 	switch method {
 	case "GET":
 		return req.Get(url)
@@ -132,7 +132,7 @@ func sendRequest(req *req.Request, method, url string) (*req.Response, error) {
 	}
 }
 
-func handleResponseSize(resp *req.Response, cfg *config.Config, c *gin.Context) error {
+func HandleResponseSize(resp *req.Response, cfg *config.Config, c *gin.Context) error {
 	contentLength := resp.Header.Get("Content-Length")
 	if contentLength != "" {
 		size, err := strconv.Atoi(contentLength)
@@ -146,7 +146,7 @@ func handleResponseSize(resp *req.Response, cfg *config.Config, c *gin.Context) 
 	return nil
 }
 
-func copyResponseHeaders(resp *req.Response, c *gin.Context, cfg *config.Config) {
+func CopyResponseHeaders(resp *req.Response, c *gin.Context, cfg *config.Config) {
 	headersToRemove := []string{"Content-Security-Policy", "Referrer-Policy", "Strict-Transport-Security"}
 
 	for _, header := range headersToRemove {
@@ -166,12 +166,12 @@ func copyResponseHeaders(resp *req.Response, c *gin.Context, cfg *config.Config)
 	}
 }
 
-func handleError(c *gin.Context, message string) {
+func HandleError(c *gin.Context, message string) {
 	c.String(http.StatusInternalServerError, fmt.Sprintf("server error %v", message))
 	logw(message)
 }
 
-func checkURL(u string) []string {
+func CheckURL(u string) []string {
 	for _, exp := range exps {
 		if matches := exp.FindStringSubmatch(u); matches != nil {
 			logw("URL matched: %s, Matches: %v", u, matches[1:])
