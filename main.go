@@ -34,6 +34,7 @@ func setupLogger() {
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
+	logw("Config loaded")
 	logw("Logger initialized")
 	logw("Init Completed")
 }
@@ -61,7 +62,10 @@ func init() {
 	})
 
 	// 未匹配路由处理
-	router.NoRoute(proxy.NoRouteHandler(cfg))
+	//router.NoRoute(proxy.NoRouteHandler(cfg))
+	router.NoRoute(func(c *gin.Context) {
+		proxy.NoRouteHandler(cfg)(c)
+	})
 }
 
 func main() {
