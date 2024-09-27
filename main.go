@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 
-	"ghproxy/auth"
 	"ghproxy/config"
 	"ghproxy/logger"
 
@@ -97,6 +96,14 @@ func api(c *gin.Context) {
 	})
 }
 
+func AuthHandler(c *gin.Context) bool {
+	if cfg.Auth {
+		authToken := c.Query("auth_token")
+		return authToken == cfg.AuthToken
+	}
+	return true
+}
+
 func noRouteHandler(config *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		rawPath := strings.TrimPrefix(c.Request.URL.RequestURI(), "/")
@@ -115,7 +122,7 @@ func noRouteHandler(config *config.Config) gin.HandlerFunc {
 			rawPath = strings.Replace(rawPath, "/blob/", "/raw/", 1)
 		}
 
-		if !auth.AuthHandler(c) {
+		if !AuthHandler(c) {
 			c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
 			logw("Unauthorized request: %s", rawPath)
 			return
