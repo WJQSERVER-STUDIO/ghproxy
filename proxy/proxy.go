@@ -1,3 +1,4 @@
+// proxy/proxy.go
 package proxy
 
 import (
@@ -16,18 +17,15 @@ import (
 	"github.com/imroc/req/v3"
 )
 
-var (
-	exps = []*regexp.Regexp{
-		regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:releases|archive)/.*`),
-		regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:blob|raw)/.*`),
-		regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:info|git-).*`),
-		regexp.MustCompile(`^(?:https?://)?raw\.github(?:usercontent|)\.com/([^/]+)/([^/]+)/.+?/.+`),
-		regexp.MustCompile(`^(?:https?://)?gist\.github\.com/([^/]+)/.+?/.+`),
-	}
-)
-
-// var cfg *config.Config
 var logw = logger.Logw
+
+var exps = []*regexp.Regexp{
+	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:releases|archive)/.*`),
+	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:blob|raw)/.*`),
+	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:info|git-).*`),
+	regexp.MustCompile(`^(?:https?://)?raw\.github(?:usercontent|)\.com/([^/]+)/([^/]+)/.+?/.+`),
+	regexp.MustCompile(`^(?:https?://)?gist\.github\.com/([^/]+)/.+?/.+`),
+}
 
 func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -35,12 +33,8 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 		re := regexp.MustCompile(`^(http:|https:)?/?/?(.*)`)
 		matches := re.FindStringSubmatch(rawPath)
 
-		if len(matches) < 3 {
-			c.String(http.StatusBadRequest, "Invalid URL format.")
-			return
-		}
-
 		rawPath = "https://" + matches[2]
+
 		matches = checkURL(rawPath)
 		if matches == nil {
 			c.String(http.StatusForbidden, "Invalid input.")
@@ -82,12 +76,13 @@ func proxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 
 	switch mode {
 	case "chrome":
-		client.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36").SetTLSFingerprintChrome().ImpersonateChrome()
+		client.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36").
+			SetTLSFingerprintChrome().
+			ImpersonateChrome()
 	case "git":
 		client.SetUserAgent("git/2.33.1")
 	}
 
-	// 读取请求体
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		handleError(c, fmt.Sprintf("Failed to read request body: %v", err))
@@ -95,22 +90,14 @@ func proxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 	}
 	defer c.Request.Body.Close()
 
-	if err := c.Request.Body.Close(); err != nil {
-		logw("Failed to close request body: %v", err)
-		return
-	}
-
-	// 创建新的请求
 	req := client.R().SetBody(body)
 
-	// 复制请求头
 	for key, values := range c.Request.Header {
 		for _, value := range values {
 			req.SetHeader(key, value)
 		}
 	}
 
-	// 发送请求并处理响应
 	resp, err := sendRequest(req, method, u)
 	if err != nil {
 		handleError(c, fmt.Sprintf("Failed to send request: %v", err))
@@ -151,7 +138,7 @@ func handleResponseSize(resp *req.Response, cfg *config.Config, c *gin.Context) 
 		size, err := strconv.Atoi(contentLength)
 		if err == nil && size > cfg.SizeLimit {
 			finalURL := resp.Request.URL.String()
-			c.Redirect(http.StatusTemporaryRedirect, finalURL) // 改为临时重定向
+			c.Redirect(http.StatusMovedPermanently, finalURL)
 			logw("Redirecting to %s due to size limit (%d bytes)", finalURL, size)
 			return fmt.Errorf("response size exceeds limit")
 		}
@@ -180,7 +167,7 @@ func copyResponseHeaders(resp *req.Response, c *gin.Context, cfg *config.Config)
 }
 
 func handleError(c *gin.Context, message string) {
-	c.String(http.StatusInternalServerError, fmt.Sprintf("Server error: %v", message))
+	c.String(http.StatusInternalServerError, fmt.Sprintf("server error %v", message))
 	logw(message)
 }
 
@@ -194,23 +181,3 @@ func checkURL(u string) []string {
 	logw("Invalid URL: %s", u)
 	return nil
 }
-
-/*func AuthHandler(c *gin.Context) bool {
-	// 如果身份验证未启用，直接返回 true
-	if !cfg.Auth {
-		logw("auth PASS")
-		return true
-	}
-
-	// 获取 auth_token 参数
-	authToken := c.Query("auth_token")
-	logw("auth_token: ", authToken)
-
-	// 验证 token
-	isValid := authToken == cfg.AuthToken
-	if !isValid {
-		logw("auth FAIL")
-	}
-
-	return isValid
-}*/
