@@ -18,6 +18,7 @@ import (
 )
 
 var logw = logger.Logw
+var cfg *config.Config
 
 var exps = []*regexp.Regexp{
 	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:releases|archive)/.*`),
