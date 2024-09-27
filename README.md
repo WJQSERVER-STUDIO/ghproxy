@@ -63,7 +63,7 @@ docker run -p 7210:80 -v ./ghproxy/log/run:/data/ghproxy/log -v ./ghproxy/log/ca
 port: 8080  # 监听端口
 host: "127.0.0.1"  # 监听地址
 sizelimit: 131072000 # 125MB
-logfilepath: "/data/ghproxy/log/ghproxy-0rtt.log"  # 日志文件路径
+logfilepath: "/data/ghproxy/log/ghproxy.log"  # 日志文件路径
 CorsAllowOrigins: true  # 是否允许跨域请求
 auth: true  # 是否开启鉴权
 authtoken: "test"  # 鉴权token
