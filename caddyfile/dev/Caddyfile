@@ -77,7 +77,7 @@
         to 127.0.0.1:8080
         import header_realip
     }
-    import log go
+    import log ghproxy
     import cache 0s 600s
     import error_page  
     import encode

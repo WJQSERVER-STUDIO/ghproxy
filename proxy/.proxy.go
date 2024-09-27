@@ -1,4 +1,4 @@
-// proxy/proxy.go
+// proxy/proxy.go 实验性
 package proxy
 
 import (
