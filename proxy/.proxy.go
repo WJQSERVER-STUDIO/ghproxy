@@ -45,7 +45,7 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 			rawPath = strings.Replace(rawPath, "/blob/", "/raw/", 1)
 		}
 
-		if !auth.AuthHandler(c) {
+		if !auth.AuthHandler(c, cfg) {
 			c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
 			logw("Unauthorized request: %s", rawPath)
 			return

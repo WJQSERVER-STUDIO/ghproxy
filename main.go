@@ -97,11 +97,23 @@ func api(c *gin.Context) {
 }
 
 func AuthHandler(c *gin.Context) bool {
-	if cfg.Auth {
-		authToken := c.Query("auth_token")
-		return authToken == cfg.AuthToken
+	// 如果身份验证未启用，直接返回 true
+	if !cfg.Auth {
+		logw("auth PASS")
+		return true
 	}
-	return true
+
+	// 获取 auth_token 参数
+	authToken := c.Query("auth_token")
+	logw("auth_token: ", authToken)
+
+	// 验证 token
+	isValid := authToken == cfg.AuthToken
+	if !isValid {
+		logw("auth FAIL")
+	}
+
+	return isValid
 }
 
 func noRouteHandler(config *config.Config) gin.HandlerFunc {
