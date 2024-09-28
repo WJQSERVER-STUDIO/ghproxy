@@ -84,7 +84,7 @@ example.com {
 }
 ```
 
-## TODO & BETA
+## TODO & DEV
 
 ### TODO
 
@@ -92,6 +92,6 @@ example.com {
 - [x] 改进程序效率
 - [x] 用户鉴权
 
-### BETA
+### DEV
 
 - [x] Docker Pull 代理
