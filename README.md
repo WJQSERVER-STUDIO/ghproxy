@@ -14,6 +14,7 @@
 - 支持Docker部署
 - 支持速率限制
 - 支持用户鉴权
+- 符合[RFC 7234](https://httpwg.org/specs/rfc7234.html)的HTTP Cache
 - 使用Caddy作为Web Server
 - 基于[WJQSERVER-STUDIO/golang-temp](https://github.com/WJQSERVER-STUDIO/golang-temp)模板构建,具有标准化的日志记录与构建流程
 
