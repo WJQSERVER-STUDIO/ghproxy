@@ -17,6 +17,7 @@ import (
 var cfg *config.Config
 var logw = logger.Logw
 var router *gin.Engine
+var configfile = "/data/ghproxy/config/config.yaml"
 
 var (
 	exps = []*regexp.Regexp{
@@ -31,7 +32,7 @@ var (
 func loadConfig() {
 	var err error
 	// 初始化配置
-	cfg, err = config.LoadConfig("/data/ghproxy/config/config.yaml")
+	cfg, err = config.LoadConfig(configfile)
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
