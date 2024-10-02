@@ -5,6 +5,8 @@
 
 使用Go实现的GHProxy,用于加速部分地区Github仓库的拉取,支持速率限制,用户鉴权,支持Docker部署
 
+[DEMO](ghproxy.1888866.xyz)
+
 ## 项目说明
 
 ### 项目特点
