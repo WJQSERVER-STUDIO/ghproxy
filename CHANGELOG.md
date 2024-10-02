@@ -1,5 +1,17 @@
 # 更新日志
 
+v1.1.1
+---
+- CHANGE: 修改部分代码，与golang-temp项目定义的开发规范保持一致
+- CHANGE: 更新Go版本至v1.23.2
+- CHANGE: 跟随Caddy更新,修改Caddyfile配置
+
+24w07b
+---
+- CHANGE: 修改部分代码，与golang-temp项目定义的开发规范保持一致
+- CHANGE: 更新Go版本至v1.23.2
+- CHANGE: 跟随Caddy更新,修改Caddyfile配置
+
 24w07a
 ---
 - CHANGE: 修改部分代码，与golang-temp项目定义的开发规范保持一致
