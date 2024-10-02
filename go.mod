@@ -1,6 +1,6 @@
 module ghproxy
 
-go 1.23.1
+go 1.23.2
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect

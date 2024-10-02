@@ -14,7 +14,7 @@ jobs:
     env:
       OUTPUT_BINARY: ghproxy
       OUTPUT_ARCHIVE: ghproxy.tar.gz
-      GO_VERSION: 1.23.1
+      GO_VERSION: 1.23.2
 
     steps:
       - uses: actions/checkout@v3
