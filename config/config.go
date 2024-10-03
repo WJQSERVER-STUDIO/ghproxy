@@ -11,6 +11,7 @@ type Config struct {
 	Host        string `yaml:"host"`
 	SizeLimit   int    `yaml:"sizelimit"`
 	LogFilePath string `yaml:"logfilepath"`
+	MaxLogSize  int    `yaml:"maxlogsize"`
 	CORSOrigin  bool   `yaml:"CorsAllowOrigins"`
 	Auth        bool   `yaml:"auth"`
 	AuthToken   string `yaml:"authtoken"`

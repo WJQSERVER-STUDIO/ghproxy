@@ -42,7 +42,7 @@ func loadConfig() {
 func setupLogger() {
 	// 初始化日志模块
 	var err error
-	err = logger.Init(cfg.LogFilePath) // 传递日志文件路径
+	err = logger.Init(cfg.LogFilePath, cfg.MaxLogSize) // 传递日志文件路径
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
