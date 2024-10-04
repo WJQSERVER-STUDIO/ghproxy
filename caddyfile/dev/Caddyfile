@@ -60,12 +60,6 @@
 	header_up X-Forwarded-Proto {http.request.header.CF-Visitor}
 }
 
-(buffer) {
-    flush_interval 2000s
-	buffer_responses
-	max_buffer_size 256k
-}
-
 (rate_limit) {
     route /* {
         rate_limit {remote.ip} {args[0]}r/m 10000 429
@@ -81,9 +75,7 @@
     import cache 0s 600s
     import error_page  
     import encode
-    route /* {
-        rate_limit {remote.ip} 60r/m 10000 429
-    }  
+    import rate_limit 60 
     route / {
         root /data/www
         file_server
