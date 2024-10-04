@@ -129,6 +129,7 @@ func SendRequest(req *req.Request, method, url string) (*req.Response, error) {
 	case "DELETE":
 		return req.Delete(url)
 	default:
+		logw("Unsupported method: %s", method)
 		return nil, fmt.Errorf("unsupported method: %s", method)
 	}
 }
@@ -148,9 +149,13 @@ func HandleResponseSize(resp *req.Response, cfg *config.Config, c *gin.Context) 
 }
 
 func CopyResponseHeaders(resp *req.Response, c *gin.Context, cfg *config.Config) {
-	headersToRemove := []string{"Content-Security-Policy", "Referrer-Policy", "Strict-Transport-Security"}
+	headersToRemove := map[string]struct{}{
+		"Content-Security-Policy":   {},
+		"Referrer-Policy":           {},
+		"Strict-Transport-Security": {},
+	}
 
-	for _, header := range headersToRemove {
+	for header := range headersToRemove {
 		resp.Header.Del(header)
 	}
 
@@ -160,10 +165,9 @@ func CopyResponseHeaders(resp *req.Response, c *gin.Context, cfg *config.Config)
 		}
 	}
 
+	c.Header("Access-Control-Allow-Origin", "")
 	if cfg.CORSOrigin {
 		c.Header("Access-Control-Allow-Origin", "*")
-	} else {
-		c.Header("Access-Control-Allow-Origin", "")
 	}
 }
 
@@ -179,6 +183,7 @@ func CheckURL(u string) []string {
 			return matches[1:]
 		}
 	}
-	logw("Invalid URL: %s", u)
+	errMsg := fmt.Sprintf("Invalid URL: %s", u)
+	logw(errMsg)
 	return nil
 }

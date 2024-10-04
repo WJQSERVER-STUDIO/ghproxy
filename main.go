@@ -14,10 +14,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var cfg *config.Config
-var logw = logger.Logw
-var router *gin.Engine
-var configfile = "/data/ghproxy/config/config.yaml"
+var (
+	cfg        *config.Config
+	logw       = logger.Logw
+	router     *gin.Engine
+	configfile = "/data/ghproxy/config/config.yaml"
+)
 
 var (
 	exps = []*regexp.Regexp{

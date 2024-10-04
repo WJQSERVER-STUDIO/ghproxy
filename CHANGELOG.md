@@ -1,5 +1,11 @@
 # 更新日志
 
+v1.2.0
+---
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: 同步更新logger模块，与golang-temp项目定义的开发规范保持一致
+- ADD: 新增日志翻转功能
+
 24w08a
 ---
 - CHANGE: 同步更新logger模块，与golang-temp项目定义的开发规范保持一致
