@@ -16,6 +16,7 @@
 - 支持Docker部署
 - 支持速率限制
 - 支持用户鉴权
+- 支持自定义黑名单
 - 符合[RFC 7234](https://httpwg.org/specs/rfc7234.html)的HTTP Cache
 - 使用Caddy作为Web Server
 - 基于[WJQSERVER-STUDIO/golang-temp](https://github.com/WJQSERVER-STUDIO/golang-temp)模板构建,具有标准化的日志记录与构建流程
@@ -62,7 +63,7 @@ docker run -p 7210:80 -v ./ghproxy/log/run:/data/ghproxy/log -v ./ghproxy/log/ca
 本项目采用config.yaml作为外部配置,默认配置如下
 使用Docker部署时,慎重修改config.yaml,以免造成不必要的麻烦
 
-```
+```yaml
 # 核心配置
 server:
   port: 8080  # 监听端口(小白请勿修改)
@@ -86,13 +87,27 @@ auth:
 # 黑名单配置
 blacklist:
   enabled: true
-  blacklistfile: "/data/ghproxy/config/blacklist.yaml"
+  blacklistfile: "/data/ghproxy/config/blacklist.json"
 
 ```
+
+### 黑名单配置
+
+黑名单配置位于config/blacklist.json,格式如下:
+
+```json
+{
+    "blacklist": [
+      "test/test1",
+      "example/repo2",
+      "another/repo3"
+    ]
+  }
+```  
 
 ### Caddy反代配置
 
-```
+```Caddyfile
 example.com {
     reverse_proxy {
         to 127.0.0.1:7210
@@ -112,9 +127,8 @@ example.com {
 - [x] 允许更多参数通过config结构传入
 - [x] 改进程序效率
 - [x] 用户鉴权
-- [ ] 仓库黑名单
+- [x] 仓库黑名单
 
 ### DEV
 
 - [x] Docker Pull 代理
-- [x] 仓库黑名单

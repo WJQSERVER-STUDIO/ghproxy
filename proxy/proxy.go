@@ -32,7 +32,6 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 		rawPath := strings.TrimPrefix(c.Request.URL.RequestURI(), "/")
 		re := regexp.MustCompile(`^(http:|https:)?/?/?(.*)`)
 		matches := re.FindStringSubmatch(rawPath)
-		logw("Matches: %v", matches[2])
 
 		if len(matches) < 3 {
 			logw("Invalid URL: %s", rawPath)
@@ -59,8 +58,9 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 		// 黑名单检查
 		blacklistpass := auth.CheckBlacklist(fullrepo)
 		if blacklistpass {
-			c.AbortWithStatus(http.StatusForbidden)
-			logw("Blacklisted repo: %s", fullrepo)
+			errMsg := fmt.Sprintf("Blacklist Blocked repo: %s", fullrepo)
+			c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
+			logw(errMsg)
 			return
 		}
 
@@ -80,7 +80,6 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 			return
 		}
 
-		logw("Request: %s %s", c.Request.Method, rawPath)
 		logw("Matches: %v", matches)
 
 		switch {
@@ -99,7 +98,7 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 
 func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 	method := c.Request.Method
-	logw("%s Method: %s", u, method)
+	logw("%s %s", method, u)
 
 	client := req.C()
 

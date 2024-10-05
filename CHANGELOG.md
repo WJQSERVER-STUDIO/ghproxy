@@ -1,5 +1,15 @@
 # 更新日志
 
+v1.3.0
+---
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: 优化黑名单功能,提升稳定性
+- CHANGE: 剃刀计划,减少调试用日志输出
+- ADD： 新增auth子模块blacklist.go,支持黑名单功能
+- ADD: 新增blacklist.json文件,用于配置黑名单
+- CHANGE: config.yaml文件格式修改,使其具备更好的可读性
+- WARNING: 此版本为大版本更新,配置文件重构,此版本不再向前兼容,请注意备份文件并重新部署
+
 24w09b
 ---
 - CHANGE: 优化代码结构,提升性能

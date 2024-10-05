@@ -12,7 +12,6 @@ var logw = logger.Logw
 func AuthHandler(c *gin.Context, cfg *config.Config) bool {
 	// 如果身份验证未启用，直接返回 true
 	if !cfg.Auth.Enabled {
-		logw("auth PASSED")
 		return true
 	}
 
@@ -31,5 +30,6 @@ func AuthHandler(c *gin.Context, cfg *config.Config) bool {
 		logw("auth FAILED: invalid auth_token: %s", authToken)
 	}
 
+	logw("auth SUCCESS: %t", isValid)
 	return isValid
 }
