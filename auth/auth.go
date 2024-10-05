@@ -38,6 +38,14 @@ func IsBlacklisted(username, repo string, blacklist map[string][]string, enabled
 	if !enabled {
 		return false
 	}
+
+	// 检查 blacklist 是否为 nil
+	if blacklist == nil {
+		// 可以选择记录日志或返回 false
+		logw("Warning: Blacklist map is nil")
+		return false
+	}
+
 	if repos, ok := blacklist[username]; ok {
 		for _, blacklistedRepo := range repos {
 			if blacklistedRepo == repo {
@@ -45,5 +53,6 @@ func IsBlacklisted(username, repo string, blacklist map[string][]string, enabled
 			}
 		}
 	}
+
 	return false
 }
