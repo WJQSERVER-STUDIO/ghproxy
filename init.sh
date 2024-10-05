@@ -6,12 +6,12 @@ if [ ! -f /data/caddy/config/Caddyfile ]; then
     cp /data/caddy/Caddyfile /data/caddy/config/Caddyfile
 fi
 
-if [ ! -f /data/${APPLICATON}/config/blacklist.yaml ]; then
-    cp /data/${APPLICATON}/blacklist.yaml /data/${APPLICATON}/config/blacklist.yaml
+if [ ! -f /data/${APPLICATON}/config/blacklist.json ]; then
+    cp /data/${APPLICATON}/blacklist.json /data/${APPLICATON}/config/blacklist.json
 fi
 
-if [ ! -f /data/${APPLICATON}/config/config.json ]; then
-    cp /data/${APPLICATON}/config.json /data/${APPLICATON}/config/config.json
+if [ ! -f /data/${APPLICATON}/config/config.yaml ]; then
+    cp /data/${APPLICATON}/config.yaml /data/${APPLICATON}/config/config.yaml
 fi
 
 /data/caddy/caddy run --config /data/caddy/config/Caddyfile > /data/${APPLICATON}/log/caddy.log 2>&1 &
