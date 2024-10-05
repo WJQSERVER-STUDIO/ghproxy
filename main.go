@@ -16,7 +16,7 @@ import (
 
 var (
 	cfg        *config.Config
-	blacklist  *config.BlacklistMap
+	blist      *config.Blist
 	logw       = logger.Logw
 	router     *gin.Engine
 	configfile = "/data/ghproxy/config/config.yaml"
@@ -87,7 +87,7 @@ func init() {
 
 	// 未匹配路由处理
 	router.NoRoute(func(c *gin.Context) {
-		proxy.NoRouteHandler(cfg, config.BlacklistMap{})(c)
+		proxy.NoRouteHandler(cfg, blist)(c)
 	})
 }
 

@@ -30,7 +30,7 @@ var exps = []*regexp.Regexp{
 	regexp.MustCompile(`^(?:https?://)?gist\.github\.com/([^/]+)/.+?/.+`),
 }
 
-func NoRouteHandler(cfg *config.Config, bmap config.BlacklistMap) gin.HandlerFunc {
+func NoRouteHandler(cfg *config.Config, blist *config.Blist) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		rawPath := strings.TrimPrefix(c.Request.URL.RequestURI(), "/")
 		re := regexp.MustCompile(`^(http:|https:)?/?/?(.*)`)
@@ -60,7 +60,7 @@ func NoRouteHandler(cfg *config.Config, bmap config.BlacklistMap) gin.HandlerFun
 		fullrepo := fmt.Sprintf("%s/%s", username, repo)
 
 		// 黑名单检查
-		blacklistpass := auth.CheckBlacklist(fullrepo)
+		blacklistpass := auth.CheckBlacklist(fullrepo, blist.Blacklist)
 		if blacklistpass {
 			c.AbortWithStatusJSON(404, gin.H{"error": "Not found"})
 			logw("Blacklisted repo: %s", fullrepo)

@@ -1,9 +1,4 @@
 blacklist:
-  username1:
-    - repo1
-    - repo2
-  username2:
-    - repo3
-    - repo4
-  username3:
-    - repo5
+    - test/test1
+    - example/repo2
+    - another/repo3
