@@ -19,6 +19,7 @@ import (
 
 var logw = logger.Logw
 var cfg *config.Config
+var blacklist *config.Blacklist
 
 var exps = []*regexp.Regexp{
 	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:releases|archive)/.*`),
@@ -28,7 +29,7 @@ var exps = []*regexp.Regexp{
 	regexp.MustCompile(`^(?:https?://)?gist\.github\.com/([^/]+)/.+?/.+`),
 }
 
-func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
+func NoRouteHandler(cfg *config.Config, blacklist *config.Blacklist) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		rawPath := strings.TrimPrefix(c.Request.URL.RequestURI(), "/")
 		re := regexp.MustCompile(`^(http:|https:)?/?/?(.*)`)
@@ -36,9 +37,27 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 
 		rawPath = "https://" + matches[2]
 
+		// 提取用户名和仓库名，格式为 <username>/<repo>
+		pathParts := strings.Split(matches[2], "/")
+		if len(pathParts) < 2 {
+			logw("Invalid path: %s", rawPath)
+			c.String(http.StatusForbidden, "Invalid path; expected username/repo.")
+			return
+		}
+		username := pathParts[0]
+		repo := pathParts[1]
+		logw("Blacklist Check > Username: %s, Repo: %s", username, repo)
+
+		// 检查仓库是否在黑名单中
+		if auth.IsBlacklisted(username, repo, blacklist.Blacklist, cfg.Blacklist.Enabled) {
+			c.String(http.StatusForbidden, "Access denied: repository is blacklisted.")
+			logw("Blacklisted repository: %s/%s", username, repo)
+			return
+		}
+
 		matches = CheckURL(rawPath)
 		if matches == nil {
-			c.String(http.StatusForbidden, "Invalid input.")
+			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
 
@@ -138,7 +157,7 @@ func HandleResponseSize(resp *req.Response, cfg *config.Config, c *gin.Context) 
 	contentLength := resp.Header.Get("Content-Length")
 	if contentLength != "" {
 		size, err := strconv.Atoi(contentLength)
-		if err == nil && size > cfg.SizeLimit {
+		if err == nil && size > cfg.Server.SizeLimit {
 			finalURL := resp.Request.URL.String()
 			c.Redirect(http.StatusMovedPermanently, finalURL)
 			logw("Redirecting to %s due to size limit (%d bytes)", finalURL, size)
@@ -166,7 +185,7 @@ func CopyResponseHeaders(resp *req.Response, c *gin.Context, cfg *config.Config)
 	}
 
 	c.Header("Access-Control-Allow-Origin", "")
-	if cfg.CORSOrigin {
+	if cfg.CORS.Enabled {
 		c.Header("Access-Control-Allow-Origin", "*")
 	}
 }

@@ -63,13 +63,31 @@ docker run -p 7210:80 -v ./ghproxy/log/run:/data/ghproxy/log -v ./ghproxy/log/ca
 使用Docker部署时,慎重修改config.yaml,以免造成不必要的麻烦
 
 ```
-port: 8080  # 监听端口
-host: "127.0.0.1"  # 监听地址
-sizelimit: 131072000 # 125MB
-logfilepath: "/data/ghproxy/log/ghproxy.log"  # 日志文件路径
-CorsAllowOrigins: true  # 是否允许跨域请求
-auth: true  # 是否开启鉴权
-authtoken: "test"  # 鉴权token
+# 核心配置
+server:
+  port: 8080  # 监听端口(小白请勿修改)
+  host: "127.0.0.1"  # 监听地址(小白请勿修改)
+  sizelimit: 131072000 # 125MB
+
+# 日志配置
+logger:
+  logfilepath: "/data/ghproxy/log/ghproxy.log"  # 日志文件路径（小白请勿修改）
+  maxlogsize: 25 # MB
+
+# CORS 配置
+cors:
+  enabled: true  # 是否开启CORS
+
+# 鉴权配置
+auth:
+  enabled: false  # 是否开启鉴权
+  authtoken: "test"  # 鉴权Token
+
+# 黑名单配置
+blacklist:
+  enabled: true
+  blacklistfile: "/data/ghproxy/config/blacklist.yaml"
+
 ```
 
 ### Caddy反代配置
@@ -94,7 +112,9 @@ example.com {
 - [x] 允许更多参数通过config结构传入
 - [x] 改进程序效率
 - [x] 用户鉴权
+- [ ] 仓库黑名单
 
 ### DEV
 
 - [x] Docker Pull 代理
+- [x] 仓库黑名单

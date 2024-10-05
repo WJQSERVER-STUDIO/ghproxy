@@ -1,5 +1,15 @@
 # 更新日志
 
+24w08b
+---
+- CHANGE: 优化代码结构,提升性能
+- ADD & CHANGE: 新增仓库黑名单功能,改进Auth模块
+- ADD: 新增blacklist.yaml文件,用于配置仓库黑名单
+- CHANGE: 大幅度修改Config包,使其更加模块化
+- CHANGE: 与Config包同步修改config.yaml文件(不向前兼容)
+- CHANGE: 修改config.yaml文件的格式,使其具备更好的可读性
+- WARNING: 由于config.yaml文件修改,此版本不再向前兼容,请注意备份文件并重新部署
+
 v1.2.0
 ---
 - CHANGE: 优化代码结构,提升性能

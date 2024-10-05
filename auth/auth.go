@@ -11,7 +11,7 @@ var logw = logger.Logw
 
 func AuthHandler(c *gin.Context, cfg *config.Config) bool {
 	// 如果身份验证未启用，直接返回 true
-	if !cfg.Auth {
+	if !cfg.Auth.Enabled {
 		logw("auth PASSED")
 		return true
 	}
@@ -26,10 +26,24 @@ func AuthHandler(c *gin.Context, cfg *config.Config) bool {
 		return false
 	}
 
-	isValid := authToken == cfg.AuthToken
+	isValid := authToken == cfg.Auth.AuthToken
 	if !isValid {
 		logw("auth FAILED: invalid auth_token: %s", authToken)
 	}
 
 	return isValid
+}
+
+func IsBlacklisted(username, repo string, blacklist map[string][]string, enabled bool) bool {
+	if !enabled {
+		return false
+	}
+	if repos, ok := blacklist[username]; ok {
+		for _, blacklistedRepo := range repos {
+			if blacklistedRepo == repo {
+				return true
+			}
+		}
+	}
+	return false
 }

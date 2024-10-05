@@ -16,6 +16,7 @@ import (
 
 var (
 	cfg        *config.Config
+	blacklist  *config.Blacklist
 	logw       = logger.Logw
 	router     *gin.Engine
 	configfile = "/data/ghproxy/config/config.yaml"
@@ -41,10 +42,19 @@ func loadConfig() {
 	fmt.Printf("Loaded config: %v\n", cfg)
 }
 
+func loadBlacklistConfig() {
+	// 初始化黑名单配置
+	blacklist, err := config.LoadBlacklistConfig("/data/ghproxy/config/blacklist.yaml")
+	if err != nil {
+		log.Fatalf("Failed to load blacklist: %v", err)
+	}
+	logw("Loaded blacklist: %v", blacklist)
+}
+
 func setupLogger() {
 	// 初始化日志模块
 	var err error
-	err = logger.Init(cfg.LogFilePath, cfg.MaxLogSize) // 传递日志文件路径
+	err = logger.Init(cfg.Log.LogFilePath, cfg.Log.MaxLogSize) // 传递日志文件路径
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
@@ -55,6 +65,7 @@ func setupLogger() {
 func init() {
 	loadConfig()
 	setupLogger()
+	loadBlacklistConfig()
 
 	// 设置 Gin 模式
 	gin.SetMode(gin.ReleaseMode)
@@ -76,13 +87,13 @@ func init() {
 
 	// 未匹配路由处理
 	router.NoRoute(func(c *gin.Context) {
-		proxy.NoRouteHandler(cfg)(c)
+		proxy.NoRouteHandler(cfg, blacklist)(c)
 	})
 }
 
 func main() {
 	// 启动服务器
-	err := router.Run(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
+	err := router.Run(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port))
 	if err != nil {
 		log.Fatalf("Error starting server: %v\n", err)
 	}
@@ -94,6 +105,6 @@ func api(c *gin.Context) {
 	// 设置响应头
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
-		"MaxResponseBodySize": cfg.SizeLimit,
+		"MaxResponseBodySize": cfg.Server.SizeLimit,
 	})
 }
