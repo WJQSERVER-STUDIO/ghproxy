@@ -39,13 +39,13 @@ func NoRouteHandler(cfg *config.Config, blacklist *config.Blacklist) gin.Handler
 
 		// 提取用户名和仓库名，格式为 <username>/<repo>
 		pathParts := strings.Split(matches[2], "/")
-		if len(pathParts) < 2 {
+		if len(pathParts) < 3 {
 			logw("Invalid path: %s", rawPath)
 			c.String(http.StatusForbidden, "Invalid path; expected username/repo.")
 			return
 		}
-		username := pathParts[0]
-		repo := pathParts[1]
+		username := pathParts[1]
+		repo := pathParts[2]
 		logw("Blacklist Check > Username: %s, Repo: %s", username, repo)
 
 		// 检查仓库是否在黑名单中

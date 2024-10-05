@@ -10,7 +10,6 @@ if [ ! -f /data/${APPLICATON}/config/blacklist.yaml ]; then
     cp /data/${APPLICATON}/blacklist.yaml /data/${APPLICATON}/config/blacklist.yaml
 fi
 
-
 if [ ! -f /data/${APPLICATON}/config/config.yaml ]; then
     cp /data/${APPLICATON}/config.yaml /data/${APPLICATON}/config/config.yaml
 fi
