@@ -12,12 +12,12 @@ type Config struct {
 
 var (
 	cfg           *config.Config
-	configfile    = "/data/ghproxy/config/config.yaml"
 	blacklistfile = "/data/ghproxy/config/blacklist.json"
 	blacklist     *Config
 )
 
-func init() {
+func LoadBlacklist(cfg *config.Config) {
+	blacklistfile = cfg.Blacklist.BlacklistFile
 	blacklist = &Config{}
 
 	data, err := os.ReadFile(blacklistfile)

@@ -21,4 +21,4 @@ auth:
 # Blacklist Configuration
 blacklist:
   enabled: true
-  blacklistfile: "/data/ghproxy/config/blacklist.yaml"
+  blacklistfile: "/data/ghproxy/config/blacklist.json"

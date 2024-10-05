@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"ghproxy/auth"
 	"ghproxy/config"
 	"ghproxy/logger"
 	"ghproxy/proxy"
@@ -52,9 +53,14 @@ func setupLogger() {
 	logw("Init Completed")
 }
 
+func LoadBlacklist(cfg *config.Config) {
+	auth.LoadBlacklist(cfg)
+}
+
 func init() {
 	loadConfig()
 	setupLogger()
+	LoadBlacklist(cfg)
 
 	// 设置 Gin 模式
 	gin.SetMode(gin.ReleaseMode)

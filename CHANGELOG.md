@@ -1,11 +1,18 @@
 # 更新日志
 
+24w09b
+---
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: 修正配置,提升稳定性
+- WARNING: 此版本配置文件重构,此版本不再向前兼容,请注意备份文件并重新部署
+
 24w09a
 ---
 - CHANGE: 优化代码结构,提升性能
 - CHANGE: 优化黑名单功能,提升稳定性
 - CHANGE&ADD: 新增auth子模块blacklist.go
 - CHANGE: 黑名单转为使用json文件存储,便于程序处理
+- WARNING: 此版本配置文件重构,此版本不再向前兼容,请注意备份文件并重新部署
 
 24w08b
 ---
@@ -15,7 +22,7 @@
 - CHANGE: 大幅度修改Config包,使其更加模块化
 - CHANGE: 与Config包同步修改config.yaml文件(不向前兼容)
 - CHANGE: 修改config.yaml文件的格式,使其具备更好的可读性
-- WARNING: 由于config.yaml文件修改,此版本不再向前兼容,请注意备份文件并重新部署
+- WARNING: 此版本配置文件重构,此版本不再向前兼容,请注意备份文件并重新部署
 
 v1.2.0
 ---
