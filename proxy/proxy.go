@@ -35,18 +35,27 @@ func NoRouteHandler(cfg *config.Config, blacklist *config.Blacklist) gin.Handler
 		rawPath := strings.TrimPrefix(c.Request.URL.RequestURI(), "/")
 		re := regexp.MustCompile(`^(http:|https:)?/?/?(.*)`)
 		matches := re.FindStringSubmatch(rawPath)
+		logw("Matches: %v", matches[2])
+
+		if len(matches) < 3 {
+			logw("Invalid URL: %s", rawPath)
+			c.String(http.StatusForbidden, "Invalid URL.")
+			return
+		}
 
 		rawPath = "https://" + matches[2]
 
-		// 提取用户名和仓库名，格式为 <username>/<repo>
-		pathParts := strings.Split(matches[2], "/")
-		if len(pathParts) < 3 {
+		// 提取用户名和仓库名，格式为 handle/<username>/<repo>/*
+		pathmatches := regexp.MustCompile(`^([^/]+)/([^/]+)/([^/]+)/.*`)
+		pathParts := pathmatches.FindStringSubmatch(matches[2])
+		if len(pathParts) < 4 {
 			logw("Invalid path: %s", rawPath)
 			c.String(http.StatusForbidden, "Invalid path; expected username/repo.")
 			return
 		}
-		username := pathParts[1]
-		repo := pathParts[2]
+
+		username := pathParts[2]
+		repo := pathParts[3]
 		logw("Blacklist Check > Username: %s, Repo: %s", username, repo)
 
 		if blacklist.Blist == nil {
