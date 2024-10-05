@@ -48,14 +48,14 @@ func NoRouteHandler(cfg *config.Config, blacklist *config.Blacklist) gin.Handler
 		repo := pathParts[2]
 		logw("Blacklist Check > Username: %s, Repo: %s", username, repo)
 
-		if blacklist.Blacklist == nil {
+		if blacklist.Blist == nil {
 			logw("Warning: Blacklist map is nil")
 			// 根据需要初始化或处理
-			blacklist.Blacklist = make(map[string][]string)
+			blacklist.Blist = make(map[string][]string)
 		}
 
 		// 检查仓库是否在黑名单中
-		if auth.IsBlacklisted(username, repo, blacklist.Blacklist, cfg.Blacklist.Enabled) {
+		if auth.IsBlacklisted(username, repo, blacklist.Blist, cfg.Blacklist.Enabled) {
 			c.String(http.StatusForbidden, "Access denied: repository is blacklisted.")
 			logw("Blacklisted repository: %s/%s", username, repo)
 			return
