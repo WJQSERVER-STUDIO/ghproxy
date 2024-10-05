@@ -65,6 +65,8 @@ func NoRouteHandler(cfg *config.Config, blist *config.Blist) gin.HandlerFunc {
 			c.AbortWithStatusJSON(404, gin.H{"error": "Not found"})
 			logw("Blacklisted repo: %s", fullrepo)
 			return
+		} else {
+			logw("Not blacklisted: %s", fullrepo)
 		}
 
 		matches = CheckURL(rawPath)
