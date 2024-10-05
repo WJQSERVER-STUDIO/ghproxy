@@ -60,7 +60,7 @@ func NoRouteHandler(cfg *config.Config, blist *config.Blist) gin.HandlerFunc {
 		fullrepo := fmt.Sprintf("%s/%s", username, repo)
 
 		// 黑名单检查
-		blacklistpass := auth.CheckBlacklist(fullrepo, blist.Blacklist)
+		blacklistpass := auth.CheckBlacklist(fullrepo)
 		if blacklistpass {
 			c.AbortWithStatusJSON(404, gin.H{"error": "Not found"})
 			logw("Blacklisted repo: %s", fullrepo)
