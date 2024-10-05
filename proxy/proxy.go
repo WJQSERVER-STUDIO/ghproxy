@@ -30,7 +30,7 @@ var exps = []*regexp.Regexp{
 	regexp.MustCompile(`^(?:https?://)?gist\.github\.com/([^/]+)/.+?/.+`),
 }
 
-func NoRouteHandler(cfg *config.Config, blacklist *config.Blacklist) gin.HandlerFunc {
+func NoRouteHandler(cfg *config.Config, bmap config.BlacklistMap) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		rawPath := strings.TrimPrefix(c.Request.URL.RequestURI(), "/")
 		re := regexp.MustCompile(`^(http:|https:)?/?/?(.*)`)
@@ -57,17 +57,13 @@ func NoRouteHandler(cfg *config.Config, blacklist *config.Blacklist) gin.Handler
 		username := pathParts[2]
 		repo := pathParts[3]
 		logw("Blacklist Check > Username: %s, Repo: %s", username, repo)
+		fullrepo := fmt.Sprintf("%s/%s", username, repo)
 
-		if blacklist.Blist == nil {
-			logw("Warning: Blacklist map is nil")
-			// 根据需要初始化或处理
-			blacklist.Blist = make(map[string][]string)
-		}
-
-		// 检查仓库是否在黑名单中
-		if auth.IsBlacklisted(username, repo, blacklist.Blist, cfg.Blacklist.Enabled) {
-			c.String(http.StatusForbidden, "Access denied: repository is blacklisted.")
-			logw("Blacklisted repository: %s/%s", username, repo)
+		// 黑名单检查
+		blacklistpass := auth.CheckBlacklist(fullrepo)
+		if !blacklistpass {
+			c.AbortWithStatusJSON(404, gin.H{"error": "Not found"})
+			logw("Blacklisted repo: %s", fullrepo)
 			return
 		}
 

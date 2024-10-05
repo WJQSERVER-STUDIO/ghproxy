@@ -16,7 +16,7 @@ import (
 
 var (
 	cfg        *config.Config
-	blacklist  *config.Blacklist
+	blacklist  *config.BlacklistMap
 	logw       = logger.Logw
 	router     *gin.Engine
 	configfile = "/data/ghproxy/config/config.yaml"
@@ -44,7 +44,7 @@ func loadConfig() {
 
 func loadBlacklistConfig() {
 	// 初始化黑名单配置
-	blacklist, err := config.LoadBlacklistConfig("/data/ghproxy/config/blacklist.yaml")
+	blacklist, err := config.LoadBlacklistConfig(cfg.Blacklist.BlacklistFile)
 	if err != nil {
 		log.Fatalf("Failed to load blacklist: %v", err)
 	}
@@ -87,7 +87,7 @@ func init() {
 
 	// 未匹配路由处理
 	router.NoRoute(func(c *gin.Context) {
-		proxy.NoRouteHandler(cfg, blacklist)(c)
+		proxy.NoRouteHandler(cfg, config.BlacklistMap{})(c)
 	})
 }
 
