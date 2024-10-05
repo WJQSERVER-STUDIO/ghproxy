@@ -1,44 +1,38 @@
 package auth
 
 import (
-	"fmt"
+	"encoding/json"
 	"ghproxy/config"
-	"log"
+	"os"
 )
 
+type Config struct {
+	Blacklist []string `json:"blacklist"`
+}
+
 var (
-	cfg        *config.Config
-	configfile = "/data/ghproxy/config/config.yaml"
-	blacklist  *config.Blist
+	cfg           *config.Config
+	configfile    = "/data/ghproxy/config/config.yaml"
+	blacklistfile = "/data/ghproxy/config/blacklist.json"
+	blacklist     *Config
 )
 
 func init() {
-	loadBlacklistConfig()
-}
+	blacklist = &Config{}
 
-func loadConfig() {
-	var err error
-	// 初始化配置
-	cfg, err = config.LoadConfig(configfile)
+	data, err := os.ReadFile(blacklistfile)
 	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
+		logw("Failed to read blacklist file: %v", err)
 	}
-	fmt.Printf("Loaded config: %v\n", cfg)
-}
 
-func loadBlacklistConfig() {
-	var err error
-	// 初始化黑名单配置
-	blacklist, err = config.LoadBlacklistConfig(cfg.Blacklist.BlacklistFile)
+	err = json.Unmarshal(data, blacklist)
 	if err != nil {
-		log.Fatalf("Failed to load blacklist: %v", err)
+		logw("Failed to unmarshal blacklist JSON: %v", err)
 	}
-	logw("Loaded blacklist: %v", blacklist)
 }
 
 func CheckBlacklist(fullrepo string) bool {
-	forRangeCheck(blacklist.Blacklist, fullrepo)
-	return false
+	return forRangeCheck(blacklist.Blacklist, fullrepo)
 }
 
 func forRangeCheck(blist []string, fullrepo string) bool {
