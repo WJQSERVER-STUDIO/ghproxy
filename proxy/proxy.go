@@ -61,7 +61,7 @@ func NoRouteHandler(cfg *config.Config, bmap config.BlacklistMap) gin.HandlerFun
 
 		// 黑名单检查
 		blacklistpass := auth.CheckBlacklist(fullrepo)
-		if !blacklistpass {
+		if blacklistpass {
 			c.AbortWithStatusJSON(404, gin.H{"error": "Not found"})
 			logw("Blacklisted repo: %s", fullrepo)
 			return
