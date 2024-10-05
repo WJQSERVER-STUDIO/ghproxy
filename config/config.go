@@ -33,10 +33,6 @@ type Config struct {
 	} `yaml:"blacklist"`
 }
 
-type Blist struct {
-	Blacklist []string `yaml:"blacklist"`
-}
-
 // LoadConfig 从 YAML 配置文件加载配置
 func LoadConfig(filePath string) (*Config, error) {
 	var config Config
@@ -44,15 +40,6 @@ func LoadConfig(filePath string) (*Config, error) {
 		return nil, err
 	}
 	return &config, nil
-}
-
-// LoadBlacklistConfig 从 YAML 配置文件加载黑名单配置
-func LoadBlacklistConfig(filePath string) (*Blist, error) {
-	var blacklist Blist
-	if err := loadYAML(filePath, &blacklist); err != nil {
-		return nil, err
-	}
-	return &blacklist, nil
 }
 
 // LoadyamlConfig 从 YAML 配置文件加载配置

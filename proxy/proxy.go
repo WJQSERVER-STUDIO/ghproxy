@@ -19,9 +19,6 @@ import (
 
 var logw = logger.Logw
 
-//var cfg *config.Config
-//var blacklist *config.Blacklist
-
 var exps = []*regexp.Regexp{
 	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:releases|archive)/.*`),
 	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:blob|raw)/.*`),
@@ -30,7 +27,7 @@ var exps = []*regexp.Regexp{
 	regexp.MustCompile(`^(?:https?://)?gist\.github\.com/([^/]+)/.+?/.+`),
 }
 
-func NoRouteHandler(cfg *config.Config, blist *config.Blist) gin.HandlerFunc {
+func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		rawPath := strings.TrimPrefix(c.Request.URL.RequestURI(), "/")
 		re := regexp.MustCompile(`^(http:|https:)?/?/?(.*)`)
@@ -62,11 +59,9 @@ func NoRouteHandler(cfg *config.Config, blist *config.Blist) gin.HandlerFunc {
 		// 黑名单检查
 		blacklistpass := auth.CheckBlacklist(fullrepo)
 		if blacklistpass {
-			c.AbortWithStatusJSON(404, gin.H{"error": "Not found"})
+			c.AbortWithStatus(http.StatusForbidden)
 			logw("Blacklisted repo: %s", fullrepo)
 			return
-		} else {
-			logw("Not blacklisted: %s", fullrepo)
 		}
 
 		matches = CheckURL(rawPath)

@@ -16,7 +16,6 @@ import (
 
 var (
 	cfg        *config.Config
-	blist      *config.Blist
 	logw       = logger.Logw
 	router     *gin.Engine
 	configfile = "/data/ghproxy/config/config.yaml"
@@ -42,15 +41,6 @@ func loadConfig() {
 	fmt.Printf("Loaded config: %v\n", cfg)
 }
 
-func loadBlacklistConfig() {
-	// 初始化黑名单配置
-	blacklist, err := config.LoadBlacklistConfig(cfg.Blacklist.BlacklistFile)
-	if err != nil {
-		log.Fatalf("Failed to load blacklist: %v", err)
-	}
-	logw("Loaded blacklist: %v", blacklist)
-}
-
 func setupLogger() {
 	// 初始化日志模块
 	var err error
@@ -65,7 +55,6 @@ func setupLogger() {
 func init() {
 	loadConfig()
 	setupLogger()
-	loadBlacklistConfig()
 
 	// 设置 Gin 模式
 	gin.SetMode(gin.ReleaseMode)
@@ -87,7 +76,7 @@ func init() {
 
 	// 未匹配路由处理
 	router.NoRoute(func(c *gin.Context) {
-		proxy.NoRouteHandler(cfg, blist)(c)
+		proxy.NoRouteHandler(cfg)(c)
 	})
 }
 

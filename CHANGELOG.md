@@ -1,5 +1,12 @@
 # 更新日志
 
+24w09a
+---
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: 优化黑名单功能,提升稳定性
+- CHANGE&ADD: 新增auth子模块blacklist.go
+- CHANGE: 黑名单转为使用json文件存储,便于程序处理
+
 24w08b
 ---
 - CHANGE: 优化代码结构,提升性能
