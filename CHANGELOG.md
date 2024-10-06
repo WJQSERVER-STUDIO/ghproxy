@@ -1,10 +1,22 @@
 # 更新日志
 
+v1.3.1
+---
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: 剃刀计划,减少多余日志输出
+- CHANGE: 调整缓存参数
+
+24w10a
+---
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: 剃刀计划,减少多余日志输出
+- CHANGE: 调整缓存参数
+
 v1.3.0
 ---
 - CHANGE: 优化代码结构,提升性能
 - CHANGE: 优化黑名单功能,提升稳定性
-- CHANGE: 剃刀计划,减少调试用日志输出
+- CHANGE: 剃刀计划,减少多余日志输出
 - ADD： 新增auth子模块blacklist.go,支持黑名单功能
 - ADD: 新增blacklist.json文件,用于配置黑名单
 - CHANGE: config.yaml文件格式修改,使其具备更好的可读性

@@ -7,7 +7,7 @@ server:
 # Logging Configuration
 logger:
   logfilepath: "/data/ghproxy/log/ghproxy.log"
-  maxlogsize: 25 # MB
+  maxlogsize: 5 # MB
 
 # CORS Configuration
 cors:

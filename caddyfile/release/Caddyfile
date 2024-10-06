@@ -60,12 +60,6 @@
 	header_up X-Forwarded-Proto {http.request.header.CF-Visitor}
 }
 
-(buffer) {
-    flush_interval 2000s
-	buffer_responses
-	max_buffer_size 256k
-}
-
 (rate_limit) {
     route /* {
         rate_limit {remote.ip} {args[0]}r/m 10000 429
@@ -78,7 +72,7 @@
         import header_realip
     }
     import log ghproxy
-    import cache 0s 600s
+    import cache 0s 300s
     import error_page  
     import encode
     route /* {
@@ -92,7 +86,7 @@
     route /favicon.ico {
         root /data/www
         file_server
-        import cache 60s 24h
+        import cache 0s 24h
     }
 }
 

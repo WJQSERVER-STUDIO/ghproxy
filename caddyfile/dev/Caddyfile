@@ -72,7 +72,7 @@
         import header_realip
     }
     import log ghproxy
-    import cache 0s 600s
+    import cache 0s 300s
     import error_page  
     import encode
     import rate_limit 60 
@@ -84,7 +84,7 @@
     route /favicon.ico {
         root /data/www
         file_server
-        import cache 60s 24h
+        import cache 0s 24h
     }
     handle_errors {
         @redirects `{err.status_code} in [301, 302, 307]`

@@ -73,7 +73,7 @@ server:
 # 日志配置
 logger:
   logfilepath: "/data/ghproxy/log/ghproxy.log"  # 日志文件路径（小白请勿修改）
-  maxlogsize: 25 # MB
+  maxlogsize: 5 # MB
 
 # CORS 配置
 cors:

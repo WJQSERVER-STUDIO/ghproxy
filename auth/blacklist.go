@@ -41,6 +41,5 @@ func forRangeCheck(blist []string, fullrepo string) bool {
 			return true
 		}
 	}
-	logw("%s not in blacklist", fullrepo)
 	return false
 }
