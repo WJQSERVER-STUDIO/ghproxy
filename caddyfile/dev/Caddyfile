@@ -76,6 +76,8 @@
     import error_page  
     import encode
     import rate_limit 60 
+    header Age 10
+    header Cache-Control "max-age=300"
     route / {
         root /data/www
         file_server
