@@ -196,6 +196,9 @@ func CopyResponseHeaders(resp *req.Response, c *gin.Context, cfg *config.Config)
 	if cfg.CORS.Enabled {
 		c.Header("Access-Control-Allow-Origin", "*")
 	}
+
+	c.Header("Age", "10")
+	c.Header("Cache-Control", "max-age=300")
 }
 
 func HandleError(c *gin.Context, message string) {
