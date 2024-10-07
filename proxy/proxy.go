@@ -56,21 +56,25 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 		fullrepo := fmt.Sprintf("%s/%s", username, repo)
 
 		// 白名单检查
-		whitelistpass := auth.CheckWhitelist(fullrepo)
-		if !whitelistpass {
-			errMsg := fmt.Sprintf("Whitelist Blocked repo: %s", fullrepo)
-			c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
-			logw(errMsg)
-			return
+		if cfg.Whitelist.Enabled {
+			whitelistpass := auth.CheckWhitelist(fullrepo)
+			if !whitelistpass {
+				errMsg := fmt.Sprintf("Whitelist Blocked repo: %s", fullrepo)
+				c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
+				logw(errMsg)
+				return
+			}
 		}
 
 		// 黑名单检查
-		blacklistpass := auth.CheckBlacklist(fullrepo)
-		if blacklistpass {
-			errMsg := fmt.Sprintf("Blacklist Blocked repo: %s", fullrepo)
-			c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
-			logw(errMsg)
-			return
+		if cfg.Blacklist.Enabled {
+			blacklistpass := auth.CheckBlacklist(fullrepo)
+			if blacklistpass {
+				errMsg := fmt.Sprintf("Blacklist Blocked repo: %s", fullrepo)
+				c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
+				logw(errMsg)
+				return
+			}
 		}
 
 		matches = CheckURL(rawPath)

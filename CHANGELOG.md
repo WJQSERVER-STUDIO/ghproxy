@@ -1,5 +1,18 @@
 # 更新日志
 
+v1.4.0
+---
+- CHANGE: 优化代码结构,提升性能
+- ADD: 新增auth子模块whitelist.go,支持白名单功能
+- ADD: 新增whitelist.json文件,用于配置白名单
+- CHANGE&ADD: 在config.yaml文件中新增白名单配置块
+- FIX: 由于临时加入且未在原开发路线上计划的白名单功能,导致函数命名冲突,在此修复blacklist.go的函数命名问题
+
+24w11b
+---
+- PRE-RELEASE: 此版本是v1.4.0的预发布版本,请勿在生产环境中使用
+- FIX: 修复黑/白名单是否生效相关问题
+
 24w11a
 ---
 - PRE-RELEASE: 此版本是v1.4.0的预发布版本,请勿在生产环境中使用
@@ -7,7 +20,7 @@
 - CHANGE: 优化代码结构,提升性能
 - ADD: 新增auth子模块whitelist.go,支持白名单功能
 - ADD: 新增whitelist.json文件,用于配置白名单
-- FIX: 由于新加入未在原开发路线上计划的白名单功能,导致函数命名冲突,在此修复blacklist.go的函数命名问题
+- FIX: 由于临时加入且未在原开发路线上计划的白名单功能,导致函数命名冲突,在此修复blacklist.go的函数命名问题
 
 v1.3.1
 ---

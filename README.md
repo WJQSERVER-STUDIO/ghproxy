@@ -51,7 +51,7 @@ git clone https://ghproxy.1888866.xyz/github.com/WJQSERVER-STUDIO/ghproxy.git
 - Docker-cli
 
 ```
-docker run -p 7210:80 -v ./ghproxy/log/run:/data/ghproxy/log -v ./ghproxy/log/caddy:/data/caddy/log --restart always wjqserver/ghproxy
+docker run -p 7210:80 -v ./ghproxy/log/run:/data/ghproxy/log -v ./ghproxy/log/caddy:/data/caddy/log -v ./ghproxy/config:/data/ghproxy/config  --restart always wjqserver/ghproxy
 ```
 
 - Docker-Compose
@@ -86,8 +86,13 @@ auth:
 
 # 黑名单配置
 blacklist:
-  enabled: true
+  enabled: true  # 是否开启黑名单
   blacklistfile: "/data/ghproxy/config/blacklist.json"
+
+# 白名单配置
+whitelist:
+  enabled: false  # 是否开启白名单
+  whitelistfile: "/data/ghproxy/config/whitelist.json"
 
 ```
 
@@ -103,7 +108,21 @@ blacklist:
       "another/repo3"
     ]
   }
-```  
+```
+
+### 白名单配置
+
+白名单配置位于config/whitelist.json,格式如下:
+
+```json
+{
+    "whitelist": [
+      "test/test1",
+      "example/repo2",
+      "another/repo3"
+    ]
+  }
+```
 
 ### Caddy反代配置
 
@@ -128,6 +147,7 @@ example.com {
 - [x] 改进程序效率
 - [x] 用户鉴权
 - [x] 仓库黑名单
+- [x] 仓库白名单
 
 ### DEV
 
