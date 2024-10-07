@@ -1,8 +1,8 @@
 {
     "whitelist": [
-      "test/test1",
-      "example/repo2",
-      "another/repo3"
+      "white/list",
+      "white/test1",
+      "example/white"
     ]
   }
   

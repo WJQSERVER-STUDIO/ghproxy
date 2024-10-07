@@ -1,8 +1,8 @@
 {
     "blacklist": [
+      "black/list",
       "test/test1",
-      "example/repo2",
-      "another/repo3"
+      "example/repo2"
     ]
   }
   

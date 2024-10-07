@@ -10,6 +10,10 @@ if [ ! -f /data/${APPLICATON}/config/blacklist.json ]; then
     cp /data/${APPLICATON}/blacklist.json /data/${APPLICATON}/config/blacklist.json
 fi
 
+if [ ! -f /data/${APPLICATON}/config/whitelist.json ]; then
+    cp /data/${APPLICATON}/whitelist.json /data/${APPLICATON}/config/whitelist.json
+fi
+
 if [ ! -f /data/${APPLICATON}/config/config.yaml ]; then
     cp /data/${APPLICATON}/config.yaml /data/${APPLICATON}/config/config.yaml
 fi
