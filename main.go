@@ -53,14 +53,15 @@ func setupLogger() {
 	logw("Init Completed")
 }
 
-func LoadBlacklist(cfg *config.Config) {
+func Loadlist(cfg *config.Config) {
 	auth.LoadBlacklist(cfg)
+	auth.LoadWhitelist(cfg)
 }
 
 func init() {
 	loadConfig()
 	setupLogger()
-	LoadBlacklist(cfg)
+	Loadlist(cfg)
 
 	// 设置 Gin 模式
 	gin.SetMode(gin.ReleaseMode)

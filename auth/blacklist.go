@@ -6,19 +6,19 @@ import (
 	"os"
 )
 
-type Config struct {
+type BlacklistConfig struct {
 	Blacklist []string `json:"blacklist"`
 }
 
 var (
 	cfg           *config.Config
 	blacklistfile = "/data/ghproxy/config/blacklist.json"
-	blacklist     *Config
+	blacklist     *BlacklistConfig
 )
 
 func LoadBlacklist(cfg *config.Config) {
 	blacklistfile = cfg.Blacklist.BlacklistFile
-	blacklist = &Config{}
+	blacklist = &BlacklistConfig{}
 
 	data, err := os.ReadFile(blacklistfile)
 	if err != nil {
@@ -32,10 +32,10 @@ func LoadBlacklist(cfg *config.Config) {
 }
 
 func CheckBlacklist(fullrepo string) bool {
-	return forRangeCheck(blacklist.Blacklist, fullrepo)
+	return forRangeCheckBlacklist(blacklist.Blacklist, fullrepo)
 }
 
-func forRangeCheck(blist []string, fullrepo string) bool {
+func forRangeCheckBlacklist(blist []string, fullrepo string) bool {
 	for _, blocked := range blist {
 		if blocked == fullrepo {
 			return true

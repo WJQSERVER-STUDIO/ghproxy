@@ -31,6 +31,11 @@ type Config struct {
 		Enabled       bool   `yaml:"enabled"`
 		BlacklistFile string `yaml:"blacklistfile"`
 	} `yaml:"blacklist"`
+
+	Whitelist struct {
+		Enabled       bool   `yaml:"enabled"`
+		WhitelistFile string `yaml:"whitelistfile"`
+	} `yaml:"whitelist"`
 }
 
 // LoadConfig 从 YAML 配置文件加载配置

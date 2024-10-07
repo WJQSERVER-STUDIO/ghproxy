@@ -20,5 +20,10 @@ auth:
 
 # Blacklist Configuration
 blacklist:
-  enabled: true
+  enabled: false
   blacklistfile: "/data/ghproxy/config/blacklist.json"
+
+# Whitelist Configuration
+whitelist:
+  enabled: false
+  whitelistfile: "/data/ghproxy/config/whitelist.json"
