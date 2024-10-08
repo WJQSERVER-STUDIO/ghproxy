@@ -7,6 +7,7 @@ v1.4.0
 - ADD: 新增whitelist.json文件,用于配置白名单
 - CHANGE&ADD: 在config.yaml文件中新增白名单配置块
 - FIX: 由于临时加入且未在原开发路线上计划的白名单功能,导致函数命名冲突,在此修复blacklist.go的函数命名问题
+- FIX: 修复黑/白名单是否生效相关问题
 
 24w11b
 ---
