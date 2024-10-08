@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"regexp"
 
 	"ghproxy/auth"
 	"ghproxy/config"
@@ -20,16 +19,6 @@ var (
 	logw       = logger.Logw
 	router     *gin.Engine
 	configfile = "/data/ghproxy/config/config.yaml"
-)
-
-var (
-	exps = []*regexp.Regexp{
-		regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:releases|archive)/.*`),
-		regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:blob|raw)/.*`),
-		regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:info|git-).*`),
-		regexp.MustCompile(`^(?:https?://)?raw\.github(?:usercontent|)\.com/([^/]+)/([^/]+)/.+?/.+`),
-		regexp.MustCompile(`^(?:https?://)?gist\.github\.com/([^/]+)/.+?/.+`),
-	}
 )
 
 func loadConfig() {

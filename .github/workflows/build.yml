@@ -66,12 +66,11 @@ jobs:
         uses: actions/checkout@v4
       - name: Load VERSION
         run: |
-          if [ -f DEV-VERSION ]; then
-            echo "VERSION=$(cat DEV-VERSION)" >> $GITHUB_ENV
+          if [ -f VERSION ]; then
+            echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV
           else
-            echo "DEV-VERSION file not found!" && exit 1
-          fi        
-
+            echo "VERSION file not found!" && exit 1
+          fi      
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
