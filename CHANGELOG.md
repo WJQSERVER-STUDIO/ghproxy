@@ -1,5 +1,18 @@
 # 更新日志
 
+24w12b
+---
+- PRE-RELEASE: 此版本是v1.4.1的预发布版本,请勿在生产环境中使用
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: 尝试引入Alpine Linux作为基础镜像,减少镜像体积
+
+24w12a
+---
+- PRE-RELEASE: 此版本是v1.4.1的预发布版本,请勿在生产环境中使用
+- CHANGE: 优化代码结构,提升性能
+- FIX: 修正部分参数错误
+- CHANGE: CGO_ENABLED=0
+
 v1.4.0
 ---
 - CHANGE: 优化代码结构,提升性能
