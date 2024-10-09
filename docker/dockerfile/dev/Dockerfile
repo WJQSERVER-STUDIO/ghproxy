@@ -3,6 +3,9 @@ FROM alpine:latest AS builder
 ARG USER=WJQSERVER-STUDIO
 ARG REPO=ghproxy
 ARG APPLICATION=ghproxy
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETPLATFORM
 
 # 创建文件夹
 RUN mkdir -p /data/www
@@ -19,7 +22,7 @@ RUN wget -O /data/www/favicon.ico https://raw.githubusercontent.com/${USER}/${RE
 # 后端
 RUN wget -O /data/caddy/Caddyfile https://raw.githubusercontent.com/${USER}/${REPO}/main/caddyfile/release/Caddyfile
 RUN VERSION=$(curl -s https://raw.githubusercontent.com/${USER}/${REPO}/main/DEV-VERSION) && \
-    wget -O /data/${APPLICATION}/${APPLICATION} https://github.com/${USER}/${REPO}/releases/download/$VERSION/${APPLICATION}
+    wget -O /data/${APPLICATION}/${APPLICATION} https://github.com/${USER}/${REPO}/releases/download/$VERSION/${APPLICATION}-${TARGETOS}-${TARGETARCH}
 RUN wget -O /data/${APPLICATION}/config.yaml https://raw.githubusercontent.com/${USER}/${REPO}/main/config/config.yaml
 RUN wget -O /data/${APPLICATION}/blacklist.json https://raw.githubusercontent.com/${USER}/${REPO}/main/config/blacklist.json
 RUN wget -O /data/${APPLICATION}/whitelist.json https://raw.githubusercontent.com/${USER}/${REPO}/main/config/whitelist.json
