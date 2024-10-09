@@ -1,4 +1,4 @@
-FROM alpine:latest AS builder
+FROM wjqserver/caddy:daily-alpine AS builder
 
 ARG USER=WJQSERVER-STUDIO
 ARG REPO=ghproxy
