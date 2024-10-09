@@ -1,5 +1,12 @@
 # 更新日志
 
+v1.4.1
+---
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: 引入Alpine Linux作为基础镜像,减少Docker镜像体积
+- FIX: 修正部分参数错误
+- CHANGE: CGO_ENABLED=0
+
 24w12c
 ---
 - PRE-RELEASE: 此版本是v1.4.1的预发布版本,请勿在生产环境中使用

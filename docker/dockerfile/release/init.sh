@@ -1,28 +1,27 @@
-#!/bin/bash
+#!/bin/sh
 
-APPLICATON=ghproxy
+APPLICATION=ghproxy
 
 if [ ! -f /data/caddy/config/Caddyfile ]; then
     cp /data/caddy/Caddyfile /data/caddy/config/Caddyfile
 fi
 
-if [ ! -f /data/${APPLICATON}/config/blacklist.json ]; then
-    cp /data/${APPLICATON}/blacklist.json /data/${APPLICATON}/config/blacklist.json
+if [ ! -f /data/${APPLICATION}/config/blacklist.json ]; then
+    cp /data/${APPLICATION}/blacklist.json /data/${APPLICATION}/config/blacklist.json
 fi
 
-if [ ! -f /data/${APPLICATON}/config/whitelist.json ]; then
-    cp /data/${APPLICATON}/whitelist.json /data/${APPLICATON}/config/whitelist.json
+if [ ! -f /data/${APPLICATION}/config/whitelist.json ]; then
+    cp /data/${APPLICATION}/whitelist.json /data/${APPLICATION}/config/whitelist.json
 fi
 
-if [ ! -f /data/${APPLICATON}/config/config.yaml ]; then
-    cp /data/${APPLICATON}/config.yaml /data/${APPLICATON}/config/config.yaml
+if [ ! -f /data/${APPLICATION}/config/config.yaml ]; then
+    cp /data/${APPLICATION}/config.yaml /data/${APPLICATION}/config/config.yaml
 fi
 
-/data/caddy/caddy run --config /data/caddy/config/Caddyfile > /data/${APPLICATON}/log/caddy.log 2>&1 &
+/data/caddy/caddy run --config /data/caddy/config/Caddyfile > /data/${APPLICATION}/log/caddy.log 2>&1 &
 
-/data/${APPLICATON}/${APPLICATON} > /data/ghproxy/log/run.log 2>&1 &
+/data/${APPLICATION}/${APPLICATION} > /data/${APPLICATION}/log/run.log 2>&1 &
 
-while [[ true ]]; do
+while true; do
     sleep 1
-done    
-
+done
