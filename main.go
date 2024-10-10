@@ -6,10 +6,10 @@ import (
 	"log"
 	"net/http"
 
-	"ghproxy/auth"
-	"ghproxy/config"
-	"ghproxy/logger"
-	"ghproxy/proxy"
+	"github.com/satomitoka/ghproxy/auth"
+	"github.com/satomitoka/ghproxy/config"
+	"github.com/satomitoka/ghproxy/logger"
+	"github.com/satomitoka/ghproxy/proxy"
 
 	"github.com/gin-gonic/gin"
 )
