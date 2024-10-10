@@ -16,7 +16,7 @@ jobs:
         goos: [linux]
         goarch: [amd64, arm64]
     env:
-      OUTPUT_BINARY: go
+      OUTPUT_BINARY: ghproxy
       GO_VERSION: 1.23.2
 
     steps:
