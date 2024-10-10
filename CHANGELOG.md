@@ -1,11 +1,18 @@
 # 更新日志
 
+v1.4.2
+---
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: 初步引入ARM64架构支持
+- CHANGE: 对Docker镜像构建进行优化，大幅减少镜像体积,从v1.4.0的`111 MB`,到v1.4.1的`58 MB`,再到v1.4.2的`28 MB`
+- CHANGE: 切换至wjqserver/caddy:2.9.0-rc-alpine作为基础镜像
+
 24w13b
 ---
 - PRE-RELEASE: 此版本是v1.4.2的预发布版本,请勿在生产环境中使用
 - CHANGE: 优化代码结构,提升性能
 - CHANGE: 初步引入ARM64支持，但仍处于测试阶段
-- CHANGE: 对Dockerfile进行优化，减少镜像体积
+- CHANGE: 对Dockerfile进行优化，大幅减少镜像体积
 
 24w13a
 ---
@@ -16,7 +23,7 @@
 v1.4.1
 ---
 - CHANGE: 优化代码结构,提升性能
-- CHANGE: 引入Alpine Linux作为基础镜像,减少Docker镜像体积
+- CHANGE: 引入Alpine Linux作为基础镜像,大幅减少Docker镜像体积
 - FIX: 修正部分参数错误
 - CHANGE: CGO_ENABLED=0
 

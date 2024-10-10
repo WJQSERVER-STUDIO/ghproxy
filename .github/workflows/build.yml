@@ -11,9 +11,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux]
+        goarch: [amd64, arm64]
     env:
-      OUTPUT_BINARY: ghproxy
-      OUTPUT_ARCHIVE: ghproxy.tar.gz
+      OUTPUT_BINARY: go
       GO_VERSION: 1.23.2
 
     steps:
@@ -31,35 +34,33 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
       - name: Build
         run: |
-          CGO_ENABLED=0 go build -o  ${{ env.OUTPUT_BINARY }} ./main.go
+          CGO_ENABLED=0 go build -o  ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}} ./main.go
       - name: Package
         run: |
-          tar -czvf ${{ env.OUTPUT_ARCHIVE }} ./${{ env.OUTPUT_BINARY }}
+          tar -czvf ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}}.tar.gz ./${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}}
       - name: Upload to GitHub Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.OUTPUT_BINARY }}
           path: |
-            ./${{ env.OUTPUT_ARCHIVE }}
-            ./${{ env.OUTPUT_BINARY }}
+            ./${{ env.OUTPUT_BINARY }}*
       - name: 上传至Release
         id: create_release
         uses: ncipollo/release-action@v1
         with:
           name: ${{ env.VERSION }}
-          artifacts: ./${{ env.OUTPUT_ARCHIVE }}, ./${{ env.OUTPUT_BINARY }}
+          artifacts: ./${{ env.OUTPUT_BINARY }}*
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ env.VERSION }}
           allowUpdates: true
         env:
           export PATH: $PATH:/usr/local/go/bin     
-
   docker:
     runs-on: ubuntu-latest
     needs: build  # 确保这个作业在 build 作业完成后运行
     env:
       IMAGE_NAME: wjqserver/ghproxy  # 定义镜像名称变量
-      DOCKERFILE: docker/dockerfile/release/Dockerfile
+      DOCKERFILE: docker/dockerfile/release/Dockerfile  # 定义 Dockerfile 路径变量
 
     steps:
       - name: Checkout
@@ -70,7 +71,7 @@ jobs:
             echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV
           else
             echo "VERSION file not found!" && exit 1
-          fi      
+          fi
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -85,10 +86,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: 构建镜像
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           file: ./${{ env.DOCKERFILE }}
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: | 
             ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
