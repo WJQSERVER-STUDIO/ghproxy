@@ -32,13 +32,17 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ${{ env.GO_VERSION }}
+      - name: Install UPX    
+        run: |
+          apt update
+          apt install upx -y
       - name: Build
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
           CGO_ENABLED=0 go build -ldflags="-s -w" -o  ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}} ./main.go
-          
+          upx - 9 ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}}
       - name: Package
         run: |
           tar -czvf ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}}.tar.gz ./${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}}
