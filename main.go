@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -20,6 +21,11 @@ var (
 	router     *gin.Engine
 	configfile = "/data/ghproxy/config/config.yaml"
 )
+
+func ReadFlag() {
+	cfgfile := flag.String("cfg", configfile, "config file path")
+	configfile = *cfgfile
+}
 
 func loadConfig() {
 	var err error
@@ -48,6 +54,7 @@ func Loadlist(cfg *config.Config) {
 }
 
 func init() {
+	ReadFlag()
 	loadConfig()
 	setupLogger()
 	Loadlist(cfg)
