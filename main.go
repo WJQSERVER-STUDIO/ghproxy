@@ -17,9 +17,16 @@ import (
 
 var (
 	cfg        *config.Config
-	logw       = logger.Logw
 	router     *gin.Engine
 	configfile = "/data/ghproxy/config/config.toml"
+)
+
+// 日志模块
+var (
+	logw       = logger.Logw
+	logInfo    = logger.LogInfo
+	LogWarning = logger.LogWarning
+	logError   = logger.LogError
 )
 
 func ReadFlag() {
@@ -44,8 +51,8 @@ func setupLogger(cfg *config.Config) {
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
-	logw("Logger initialized")
-	logw("Init Completed")
+	logInfo("Logger initialized")
+	logInfo("Init Completed")
 }
 
 func Loadlist(cfg *config.Config) {
@@ -87,7 +94,7 @@ func main() {
 	// 启动服务器
 	err := router.Run(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port))
 	if err != nil {
-		log.Fatalf("Error starting server: %v\n", err)
+		logError("Error starting server: %v\n", err)
 	}
 
 	fmt.Println("Program finished")

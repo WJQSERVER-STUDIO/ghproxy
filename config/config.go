@@ -56,7 +56,7 @@ func loadYAML(filePath string, out interface{}) error {
 
 type Config struct {
 	Server    ServerConfig
-	Log       LoggerConfig
+	Log       LogConfig
 	CORS      CORSConfig
 	Auth      AuthConfig
 	Blacklist BlacklistConfig
@@ -69,7 +69,7 @@ type ServerConfig struct {
 	SizeLimit int    `toml:"sizelimit"`
 }
 
-type LoggerConfig struct {
+type LogConfig struct {
 	LogFilePath string `toml:"logfilepath"`
 	MaxLogSize  int    `toml:"maxlogsize"`
 }

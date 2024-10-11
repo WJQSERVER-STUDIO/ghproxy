@@ -19,14 +19,16 @@ var (
 	logChannel   = make(chan string, 100)
 	quitChannel  = make(chan struct{})
 	logFileMutex sync.Mutex // 保护 logFile 的互斥锁
+	logFilePath  = "/data/ghproxy/log/ghproxy.log"
 )
 
 // Init 初始化日志记录器，接受日志文件路径作为参数
-func Init(logFilePath string, maxLogsize int) error {
+func Init(logFilePath_input string, maxLogsize int) error {
 	logFileMutex.Lock()
 	defer logFileMutex.Unlock()
 
 	var err error
+	logFilePath = logFilePath_input
 	logFile, err = os.OpenFile(logFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return err
@@ -58,6 +60,26 @@ func Log(customMessage string) {
 
 // Logw 用于格式化日志记录
 func Logw(format string, args ...interface{}) {
+	message := fmt.Sprintf(format, args...)
+	Log(message)
+}
+
+// 日志等级INFO
+func LogInfo(format string, args ...interface{}) {
+	message := fmt.Sprintf(format, args...)
+	output := fmt.Sprintf("[INFO] %s", message)
+	Log(output)
+}
+
+// 日志等级WARNING
+func LogWarning(format string, args ...interface{}) {
+	message := fmt.Sprintf(format, args...)
+	output := fmt.Sprintf("[WARNING] %s", message)
+	Log(output)
+}
+
+// 日志等级ERROR
+func LogError(format string, args ...interface{}) {
 	message := fmt.Sprintf(format, args...)
 	Log(message)
 }

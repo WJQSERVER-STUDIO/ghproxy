@@ -17,7 +17,13 @@ import (
 	"github.com/imroc/req/v3"
 )
 
-var logw = logger.Logw
+// 日志模块
+var (
+	logw       = logger.Logw
+	logInfo    = logger.LogInfo
+	LogWarning = logger.LogWarning
+	logError   = logger.LogError
+)
 
 var exps = []*regexp.Regexp{
 	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:releases|archive)/.*`),
@@ -34,7 +40,7 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 		matches := re.FindStringSubmatch(rawPath)
 
 		if len(matches) < 3 {
-			logw("Invalid URL: %s", rawPath)
+			LogWarning("Invalid URL: %s", rawPath)
 			c.String(http.StatusForbidden, "Invalid URL.")
 			return
 		}
@@ -45,14 +51,14 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 		pathmatches := regexp.MustCompile(`^([^/]+)/([^/]+)/([^/]+)/.*`)
 		pathParts := pathmatches.FindStringSubmatch(matches[2])
 		if len(pathParts) < 4 {
-			logw("Invalid path: %s", rawPath)
+			LogWarning("Invalid path: %s", rawPath)
 			c.String(http.StatusForbidden, "Invalid path; expected username/repo.")
 			return
 		}
 
 		username := pathParts[2]
 		repo := pathParts[3]
-		logw("Blacklist Check > Username: %s, Repo: %s", username, repo)
+		LogWarning("Blacklist Check > Username: %s, Repo: %s", username, repo)
 		fullrepo := fmt.Sprintf("%s/%s", username, repo)
 
 		// 白名单检查
@@ -61,7 +67,7 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 			if !whitelistpass {
 				errMsg := fmt.Sprintf("Whitelist Blocked repo: %s", fullrepo)
 				c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
-				logw(errMsg)
+				LogWarning(errMsg)
 				return
 			}
 		}
@@ -72,7 +78,7 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 			if blacklistpass {
 				errMsg := fmt.Sprintf("Blacklist Blocked repo: %s", fullrepo)
 				c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
-				logw(errMsg)
+				LogWarning(errMsg)
 				return
 			}
 		}
@@ -89,18 +95,18 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 
 		if !auth.AuthHandler(c, cfg) {
 			c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
-			logw("Unauthorized request: %s", rawPath)
+			LogWarning("Unauthorized request: %s", rawPath)
 			return
 		}
 
-		logw("Matches: %v", matches)
+		logInfo("Matches: %v", matches)
 
 		switch {
 		case exps[0].MatchString(rawPath), exps[1].MatchString(rawPath), exps[3].MatchString(rawPath), exps[4].MatchString(rawPath):
-			logw("%s Matched - USE proxy-chrome", rawPath)
+			logInfo("%s Matched - USE proxy-chrome", rawPath)
 			ProxyRequest(c, rawPath, cfg, "chrome")
 		case exps[2].MatchString(rawPath):
-			logw("%s Matched - USE proxy-git", rawPath)
+			logInfo("%s Matched - USE proxy-git", rawPath)
 			ProxyRequest(c, rawPath, cfg, "git")
 		default:
 			c.String(http.StatusForbidden, "Invalid input.")
@@ -111,33 +117,18 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 
 func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 	method := c.Request.Method
-	logw("%s %s", method, u)
+	logInfo("%s %s", method, u)
 
-	client := req.C()
+	client := createHTTPClient(mode)
 
-	switch mode {
-	case "chrome":
-		client.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36").
-			SetTLSFingerprintChrome().
-			ImpersonateChrome()
-	case "git":
-		client.SetUserAgent("git/2.33.1")
-	}
-
-	body, err := io.ReadAll(c.Request.Body)
+	body, err := readRequestBody(c)
 	if err != nil {
-		HandleError(c, fmt.Sprintf("Failed to read request body: %v", err))
+		HandleError(c, err.Error())
 		return
 	}
-	defer c.Request.Body.Close()
 
 	req := client.R().SetBody(body)
-
-	for key, values := range c.Request.Header {
-		for _, value := range values {
-			req.SetHeader(key, value)
-		}
-	}
+	setRequestHeaders(c, req)
 
 	resp, err := SendRequest(req, method, u)
 	if err != nil {
@@ -147,15 +138,54 @@ func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 	defer resp.Body.Close()
 
 	if err := HandleResponseSize(resp, cfg, c); err != nil {
-		logw("Error handling response size: %v", err)
+		LogWarning("Error handling response size: %v", err)
 		return
 	}
 
 	CopyResponseHeaders(resp, c, cfg)
 	c.Status(resp.StatusCode)
-	if _, err := io.Copy(c.Writer, resp.Body); err != nil {
-		logw("Failed to copy response body: %v", err)
+	if err := copyResponseBody(c, resp.Body); err != nil {
+		logError("Failed to copy response body: %v", err)
 	}
+}
+
+// createHTTPClient 创建并配置 HTTP 客户端
+func createHTTPClient(mode string) *req.Client {
+	client := req.C()
+	switch mode {
+	case "chrome":
+		client.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36").
+			SetTLSFingerprintChrome().
+			ImpersonateChrome()
+	case "git":
+		client.SetUserAgent("git/2.33.1")
+	}
+	return client
+}
+
+// readRequestBody 读取请求体
+func readRequestBody(c *gin.Context) ([]byte, error) {
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read request body: %v", err)
+	}
+	defer c.Request.Body.Close()
+	return body, nil
+}
+
+// setRequestHeaders 设置请求头
+func setRequestHeaders(c *gin.Context, req *req.Request) {
+	for key, values := range c.Request.Header {
+		for _, value := range values {
+			req.SetHeader(key, value)
+		}
+	}
+}
+
+// copyResponseBody 复制响应体到客户端
+func copyResponseBody(c *gin.Context, respBody io.Reader) error {
+	_, err := io.Copy(c.Writer, respBody)
+	return err
 }
 
 func SendRequest(req *req.Request, method, url string) (*req.Response, error) {
@@ -169,7 +199,7 @@ func SendRequest(req *req.Request, method, url string) (*req.Response, error) {
 	case "DELETE":
 		return req.Delete(url)
 	default:
-		logw("Unsupported method: %s", method)
+		logInfo("Unsupported method: %s", method)
 		return nil, fmt.Errorf("unsupported method: %s", method)
 	}
 }
@@ -181,14 +211,25 @@ func HandleResponseSize(resp *req.Response, cfg *config.Config, c *gin.Context) 
 		if err == nil && size > cfg.Server.SizeLimit {
 			finalURL := resp.Request.URL.String()
 			c.Redirect(http.StatusMovedPermanently, finalURL)
-			logw("Redirecting to %s due to size limit (%d bytes)", finalURL, size)
-			return fmt.Errorf("response size exceeds limit")
+			LogWarning("Size limit exceeded: %s, Size: %d", finalURL, size)
+			return fmt.Errorf("size limit exceeded: %d", size)
 		}
 	}
 	return nil
 }
 
 func CopyResponseHeaders(resp *req.Response, c *gin.Context, cfg *config.Config) {
+	removeHeaders(resp)
+
+	copyHeaders(resp, c)
+
+	setCORSHeaders(c, cfg)
+
+	setDefaultHeaders(c)
+}
+
+// removeHeaders 移除指定的响应头
+func removeHeaders(resp *req.Response) {
 	headersToRemove := map[string]struct{}{
 		"Content-Security-Policy":   {},
 		"Referrer-Policy":           {},
@@ -198,35 +239,45 @@ func CopyResponseHeaders(resp *req.Response, c *gin.Context, cfg *config.Config)
 	for header := range headersToRemove {
 		resp.Header.Del(header)
 	}
+}
 
+// copyHeaders 复制响应头到 Gin 上下文
+func copyHeaders(resp *req.Response, c *gin.Context) {
 	for key, values := range resp.Header {
 		for _, value := range values {
 			c.Header(key, value)
 		}
 	}
+}
 
-	c.Header("Access-Control-Allow-Origin", "")
+// setCORSHeaders 设置 CORS 相关的响应头
+func setCORSHeaders(c *gin.Context, cfg *config.Config) {
 	if cfg.CORS.Enabled {
 		c.Header("Access-Control-Allow-Origin", "*")
+	} else {
+		c.Header("Access-Control-Allow-Origin", "")
 	}
+}
 
+// setDefaultHeaders 设置默认的响应头
+func setDefaultHeaders(c *gin.Context) {
 	c.Header("Age", "10")
 	c.Header("Cache-Control", "max-age=300")
 }
 
 func HandleError(c *gin.Context, message string) {
 	c.String(http.StatusInternalServerError, fmt.Sprintf("server error %v", message))
-	logw(message)
+	LogWarning(message)
 }
 
 func CheckURL(u string) []string {
 	for _, exp := range exps {
 		if matches := exp.FindStringSubmatch(u); matches != nil {
-			logw("URL matched: %s, Matches: %v", u, matches[1:])
+			logInfo("URL matched: %s, Matches: %v", u, matches[1:])
 			return matches[1:]
 		}
 	}
 	errMsg := fmt.Sprintf("Invalid URL: %s", u)
-	logw(errMsg)
+	LogWarning(errMsg)
 	return nil
 }
