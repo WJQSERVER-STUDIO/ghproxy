@@ -70,6 +70,7 @@ jobs:
     needs: build
     env:
       IMAGE_NAME: wjqserver/ghproxy
+      PROG_NAME: ghproxy
       DOCKERFILE: docker/dockerfile/dev/Dockerfile
         
     steps:
@@ -95,12 +96,25 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: 构建镜像
-        uses: docker/build-push-action@v6
-        with:
-          file: ./${{ env.DOCKERFILE }}
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: | 
-            ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
-            ${{ env.IMAGE_NAME }}:dev
+      - name: Build Docker image
+        run: |
+          docker buildx build --platform linux/amd64,linux/arm64 -t ${{ env.PROG_NAME }}:dev,${{ env.PROG_NAME }}:${{ env.VERSION }} -f ./${{ env.DOCKERFILE }}
+
+      - name: Install Slim  
+        run: |  
+          curl -L -o ds.tar.gz https://github.com/slimtoolkit/slim/releases/download/1.40.11/dist_linux.tar.gz  
+          tar -xvf ds.tar.gz  
+          mv dist_linux/slim /usr/local/bin/  
+          mv dist_linux/slim-sensor /usr/local/bin/  
+          rm -rf ds.tar.gz dist_linux  
+      
+      - name: Optimize Docker image using Slim  
+        run: |  
+          slimlim build --include-path /data --http-probe --continue-after 20 --tag ${{ env.PROG_NAME }}:${{ env.VERSION }} ${{ env.PROG_NAME }}:dev
+          
+      - name: Push Docker image
+        run: |
+          docker tag ${{ env.PROG_NAME }}:${{ env.VERSION }} ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          docker tag ${{ env.PROG_NAME }}:dev ${{ env.IMAGE_NAME }}:dev
+          docker push ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          docker push ${{ env.IMAGE_NAME }}:dev
