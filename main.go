@@ -37,7 +37,7 @@ func loadConfig() {
 	fmt.Printf("Loaded config: %v\n", cfg)
 }
 
-func setupLogger() {
+func setupLogger(cfg *config.Config) {
 	// 初始化日志模块
 	var err error
 	err = logger.Init(cfg.Log.LogFilePath, cfg.Log.MaxLogSize) // 传递日志文件路径
@@ -56,7 +56,7 @@ func Loadlist(cfg *config.Config) {
 func init() {
 	ReadFlag()
 	loadConfig()
-	setupLogger()
+	setupLogger(cfg)
 	Loadlist(cfg)
 
 	// 设置 Gin 模式
