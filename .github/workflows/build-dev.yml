@@ -93,6 +93,16 @@ jobs:
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin 
 
+      - name: 构建镜像
+        uses: docker/build-push-action@v6
+        with:
+          file: ./${{ env.DOCKERFILE }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: | 
+            ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+            ${{ env.IMAGE_NAME }}:dev
+
       - name: Build Docker image
         run: |
           docker buildx build --platform linux/amd64,linux/arm64 --tag ${{ env.IMAGE_NAME }}:dev --tag ${{ env.IMAGE_NAME }}:${{ env.VERSION }} -f ./${{ env.DOCKERFILE }} ./${{ env.DOCKERFILE_PATH }}
