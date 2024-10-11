@@ -70,7 +70,6 @@ jobs:
     needs: build
     env:
       IMAGE_NAME: wjqserver/ghproxy
-      PROG_NAME: ghproxy
       DOCKERFILE: docker/dockerfile/dev/Dockerfile
       DOCKERFILE_PATH: docker/dockerfile/dev
         
@@ -92,14 +91,11 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin 
 
       - name: Build Docker image
         run: |
-          docker buildx build --platform linux/amd64,linux/arm64 --tag ${{ env.PROG_NAME }}:dev --tag ${{ env.PROG_NAME }}:${{ env.VERSION }} -f ./${{ env.DOCKERFILE }} ./${{ env.DOCKERFILE_PATH }}
+          docker buildx build --platform linux/amd64,linux/arm64 --tag ${{ env.IMAGE_NAME }}:dev --tag ${{ env.IMAGE_NAME }}:${{ env.VERSION }} -f ./${{ env.DOCKERFILE }} ./${{ env.DOCKERFILE_PATH }}
 
       - name: Install Slim  
         run: |  
@@ -116,7 +112,5 @@ jobs:
           
       - name: Push Docker image
         run: |
-          docker tag ${{ env.PROG_NAME }}:${{ env.VERSION }} ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
-          docker tag ${{ env.PROG_NAME }}:dev ${{ env.IMAGE_NAME }}:dev
           docker push ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
           docker push ${{ env.IMAGE_NAME }}:dev
