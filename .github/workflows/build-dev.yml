@@ -98,7 +98,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker buildx build --platform linux/amd64,linux/arm64 -t ${{ env.PROG_NAME }}:dev,${{ env.PROG_NAME }}:${{ env.VERSION }} -f ./${{ env.DOCKERFILE }}
+          docker buildx build --platform linux/amd64,linux/arm64 --tag ${{ env.PROG_NAME }}:dev --tag ${{ env.PROG_NAME }}:${{ env.VERSION }} -f ./${{ env.DOCKERFILE }}
 
       - name: Install Slim  
         run: |  
