@@ -14,8 +14,8 @@ if [ ! -f /data/${APPLICATION}/config/whitelist.json ]; then
     cp /data/${APPLICATION}/whitelist.json /data/${APPLICATION}/config/whitelist.json
 fi
 
-if [ ! -f /data/${APPLICATION}/config/config.yaml ]; then
-    cp /data/${APPLICATION}/config.yaml /data/${APPLICATION}/config/config.yaml
+if [ ! -f /data/${APPLICATION}/config/config.toml ]; then
+    cp /data/${APPLICATION}/config.toml /data/${APPLICATION}/config/config.toml
 fi
 
 /data/caddy/caddy run --config /data/caddy/config/Caddyfile > /data/${APPLICATION}/log/caddy.log 2>&1 &
