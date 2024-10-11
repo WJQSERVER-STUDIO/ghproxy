@@ -108,7 +108,7 @@ jobs:
       
       - name: Optimize Docker image using Slim  
         run: |  
-          slim build --include-path /data --http-probe --continue-after 20 --tag ${{ env.PROG_NAME }}:${{ env.VERSION }} ${{ env.PROG_NAME }}:dev
+          slim build --include-path /data --http-probe --continue-after 20 --tag ${{ env.IMAGE_NAME }}:${{ env.VERSION }} ${{ env.IMAGE_NAME }}:dev
           
       - name: Push Docker image
         run: |
