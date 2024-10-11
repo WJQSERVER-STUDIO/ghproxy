@@ -20,7 +20,7 @@ fi
 
 /data/caddy/caddy run --config /data/caddy/config/Caddyfile > /data/${APPLICATION}/log/caddy.log 2>&1 &
 
-/data/${APPLICATION}/${APPLICATION} > /data/${APPLICATION}/log/run.log 2>&1 &
+/data/${APPLICATION}/${APPLICATION} -cfg /data/${APPLICATION}/config/config.yaml > /data/${APPLICATION}/log/run.log 2>&1 &
 
 while true; do
     sleep 1
