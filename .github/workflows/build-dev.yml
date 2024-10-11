@@ -108,10 +108,11 @@ jobs:
           mv dist_linux/slim /usr/local/bin/  
           mv dist_linux/slim-sensor /usr/local/bin/  
           rm -rf ds.tar.gz dist_linux  
+          slim version
       
       - name: Optimize Docker image using Slim  
         run: |  
-          slimlim build --include-path /data --http-probe --continue-after 20 --tag ${{ env.PROG_NAME }}:${{ env.VERSION }} ${{ env.PROG_NAME }}:dev
+          slim build --include-path /data --http-probe --continue-after 20 --tag ${{ env.PROG_NAME }}:${{ env.VERSION }} ${{ env.PROG_NAME }}:dev
           
       - name: Push Docker image
         run: |
