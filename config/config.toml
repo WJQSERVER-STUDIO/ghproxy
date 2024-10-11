@@ -3,7 +3,7 @@ host = "127.0.0.1"
 port = 8080 
 sizelimit = 131072000 # 125MB
 
-[logger]
+[log]
 logfilepath = "/data/ghproxy/log/ghproxy.log" 
 maxlogsize = 5 # MB
 
