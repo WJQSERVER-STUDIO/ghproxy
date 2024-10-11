@@ -1,12 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
 
+	"ghproxy/api"
 	"ghproxy/auth"
 	"ghproxy/config"
 	"ghproxy/logger"
@@ -56,8 +56,12 @@ func setupLogger(cfg *config.Config) {
 }
 
 func Loadlist(cfg *config.Config) {
-	auth.LoadBlacklist(cfg)
-	auth.LoadWhitelist(cfg)
+	auth.Init(cfg)
+}
+
+func setupApi(cfg *config.Config, router *gin.Engine) {
+	// 注册 API 接口
+	api.InitHandleRouter(cfg, router)
 }
 
 func init() {
@@ -72,16 +76,11 @@ func init() {
 	// 初始化路由
 	router = gin.Default()
 
+	setupApi(cfg, router)
+
 	// 定义路由
 	router.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "https://ghproxy0rtt.1888866.xyz/")
-	})
-
-	router.GET("/api", api)
-
-	// 健康检查
-	router.GET("/api/healthcheck", func(c *gin.Context) {
-		c.String(http.StatusOK, "OK")
 	})
 
 	// 未匹配路由处理
@@ -98,12 +97,4 @@ func main() {
 	}
 
 	fmt.Println("Program finished")
-}
-
-func api(c *gin.Context) {
-	// 设置响应头
-	c.Writer.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
-		"MaxResponseBodySize": cfg.Server.SizeLimit,
-	})
 }
