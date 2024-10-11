@@ -72,6 +72,7 @@ jobs:
       IMAGE_NAME: wjqserver/ghproxy
       PROG_NAME: ghproxy
       DOCKERFILE: docker/dockerfile/dev/Dockerfile
+      DOCKERFILE_PATH: docker/dockerfile/dev
         
     steps:
       - name: Checkout
@@ -98,7 +99,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker buildx build --platform linux/amd64,linux/arm64 --tag ${{ env.PROG_NAME }}:dev --tag ${{ env.PROG_NAME }}:${{ env.VERSION }} -f ./${{ env.DOCKERFILE }}
+          docker buildx build --platform linux/amd64,linux/arm64 --tag ${{ env.PROG_NAME }}:dev --tag ${{ env.PROG_NAME }}:${{ env.VERSION }} -f ./${{ env.DOCKERFILE }} ./${{ env.DOCKERFILE_PATH }}
 
       - name: Install Slim  
         run: |  
