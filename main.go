@@ -19,7 +19,7 @@ var (
 	cfg        *config.Config
 	logw       = logger.Logw
 	router     *gin.Engine
-	configfile = "/data/ghproxy/config/config.yaml"
+	configfile = "/data/ghproxy/config/config.toml"
 )
 
 func ReadFlag() {
