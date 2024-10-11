@@ -42,10 +42,12 @@ func InitHandleRouter(cfg *config.Config, router *gin.Engine) {
 }
 
 func SizeLimitHandler(cfg *config.Config, c *gin.Context) {
+	// 转换为MB
+	sizeLimit := cfg.Server.SizeLimit / 1024 / 1024
 	// 设置响应头
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
-		"MaxResponseBodySize": cfg.Server.SizeLimit,
+		"MaxResponseBodySize": sizeLimit,
 	})
 }
 
