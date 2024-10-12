@@ -26,7 +26,7 @@ RUN wget -O /usr/local/bin/init.sh https://raw.githubusercontent.com/${USER}/${R
 
 # 拉取配置
 RUN wget -O /data/caddy/Caddyfile https://raw.githubusercontent.com/${USER}/${REPO}/main/caddyfile/release/Caddyfile
-RUN wget -O /data/${APPLICATION}/config.yaml https://raw.githubusercontent.com/${USER}/${REPO}/main/config/config.yaml
+RUN wget -O /data/${APPLICATION}/config.toml https://raw.githubusercontent.com/${USER}/${REPO}/main/config/config.toml
 RUN wget -O /data/${APPLICATION}/blacklist.json https://raw.githubusercontent.com/${USER}/${REPO}/main/config/blacklist.json
 RUN wget -O /data/${APPLICATION}/whitelist.json https://raw.githubusercontent.com/${USER}/${REPO}/main/config/whitelist.json
 

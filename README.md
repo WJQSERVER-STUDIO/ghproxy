@@ -16,7 +16,7 @@
 - 支持Docker部署
 - 支持速率限制
 - 支持用户鉴权
-- 支持自定义黑名单
+- 支持自定义黑名单/白名单
 - 符合[RFC 7234](https://httpwg.org/specs/rfc7234.html)的HTTP Cache
 - 使用Caddy作为Web Server
 - 基于[WJQSERVER-STUDIO/golang-temp](https://github.com/WJQSERVER-STUDIO/golang-temp)模板构建,具有标准化的日志记录与构建流程
@@ -60,39 +60,33 @@ docker run -p 7210:80 -v ./ghproxy/log/run:/data/ghproxy/log -v ./ghproxy/log/ca
 
 ### 外部配置文件
 
-本项目采用config.yaml作为外部配置,默认配置如下
-使用Docker部署时,慎重修改config.yaml,以免造成不必要的麻烦
+本项目采用`config.toml`作为外部配置,默认配置如下
+使用Docker部署时,慎重修改`config.toml`,以免造成不必要的麻烦
 
-```yaml
-# 核心配置
-server:
-  port: 8080  # 监听端口(小白请勿修改)
-  host: "127.0.0.1"  # 监听地址(小白请勿修改)
-  sizelimit: 131072000 # 125MB
+```toml
+[server]
+host = "127.0.0.1" # 监听地址(小白请勿修改)
+port = 8080 #监听端口(小白请勿修改)
+sizelimit = 131072000 # 125MB
 
-# 日志配置
-logger:
-  logfilepath: "/data/ghproxy/log/ghproxy.log"  # 日志文件路径（小白请勿修改）
-  maxlogsize: 5 # MB
+[log]
+logfilepath = "/data/ghproxy/log/ghproxy.log"  # 日志文件路径（小白请勿修改）
+maxlogsize = 5 # MB
 
-# CORS 配置
-cors:
-  enabled: true  # 是否开启CORS
+[cors]
+enabled = true # 是否开启CORS
 
-# 鉴权配置
-auth:
-  enabled: false  # 是否开启鉴权
-  authtoken: "test"  # 鉴权Token
+[auth]
+authtoken = "test"  # 鉴权Token
+enabled = false  # 是否开启鉴权
 
-# 黑名单配置
-blacklist:
-  enabled: true  # 是否开启黑名单
-  blacklistfile: "/data/ghproxy/config/blacklist.json"
+[blacklist]
+blacklistfile = "/data/ghproxy/config/blacklist.json" # 黑名单文件路径
+enabled = false  # 是否开启黑名单
 
-# 白名单配置
-whitelist:
-  enabled: false  # 是否开启白名单
-  whitelistfile: "/data/ghproxy/config/whitelist.json"
+[whitelist]
+enabled = false  # 是否开启白名单
+whitelistfile = "/data/ghproxy/config/whitelist.json" # 白名单文件路径
 
 ```
 
@@ -105,7 +99,7 @@ whitelist:
     "blacklist": [
       "test/test1",
       "example/repo2",
-      "another/repo3"
+      "another/*"
     ]
   }
 ```
@@ -119,7 +113,7 @@ whitelist:
     "whitelist": [
       "test/test1",
       "example/repo2",
-      "another/repo3"
+      "another/*"
     ]
   }
 ```
@@ -138,6 +132,10 @@ example.com {
     encode zstd gzip    
 }
 ```
+
+### 前端页面
+
+![ghproxy-demo-v1.5.0.png](https://webp.wjqserver.com/ghproxy/ghproxy-demo-v1.5.0.png)
 
 ## TODO & DEV
 
