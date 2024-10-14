@@ -5,8 +5,7 @@ go 1.23.2
 require (
 	github.com/BurntSushi/toml v1.4.0
 	github.com/gin-gonic/gin v1.10.0
-	github.com/imroc/req/v3 v3.47.0
-	gopkg.in/yaml.v3 v3.0.1
+	github.com/imroc/req/v3 v3.48.0
 )
 
 require (
@@ -51,4 +50,5 @@ require (
 	golang.org/x/text v0.19.0 // indirect
 	golang.org/x/tools v0.26.0 // indirect
 	google.golang.org/protobuf v1.35.1 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
