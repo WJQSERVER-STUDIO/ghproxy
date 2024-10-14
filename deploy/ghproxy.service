@@ -1,0 +1,13 @@
+[Unit]
+Description=Github Proxy Service
+After=network.target
+
+[Service]
+ExecStart=/bin/bash -c '/root/data/ghproxy/ghproxy -cfg /root/data/ghproxy/config/config.toml > /root/data/ghproxy/log/run.log 2>&1'
+WorkingDirectory=/root/data/ghproxy
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

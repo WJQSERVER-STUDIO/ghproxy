@@ -1,5 +1,18 @@
 # 更新日志
 
+v1.5.1
+---
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: Bump github.com/imroc/req/v3 from 3.48.0 to 3.49.0 by @dependabot in https://github.com/WJQSERVER-STUDIO/ghproxy/pull/7
+- ADD: 新增一键部署脚本,简化二进制文件部署流程
+
+24w16a
+---
+- PRE-RELEASE: 此版本是v1.5.1的预发布版本,请勿在生产环境中使用
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: Bump github.com/imroc/req/v3 from 3.47.0 to 3.48.0 by @dependabot in https://github.com/WJQSERVER-STUDIO/ghproxy/pull/6
+- ADD: 新增一键部署脚本,简化二进制文件部署流程
+
 v1.5.0
 ---
 - CHANGE: 优化代码结构,提升性能

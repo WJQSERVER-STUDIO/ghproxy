@@ -58,6 +58,16 @@ docker run -p 7210:80 -v ./ghproxy/log/run:/data/ghproxy/log -v ./ghproxy/log/ca
 
     参看[docker-compose.yml](https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/docker/compose/docker-compose.yml)
 
+### 二进制文件部署
+
+一键部署脚本:
+
+```bash
+wget -O install.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/install.sh && chmod +x install.sh &&./install.sh
+```
+
+## 配置说明
+
 ### 外部配置文件
 
 本项目采用`config.toml`作为外部配置,默认配置如下

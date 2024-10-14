@@ -1,0 +1,23 @@
+[server]
+host = "127.0.0.1" 
+port = 8080 
+sizelimit = 131072000 # 125MB
+
+[log]
+logfilepath = "/root/data/ghproxy/log/ghproxy.log" 
+maxlogsize = 5 # MB
+
+[cors]
+enabled = true
+
+[auth]
+authtoken = "test"
+enabled = false
+
+[blacklist]
+blacklistfile = "/root/data/ghproxy/config/blacklist.json"
+enabled = false
+
+[whitelist]
+enabled = false
+whitelistfile = "/root/data/ghproxy/config/whitelist.json"
