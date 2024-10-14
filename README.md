@@ -58,7 +58,7 @@ docker run -p 7210:80 -v ./ghproxy/log/run:/data/ghproxy/log -v ./ghproxy/log/ca
 
     参看[docker-compose.yml](https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/docker/compose/docker-compose.yml)
 
-### 二进制文件部署
+### 二进制文件部署(不推荐)
 
 一键部署脚本:
 
