@@ -32,7 +32,6 @@ var (
 
 func ReadFlag() {
 	flag.StringVar(&cfgfile, "cfg", configfile, "config file path")
-	fmt.Printf("Config file path: %s\n", cfgfile)
 }
 
 func loadConfig() {
@@ -71,6 +70,8 @@ func init() {
 	loadConfig()
 	setupLogger(cfg)
 	Loadlist(cfg)
+
+	fmt.Println("Config File Path: ", cfgfile)
 
 	// 设置 Gin 模式
 	gin.SetMode(gin.ReleaseMode)
