@@ -19,6 +19,7 @@ var (
 	cfg        *config.Config
 	router     *gin.Engine
 	configfile = "/data/ghproxy/config/config.toml"
+	cfgfile    string
 )
 
 // 日志模块
@@ -30,14 +31,14 @@ var (
 )
 
 func ReadFlag() {
-	cfgfile := flag.String("cfg", configfile, "config file path")
-	configfile = *cfgfile
+	flag.StringVar(&cfgfile, "cfg", configfile, "config file path")
+	fmt.Printf("Config file path: %s\n", cfgfile)
 }
 
 func loadConfig() {
 	var err error
 	// 初始化配置
-	cfg, err = config.LoadConfig(configfile)
+	cfg, err = config.LoadConfig(cfgfile)
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
@@ -66,6 +67,7 @@ func setupApi(cfg *config.Config, router *gin.Engine) {
 
 func init() {
 	ReadFlag()
+	flag.Parse()
 	loadConfig()
 	setupLogger(cfg)
 	Loadlist(cfg)
