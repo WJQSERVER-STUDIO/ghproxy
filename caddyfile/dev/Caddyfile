@@ -102,17 +102,19 @@
             header_up X-Forwarded-For {http.request.header.X-Forwarded-For}
             header_up X-Forwarded-Proto {scheme}
             header_up Authorization {http.request.header.Authorization}
+            header {
+                www-authenticate 'Bearer realm="https://${host}/token",service="registry.docker.io"'
+            }
         }
     }
-    
-    route /auth* {
+
+    route /token* {
         reverse_proxy https://auth.docker.io {
             header_up Host auth.docker.io
             header_up X-Real-IP {remote}
             header_up X-Forwarded-For {http.request.header.X-Forwarded-For}
             header_up X-Forwarded-Proto {scheme}
             header_up Authorization {http.request.header.Authorization}
-            header_down Authorization
         }
     }    
 }

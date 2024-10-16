@@ -1,5 +1,11 @@
 # 更新日志
 
+24w18a
+---
+- PRE-RELEASE: 此版本是预发布版本,请勿在生产环境中使用
+- CHANGE: 改进Docker 代理
+- CHANGE: 改进前端页面的copy提示,弃用alert提示
+
 v1.5.2
 ---
 - FIX: 修正flag传入问题
