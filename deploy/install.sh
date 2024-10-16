@@ -66,7 +66,7 @@ chmod +x /root/data/ghproxy/ghproxy
 if [ -f /root/data/ghproxy/config/config.toml ]; then
     echo "配置文件已存在, 跳过下载"
 else
-    wget -O /root/data/ghproxy/config/config.toml https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/config.toml
+    wget -O /root/data/ghproxy/config/config.toml https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/config.toml
 fi
 
 # 替换 port = 8080 
