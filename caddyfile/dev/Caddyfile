@@ -103,6 +103,17 @@
             header_up X-Forwarded-Proto {scheme}
             header_up Authorization {http.request.header.Authorization}
         }
+    }
+    
+    route /auth* {
+        reverse_proxy https://auth.docker.io {
+            header_up Host auth.docker.io
+            header_up X-Real-IP {remote}
+            header_up X-Forwarded-For {http.request.header.X-Forwarded-For}
+            header_up X-Forwarded-Proto {scheme}
+            header_up Authorization {http.request.header.Authorization}
+            header_down Authorization
+        }
     }    
 }
 

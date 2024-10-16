@@ -7,7 +7,7 @@
 
 [DEMO](https://ghproxy.1888866.xyz)
 
-[TG讨论群](https://t.me/ghproxy_go)
+[TG讨论群组](https://t.me/ghproxy_go)
 
 ## 项目说明
 
