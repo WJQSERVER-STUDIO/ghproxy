@@ -102,9 +102,9 @@
             header_up X-Forwarded-For {http.request.header.X-Forwarded-For}
             header_up X-Forwarded-Proto {scheme}
             header_up Authorization {http.request.header.Authorization}
-            header {
+        }
+        header {
                 www-authenticate 'Bearer realm="https://${host}/token",service="registry.docker.io"'
-            }
         }
     }
 
