@@ -41,6 +41,7 @@ func loadConfig() {
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
+	fmt.Println("Config File Path: ", cfgfile)
 	fmt.Printf("Loaded config: %v\n", cfg)
 }
 
@@ -51,7 +52,8 @@ func setupLogger(cfg *config.Config) {
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
-	logInfo("Logger initialized")
+	logInfo("Config File Path: ", cfgfile)
+	logInfo("Loaded config: %v\n", cfg)
 	logInfo("Init Completed")
 }
 
@@ -71,8 +73,6 @@ func init() {
 	setupLogger(cfg)
 	Loadlist(cfg)
 
-	fmt.Println("Config File Path: ", cfgfile)
-
 	// 设置 Gin 模式
 	gin.SetMode(gin.ReleaseMode)
 
@@ -83,7 +83,10 @@ func init() {
 
 	// 定义路由
 	router.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "https://ghproxy0rtt.1888866.xyz/")
+		// 返回403错误
+		c.String(http.StatusForbidden, "403 Forbidden This route is not allowed to access.")
+		// 记录访问者IP UA METHOD
+		LogWarning("Forbidden: IP:%s UA:%s METHOD:%s", c.ClientIP(), c.Request.UserAgent(), c.Request.Method)
 	})
 
 	// 未匹配路由处理

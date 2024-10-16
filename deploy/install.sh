@@ -63,7 +63,12 @@ wget -O /root/data/ghproxy/ghproxy https://github.com/WJQSERVER-STUDIO/ghproxy/r
 chmod +x /root/data/ghproxy/ghproxy
 
 # 下载配置文件
-wget -O /root/data/ghproxy/config/config.toml https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/config.toml
+if [ -f /root/data/ghproxy/config/config.toml ]; then
+    echo "配置文件已存在, 跳过下载"
+else
+    wget -O /root/data/ghproxy/config/config.toml https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/config.toml
+fi
+
 # 替换 port = 8080 
 sed -i "s/port = 8080/port = $PORT/g" /root/data/ghproxy/config/config.toml
 
