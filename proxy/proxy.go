@@ -155,7 +155,7 @@ func createHTTPClient(mode string) *req.Client {
 	client := req.C()
 	switch mode {
 	case "chrome":
-		client.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36").
+		client.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36").
 			SetTLSFingerprintChrome().
 			ImpersonateChrome()
 	case "git":

@@ -18,11 +18,11 @@ var (
 	logger       *log.Logger
 	logChannel   = make(chan string, 100)
 	quitChannel  = make(chan struct{})
-	logFileMutex sync.Mutex // 保护 logFile 的互斥锁
+	logFileMutex sync.Mutex
 	logFilePath  = "/data/ghproxy/log/ghproxy.log"
 )
 
-// Init 初始化日志记录器，接受日志文件路径作为参数
+// 初始化，接受日志文件路径作为参数
 func Init(logFilePath_input string, maxLogsize int) error {
 	logFileMutex.Lock()
 	defer logFileMutex.Unlock()
@@ -40,7 +40,6 @@ func Init(logFilePath_input string, maxLogsize int) error {
 	return nil
 }
 
-// logWorker 处理日志记录
 func logWorker() {
 	for {
 		select {
@@ -53,38 +52,37 @@ func logWorker() {
 	}
 }
 
-// Log 直接记录日志的函数
 func Log(customMessage string) {
 	logChannel <- customMessage
 }
 
-// Logw 用于格式化日志记录
+// 格式化日志记录
 func Logw(format string, args ...interface{}) {
 	message := fmt.Sprintf(format, args...)
 	Log(message)
 }
 
-// 日志等级INFO
+// INFO
 func LogInfo(format string, args ...interface{}) {
 	message := fmt.Sprintf(format, args...)
 	output := fmt.Sprintf("[INFO] %s", message)
 	Log(output)
 }
 
-// 日志等级WARNING
+// WARNING
 func LogWarning(format string, args ...interface{}) {
 	message := fmt.Sprintf(format, args...)
 	output := fmt.Sprintf("[WARNING] %s", message)
 	Log(output)
 }
 
-// 日志等级ERROR
+// ERROR
 func LogError(format string, args ...interface{}) {
 	message := fmt.Sprintf(format, args...)
 	Log(message)
 }
 
-// Close 关闭日志文件
+// 关闭日志文件
 func Close() {
 	logFileMutex.Lock()
 	defer logFileMutex.Unlock()
@@ -100,7 +98,7 @@ func Close() {
 func monitorLogSize(logFilePath string, maxLogsize int) {
 	var maxLogsizeBytes int64 = int64(maxLogsize) * 1024 * 1024 // 最大日志文件大小，单位为MB
 	for {
-		time.Sleep(600 * time.Second) // 每10分钟检查一次
+		time.Sleep(120 * time.Minute) // 每120分钟检查一次日志文件大小
 		logFileMutex.Lock()
 		info, err := logFile.Stat()
 		logFileMutex.Unlock()
