@@ -16,12 +16,12 @@ type Config struct {
 type ServerConfig struct {
 	Port      int    `toml:"port"`
 	Host      string `toml:"host"`
-	SizeLimit int    `toml:"sizelimit"`
+	SizeLimit int    `toml:"sizeLimit"`
 }
 
 type LogConfig struct {
-	LogFilePath string `toml:"logfilepath"`
-	MaxLogSize  int    `toml:"maxlogsize"`
+	LogFilePath string `toml:"logFilePath"`
+	MaxLogSize  int    `toml:"maxLogSize"`
 }
 
 type CORSConfig struct {
@@ -30,17 +30,17 @@ type CORSConfig struct {
 
 type AuthConfig struct {
 	Enabled   bool   `toml:"enabled"`
-	AuthToken string `toml:"authtoken"`
+	AuthToken string `toml:"authToken"`
 }
 
 type BlacklistConfig struct {
 	Enabled       bool   `toml:"enabled"`
-	BlacklistFile string `toml:"blacklistfile"`
+	BlacklistFile string `toml:"blacklistFile"`
 }
 
 type WhitelistConfig struct {
 	Enabled       bool   `toml:"enabled"`
-	WhitelistFile string `toml:"whitelistfile"`
+	WhitelistFile string `toml:"whitelistFile"`
 }
 
 // LoadConfig 从 TOML 配置文件加载配置

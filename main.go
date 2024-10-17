@@ -30,7 +30,7 @@ var (
 	logError   = logger.LogError
 )
 
-func ReadFlag() {
+func readFlag() {
 	flag.StringVar(&cfgfile, "cfg", configfile, "config file path")
 }
 
@@ -57,7 +57,7 @@ func setupLogger(cfg *config.Config) {
 	logInfo("Init Completed")
 }
 
-func Loadlist(cfg *config.Config) {
+func loadlist(cfg *config.Config) {
 	auth.Init(cfg)
 }
 
@@ -67,11 +67,11 @@ func setupApi(cfg *config.Config, router *gin.Engine) {
 }
 
 func init() {
-	ReadFlag()
+	readFlag()
 	flag.Parse()
 	loadConfig()
 	setupLogger(cfg)
-	Loadlist(cfg)
+	loadlist(cfg)
 
 	// 设置 Gin 模式
 	gin.SetMode(gin.ReleaseMode)
