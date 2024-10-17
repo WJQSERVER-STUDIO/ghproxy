@@ -90,7 +90,7 @@
     }
 
     route /api* {
-        rate_limit 15r/m 10000 429
+        rate_limit {remote.ip} 15r/m 10000 429
         import cache 0s 6h
     }   
 }
