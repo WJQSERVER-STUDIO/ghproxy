@@ -11,7 +11,7 @@ maxLogSize = 5 # MB
 enabled = true
 
 [auth]
-authToken = "test"
+authToken = "token"
 enabled = false
 
 [blacklist]
@@ -21,6 +21,3 @@ enabled = false
 [whitelist]
 enabled = false
 whitelistFile = "/data/ghproxy/config/whitelist.json"
-
-[downloadFolder]
-enabled = false

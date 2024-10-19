@@ -75,9 +75,7 @@
     import cache 0s 300s
     import error_page  
     import encode
-    route /* {
-        rate_limit {remote.ip} 60r/m 10000 429
-    }  
+    import rate_limit 60  
     route / {
         root /data/www
         file_server
@@ -87,6 +85,12 @@
         root /data/www
         file_server
         import cache 0s 24h
+    
+    }
+    
+    route /api* {
+        rate_limit {remote.ip} 15r/m 10000 429
+        import cache 0s 6h
     }
 }
 

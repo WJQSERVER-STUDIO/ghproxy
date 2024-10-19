@@ -117,7 +117,6 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 
 func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 	method := c.Request.Method
-	// 记录 IP Method URL UA
 	logInfo("%s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"))
 
 	client := createHTTPClient(mode)
@@ -150,7 +149,6 @@ func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 	}
 }
 
-// createHTTPClient 创建并配置 HTTP 客户端
 func createHTTPClient(mode string) *req.Client {
 	client := req.C()
 	switch mode {
@@ -220,9 +218,10 @@ func HandleResponseSize(resp *req.Response, cfg *config.Config, c *gin.Context) 
 }
 
 func CopyResponseHeaders(resp *req.Response, c *gin.Context, cfg *config.Config) {
-	removeHeaders(resp)
 
 	copyHeaders(resp, c)
+
+	removeHeaders(resp)
 
 	setCORSHeaders(c, cfg)
 

@@ -77,28 +77,28 @@ wget -O install.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/ma
 
 ```toml
 [server]
-host = "127.0.0.1" # 监听地址(小白请勿修改)
-port = 8080 #监听端口(小白请勿修改)
-sizelimit = 131072000 # 125MB
+host = "127.0.0.1"  # 监听地址
+port = 8080  # 监听端口
+sizeLimit = 131072000 # 125MB
 
 [log]
-logfilepath = "/data/ghproxy/log/ghproxy.log"  # 日志文件路径（小白请勿修改）
-maxlogsize = 5 # MB
+logFilePath = "/data/ghproxy/log/ghproxy.log" # 日志文件路径
+maxLogSize = 5 # MB 日志文件最大大小
 
 [cors]
-enabled = true # 是否开启CORS
+enabled = true  # 是否开启跨域
 
 [auth]
-authtoken = "test"  # 鉴权Token
-enabled = false  # 是否开启鉴权
+authToken = "token"  # 用户鉴权Token
+enabled = false  # 是否开启用户鉴权
 
 [blacklist]
-blacklistfile = "/data/ghproxy/config/blacklist.json" # 黑名单文件路径
+blacklistFile = "/data/ghproxy/config/blacklist.json"  # 黑名单文件路径
 enabled = false  # 是否开启黑名单
 
 [whitelist]
 enabled = false  # 是否开启白名单
-whitelistfile = "/data/ghproxy/config/whitelist.json" # 白名单文件路径
+whitelistFile = "/data/ghproxy/config/whitelist.json"  # 白名单文件路径
 
 ```
 

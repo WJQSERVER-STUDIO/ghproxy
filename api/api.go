@@ -34,6 +34,9 @@ func InitHandleRouter(cfg *config.Config, router *gin.Engine) {
 		apiRouter.GET("/blacklist/status", func(c *gin.Context) {
 			BlackListStatusHandler(c, cfg)
 		})
+		apiRouter.GET("/cors/status", func(c *gin.Context) {
+			CorsStatusHandler(c, cfg)
+		})
 		apiRouter.GET("/healthcheck", func(c *gin.Context) {
 			HealthcheckHandler(c)
 		})
@@ -42,9 +45,7 @@ func InitHandleRouter(cfg *config.Config, router *gin.Engine) {
 }
 
 func SizeLimitHandler(cfg *config.Config, c *gin.Context) {
-	// 转换为MB
 	sizeLimit := cfg.Server.SizeLimit / 1024 / 1024
-	// 设置响应头
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
 		"MaxResponseBodySize": sizeLimit,
@@ -52,7 +53,6 @@ func SizeLimitHandler(cfg *config.Config, c *gin.Context) {
 }
 
 func WhiteListStatusHandler(c *gin.Context, cfg *config.Config) {
-	// 设置响应头
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
 		"Whitelist": cfg.Whitelist.Enabled,
@@ -60,15 +60,20 @@ func WhiteListStatusHandler(c *gin.Context, cfg *config.Config) {
 }
 
 func BlackListStatusHandler(c *gin.Context, cfg *config.Config) {
-	// 设置响应头
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
 		"Blacklist": cfg.Blacklist.Enabled,
 	})
 }
 
+func CorsStatusHandler(c *gin.Context, cfg *config.Config) {
+	c.Writer.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
+		"Cors": cfg.CORS.Enabled,
+	})
+}
+
 func HealthcheckHandler(c *gin.Context) {
-	// 设置响应头
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
 		"Status": "OK",

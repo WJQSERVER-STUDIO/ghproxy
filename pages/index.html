@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://font.sec.miui.com/font/css?family=MiSans:400,700:MiSans">
     <style>
         body {
-            background-color: #f8f9fac5;
+            background-color: #d6d6d6c5;
             font-family: 'Misans', Arial, sans-serif;
             padding: 30px;
             display: flex;
@@ -30,15 +30,15 @@
 
         h1 {
             font-weight: bold;
-            margin-bottom: 75px;
+            margin-bottom: 85px;
         }
 
         .rounded-button {
             border-radius: 6px;
             transition: background-color 0.3s, transform 0.2s;
             padding: 10px 30px;
-            background-color: #39c5bb;
-            color: white;
+            background-color: #555c5c;
+            color: rgb(255, 255, 255);
             border: none;
             margin-bottom: 10px;
         }
@@ -55,6 +55,7 @@
         }
 
         footer {
+            line-height: 1.1;
             position: absolute;
             bottom: 0;
             left: 0;
@@ -63,8 +64,8 @@
         }
 
         pre {
-            background: #2d2d2d;
-            color: #f8f8f2;
+            background: #012333;
+            color: #39c5bb;
             padding: 20px 20px;
             margin: 10px 0;
             border-radius: 8px;
@@ -80,15 +81,14 @@
             left: 10px;
             width: 12px;
             height: 12px;
-            background: #ff5f56;
+            background: #bd3c35;
             border-radius: 50%;
-            box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f;
+            box-shadow: 20px 0 0 #d69f27, 40px 0 0 #39c5bb;
         }
 
         code {
-            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-            font-size: 0.875em;
-
+            font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 1em;
         }
 
         .status-container {
@@ -112,7 +112,7 @@
             position: absolute;
             top: 5px;
             right: 10px;
-            background: rgba(118, 119, 121, 0.7);
+            background: rgba(0, 217, 224, 0.822);
             color: white;
             border: none;
             padding: 5px 10px;
@@ -135,23 +135,14 @@
         #toast {
             position: fixed;
             top: 10%;
-            /* 垂直居中 */
             left: 50%;
-            /* 水平居中 */
             transform: translate(-50%, -50%);
-            /* 调整使其中心对齐 */
-            background-color: rgba(97, 97, 97, 0.7);
-            /* 半透明黑色背景 */
+            background-color: #39c5bcd2;
             color: white;
-            /* 字体颜色 */
             padding: 15px 20px;
-            /* 内边距 */
             border-radius: 10px;
-            /* 圆角 */
             font-size: 16px;
-            /* 字体大小 */
             z-index: 1000;
-            /* 确保显示在其他元素上面 */
         }
     </style>
 </head>
@@ -160,12 +151,12 @@
     <div class="container">
         <h1>Github文件加速</h1>
         <div class="form-group">
-            <input type="text" class="form-control" id="githubLinkInput" placeholder="键入Github链接">
+            <input type="text" class="form-control" id="githubLinkInput" placeholder="请键入需要代理Github链接">
         </div>
         <button class="btn rounded-button" id="formatButton">获取文件链接</button>
 
         <div class="code" id="outputBlock">
-            <button class="copy-button" id="copyButton">Copy</button>
+            <button class="copy-button" id="copyButton">复制</button>
             <pre id="formattedLinkOutput"></pre>
         </div>
         <div class="tips">
@@ -197,7 +188,8 @@
             } else if (githubLinkInput.value.startsWith("raw.githubusercontent.com/")) {
                 formattedLink = "https://" + currentHost + "/" + githubLinkInput.value;
             } else if (!githubLinkInput.value.trim()) {
-                alert('请输入有效的GitHub链接');
+                //alert('请输入有效的GitHub链接');
+                showToast('请输入有效的GitHub链接');
             }
             var formattedLinkOutput = document.getElementById('formattedLinkOutput');
             formattedLinkOutput.textContent = formattedLink;
@@ -283,9 +275,7 @@
 
 <footer>
     <p>
-        Copyright &copy; 2024 WJQSERVER-STUDIO
-    </p>
-    <p>
+        Copyright &copy; 2024 WJQSERVER-STUDIO<br>
         GitHub仓库地址：<a href="https://github.com/WJQSERVER-STUDIO/ghproxy">https://github.com/WJQSERVER-STUDIO/ghproxy</a> <br><a href="https://t.me/ghproxy_go">Telegram交流群</a>
     </p>
     <div id="visitor-info" style="text-align: center; margin-top: 15px;">

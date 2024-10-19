@@ -65,6 +65,7 @@ chmod +x /root/data/ghproxy/ghproxy
 # 下载配置文件
 if [ -f /root/data/ghproxy/config/config.toml ]; then
     echo "配置文件已存在, 跳过下载"
+    echo "请检查配置文件是否正确，DEV版本升级时请注意配置文件兼容性"
 else
     wget -O /root/data/ghproxy/config/config.toml https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/config.toml
 fi

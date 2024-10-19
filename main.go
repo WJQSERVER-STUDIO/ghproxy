@@ -62,7 +62,6 @@ func loadlist(cfg *config.Config) {
 }
 
 func setupApi(cfg *config.Config, router *gin.Engine) {
-	// 注册 API 接口
 	api.InitHandleRouter(cfg, router)
 }
 
@@ -73,19 +72,14 @@ func init() {
 	setupLogger(cfg)
 	loadlist(cfg)
 
-	// 设置 Gin 模式
 	gin.SetMode(gin.ReleaseMode)
 
-	// 初始化路由
 	router = gin.Default()
 
 	setupApi(cfg, router)
 
-	// 定义路由
 	router.GET("/", func(c *gin.Context) {
-		// 返回403错误
 		c.String(http.StatusForbidden, "403 Forbidden This route is not allowed to access.")
-		// 记录访问者IP UA METHOD
 		LogWarning("Forbidden: IP:%s UA:%s METHOD:%s", c.ClientIP(), c.Request.UserAgent(), c.Request.Method)
 	})
 
