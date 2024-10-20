@@ -81,7 +81,7 @@ host = "127.0.0.1"  # 监听地址
 port = 8080  # 监听端口
 sizeLimit = 131072000 # 125MB
 
-[page]
+[pages]
 enabled = true  # 是否开启内置静态页面
 staticPath = "/data/www"  # 静态页面文件路径
 
