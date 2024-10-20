@@ -6,7 +6,7 @@ import (
 
 type Config struct {
 	Server    ServerConfig
-	Page      PageConfig
+	Pages     PagesConfig
 	Log       LogConfig
 	CORS      CORSConfig
 	Auth      AuthConfig
@@ -20,7 +20,7 @@ type ServerConfig struct {
 	SizeLimit int    `toml:"sizeLimit"`
 }
 
-type PageConfig struct {
+type PagesConfig struct {
 	Enabled   bool   `toml:"enabled"`
 	StaticDir string `toml:"staticDir"`
 }

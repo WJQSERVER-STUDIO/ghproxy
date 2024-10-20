@@ -79,14 +79,14 @@ func init() {
 
 	setupApi(cfg, router)
 
-	if cfg.Page.Enabled {
-		indexPagePath := fmt.Sprintf("%s/index.html", cfg.Page.StaticDir)
-		faviconPath := fmt.Sprintf("%s/favicon.ico", cfg.Page.StaticDir)
+	if cfg.Pages.Enabled {
+		indexPagePath := fmt.Sprintf("%s/index.html", cfg.Pages.StaticDir)
+		faviconPath := fmt.Sprintf("%s/favicon.ico", cfg.Pages.StaticDir)
 		// 静态index页
 		router.StaticFile("/", indexPagePath)
 		// 静态favicon.ico
 		router.StaticFile("/favicon.ico", faviconPath)
-	} else if !cfg.Page.Enabled {
+	} else if !cfg.Pages.Enabled {
 		router.GET("/", func(c *gin.Context) {
 			c.String(http.StatusForbidden, "403 Forbidden This route is not allowed to access.")
 			LogWarning("Forbidden: IP:%s UA:%s METHOD:%s HTTPv:%s", c.ClientIP(), c.Request.UserAgent(), c.Request.Method, c.Request.Proto)
