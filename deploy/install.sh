@@ -28,7 +28,7 @@ install() {
 }
 
 # 安装依赖包
-install curl wget sed
+install curl wget -q sed
 
 # 查看当前架构是否为linux/amd64或linux/arm64
 ARCH=$(uname -m)
@@ -56,25 +56,26 @@ mkdir -p /root/data/ghproxy/log
 
 # 获取最新版本号
 VERSION=$(curl -s https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/VERSION)
-wget -O /root/data/ghproxy/VERSION https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/VERSION
+wget -q -O /root/data/ghproxy/VERSION https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/VERSION
 
 # 下载ghproxy
-wget -O /root/data/ghproxy/ghproxy https://github.com/WJQSERVER-STUDIO/ghproxy/releases/download/$VERSION/ghproxy-linux-$ARCH
+wget -q -O /root/data/ghproxy/ghproxy https://github.com/WJQSERVER-STUDIO/ghproxy/releases/download/$VERSION/ghproxy-linux-$ARCH
 chmod +x /root/data/ghproxy/ghproxy
 
 # 下载配置文件
 if [ -f /root/data/ghproxy/config/config.toml ]; then
     echo "配置文件已存在, 跳过下载"
     echo "请检查配置文件是否正确，跨大版本升级时请注意配置文件兼容性"
+    sleep 2
 else
-    wget -O /root/data/ghproxy/config/config.toml https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/config.toml
+    wget -q -O /root/data/ghproxy/config/config.toml https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/config.toml
 fi
 
 # 替换 port = 8080 
 sed -i "s/port = 8080/port = $PORT/g" /root/data/ghproxy/config/config.toml
 
 # 下载systemd服务文件
-wget -O /etc/systemd/system/ghproxy.service https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/ghproxy.service
+wget -q -O /etc/systemd/system/ghproxy.service https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/ghproxy.service
 
 # 启动ghproxy
 systemctl daemon-reload

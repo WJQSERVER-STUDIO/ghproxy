@@ -68,7 +68,7 @@
 
 :80 {
     reverse_proxy {
-        to 127.0.0.1:8080
+        to h2c://127.0.0.1:8080
         import header_realip
     }
     import log ghproxy
