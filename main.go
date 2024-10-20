@@ -26,7 +26,7 @@ var (
 var (
 	logw       = logger.Logw
 	logInfo    = logger.LogInfo
-	LogWarning = logger.LogWarning
+	logWarning = logger.LogWarning
 	logError   = logger.LogError
 )
 
@@ -83,13 +83,17 @@ func init() {
 		indexPagePath := fmt.Sprintf("%s/index.html", cfg.Pages.StaticDir)
 		faviconPath := fmt.Sprintf("%s/favicon.ico", cfg.Pages.StaticDir)
 		// 静态index页
-		router.StaticFile("/", indexPagePath)
+		//router.StaticFile("/", indexPagePath)
+		router.GET("/", func(c *gin.Context) {
+			c.File(indexPagePath)
+			logInfo("IP:%s UA:%s METHOD:%s HTTPv:%s", c.ClientIP(), c.Request.UserAgent(), c.Request.Method, c.Request.Proto)
+		})
 		// 静态favicon.ico
 		router.StaticFile("/favicon.ico", faviconPath)
 	} else if !cfg.Pages.Enabled {
 		router.GET("/", func(c *gin.Context) {
 			c.String(http.StatusForbidden, "403 Forbidden This route is not allowed to access.")
-			LogWarning("Forbidden: IP:%s UA:%s METHOD:%s HTTPv:%s", c.ClientIP(), c.Request.UserAgent(), c.Request.Method, c.Request.Proto)
+			logWarning("Forbidden: IP:%s UA:%s METHOD:%s HTTPv:%s", c.ClientIP(), c.Request.UserAgent(), c.Request.Method, c.Request.Proto)
 		})
 	}
 

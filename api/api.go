@@ -17,7 +17,7 @@ var (
 var (
 	logw       = logger.Logw
 	logInfo    = logger.LogInfo
-	LogWarning = logger.LogWarning
+	logWarning = logger.LogWarning
 	logError   = logger.LogError
 )
 

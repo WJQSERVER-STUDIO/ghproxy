@@ -21,7 +21,7 @@ import (
 var (
 	logw       = logger.Logw
 	logInfo    = logger.LogInfo
-	LogWarning = logger.LogWarning
+	logWarning = logger.LogWarning
 	logError   = logger.LogError
 )
 
@@ -40,7 +40,7 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 		matches := re.FindStringSubmatch(rawPath)
 
 		if len(matches) < 3 {
-			LogWarning("Invalid URL: %s", rawPath)
+			logWarning("Invalid URL: %s", rawPath)
 			c.String(http.StatusForbidden, "Invalid URL.")
 			return
 		}
@@ -51,14 +51,14 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 		pathmatches := regexp.MustCompile(`^([^/]+)/([^/]+)/([^/]+)/.*`)
 		pathParts := pathmatches.FindStringSubmatch(matches[2])
 		if len(pathParts) < 4 {
-			LogWarning("Invalid path: %s", rawPath)
+			logWarning("Invalid path: %s", rawPath)
 			c.String(http.StatusForbidden, "Invalid path; expected username/repo.")
 			return
 		}
 
 		username := pathParts[2]
 		repo := pathParts[3]
-		LogWarning("Blacklist Check > Username: %s, Repo: %s", username, repo)
+		logWarning("Blacklist Check > Username: %s, Repo: %s", username, repo)
 		fullrepo := fmt.Sprintf("%s/%s", username, repo)
 
 		// 白名单检查
@@ -67,7 +67,7 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 			if !whitelistpass {
 				errMsg := fmt.Sprintf("Whitelist Blocked repo: %s", fullrepo)
 				c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
-				LogWarning(errMsg)
+				logWarning(errMsg)
 				return
 			}
 		}
@@ -78,7 +78,7 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 			if blacklistpass {
 				errMsg := fmt.Sprintf("Blacklist Blocked repo: %s", fullrepo)
 				c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
-				LogWarning(errMsg)
+				logWarning(errMsg)
 				return
 			}
 		}
@@ -95,7 +95,7 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 
 		if !auth.AuthHandler(c, cfg) {
 			c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
-			LogWarning("Unauthorized request: %s", rawPath)
+			logWarning("Unauthorized request: %s", rawPath)
 			return
 		}
 
@@ -139,7 +139,7 @@ func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 	defer resp.Body.Close()
 
 	if err := HandleResponseSize(resp, cfg, c); err != nil {
-		LogWarning("Error handling response size: %v", err)
+		logWarning("Error handling response size: %v", err)
 		return
 	}
 
@@ -211,7 +211,7 @@ func HandleResponseSize(resp *req.Response, cfg *config.Config, c *gin.Context) 
 		if err == nil && size > cfg.Server.SizeLimit {
 			finalURL := resp.Request.URL.String()
 			c.Redirect(http.StatusMovedPermanently, finalURL)
-			LogWarning("Size limit exceeded: %s, Size: %d", finalURL, size)
+			logWarning("Size limit exceeded: %s, Size: %d", finalURL, size)
 			return fmt.Errorf("size limit exceeded: %d", size)
 		}
 	}
@@ -268,7 +268,7 @@ func setDefaultHeaders(c *gin.Context) {
 
 func HandleError(c *gin.Context, message string) {
 	c.String(http.StatusInternalServerError, fmt.Sprintf("server error %v", message))
-	LogWarning(message)
+	logWarning(message)
 }
 
 func CheckURL(u string) []string {
@@ -279,6 +279,6 @@ func CheckURL(u string) []string {
 		}
 	}
 	errMsg := fmt.Sprintf("Invalid URL: %s", u)
-	LogWarning(errMsg)
+	logWarning(errMsg)
 	return nil
 }

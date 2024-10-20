@@ -11,7 +11,7 @@ import (
 var (
 	logw       = logger.Logw
 	logInfo    = logger.LogInfo
-	LogWarning = logger.LogWarning
+	logWarning = logger.LogWarning
 	logError   = logger.LogError
 )
 
@@ -38,13 +38,13 @@ func AuthHandler(c *gin.Context, cfg *config.Config) bool {
 
 	// 验证 token
 	if authToken == "" {
-		LogWarning("auth FAILED: no auth_token provided")
+		logWarning("auth FAILED: no auth_token provided")
 		return false
 	}
 
 	isValid := authToken == cfg.Auth.AuthToken
 	if !isValid {
-		LogWarning("auth FAILED: invalid auth_token: %s", authToken)
+		logWarning("auth FAILED: invalid auth_token: %s", authToken)
 	}
 
 	logInfo("auth SUCCESS: %t", isValid)
