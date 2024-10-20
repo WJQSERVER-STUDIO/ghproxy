@@ -117,7 +117,8 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 
 func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 	method := c.Request.Method
-	logInfo("%s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"))
+	// 记录日志 IP 地址、请求方法、请求 URL、请求头 User-Agent 、HTTP版本
+	logInfo("%s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 
 	client := createHTTPClient(mode)
 

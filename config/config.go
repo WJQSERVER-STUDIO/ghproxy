@@ -6,6 +6,7 @@ import (
 
 type Config struct {
 	Server    ServerConfig
+	Page      PageConfig
 	Log       LogConfig
 	CORS      CORSConfig
 	Auth      AuthConfig
@@ -17,6 +18,11 @@ type ServerConfig struct {
 	Port      int    `toml:"port"`
 	Host      string `toml:"host"`
 	SizeLimit int    `toml:"sizeLimit"`
+}
+
+type PageConfig struct {
+	Enabled   bool   `toml:"enabled"`
+	StaticDir string `toml:"staticDir"`
 }
 
 type LogConfig struct {

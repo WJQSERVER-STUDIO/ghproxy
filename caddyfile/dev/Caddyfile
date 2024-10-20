@@ -68,7 +68,7 @@
 
 :80 {
     reverse_proxy {
-        to 127.0.0.1:8080
+        to h2c://127.0.0.1:8080
         import header_realip
     }
     import log ghproxy
@@ -76,8 +76,6 @@
     import error_page  
     import encode
     import rate_limit 60 
-    header Age 10
-    header Cache-Control "max-age=300"
     route / {
         root /data/www
         file_server

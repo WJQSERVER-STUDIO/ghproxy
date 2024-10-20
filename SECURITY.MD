@@ -17,6 +17,7 @@
 使用本项目,请遵循 **[WSL (WJQSERVER-STUDIO LICENSE)](https://wjqserver-studio.github.io/LICENSE/LICENSE.html)** 协议。
 
 本项目所有文件均受到 WSL (WJQSERVER-STUDIO LICENSE) 协议保护,任何人不得在任何情况下以非 WSL (WJQSERVER-STUDIO LICENSE) 协议内规定的方式使用,复制,修改,编译,发布,分发,再许可,或者出售本项目的任何部分。
+
 ## 报告漏洞
 
 如果您发现本项目存在安全漏洞,请通过发送ISSUES或尝试联系项目维护者来报告。请在您的报告中包含以下信息:

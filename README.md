@@ -81,6 +81,10 @@ host = "127.0.0.1"  # 监听地址
 port = 8080  # 监听端口
 sizeLimit = 131072000 # 125MB
 
+[page]
+enabled = true  # 是否开启内置静态页面
+staticPath = "/data/www"  # 静态页面文件路径
+
 [log]
 logFilePath = "/data/ghproxy/log/ghproxy.log" # 日志文件路径
 maxLogSize = 5 # MB 日志文件最大大小

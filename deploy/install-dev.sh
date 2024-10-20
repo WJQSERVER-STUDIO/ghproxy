@@ -53,6 +53,7 @@ fi
 mkdir -p /root/data/ghproxy
 mkdir -p /root/data/ghproxy/config
 mkdir -p /root/data/ghproxy/log
+mkdir -p /root/data/ghproxy/pages
 
 # 获取最新版本号
 VERSION=$(curl -s https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/DEV-VERSION)
@@ -61,6 +62,11 @@ wget -O /root/data/ghproxy/VERSION https://raw.githubusercontent.com/WJQSERVER-S
 # 下载ghproxy
 wget -O /root/data/ghproxy/ghproxy https://github.com/WJQSERVER-STUDIO/ghproxy/releases/download/$VERSION/ghproxy-linux-$ARCH
 chmod +x /root/data/ghproxy/ghproxy
+
+# 下载pages
+wget -O /root/data/ghproxy/pages/index.html https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/pages/index.html
+wget -O /root/data/ghproxy/pages/favicon.ico https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/pages/favicon.ico
+
 
 # 下载配置文件
 if [ -f /root/data/ghproxy/config/config.toml ]; then
