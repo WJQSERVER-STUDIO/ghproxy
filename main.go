@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"ghproxy/api"
 	"ghproxy/auth"
@@ -13,7 +12,6 @@ import (
 	"ghproxy/logger"
 	"ghproxy/proxy"
 
-	"github.com/gin-contrib/ratelimit"
 	"github.com/gin-gonic/gin"
 )
 
@@ -78,10 +76,6 @@ func init() {
 
 	router = gin.Default()
 	router.UseH2C = true
-	router.Use(ratelimit.New(
-		ratelimit.WithTotolLimit(10),
-		ratelimit.WithDuration(1*time.Minute),
-	))
 
 	setupApi(cfg, router)
 
