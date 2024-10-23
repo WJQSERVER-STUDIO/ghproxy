@@ -30,7 +30,7 @@ var exps = []*regexp.Regexp{
 	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:blob|raw)/.*`),
 	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:info|git-).*`),
 	regexp.MustCompile(`^(?:https?://)?raw\.github(?:usercontent|)\.com/([^/]+)/([^/]+)/.+?/.+`),
-	regexp.MustCompile(`^(?:https?://)?gist\.github\.com/([^/]+)/.+?/.+`),
+	regexp.MustCompile(`^(?:https?://)?gist\.github(?:usercontent|)\.com/([^/]+)/.+?/.+`),
 }
 
 func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
@@ -108,12 +108,12 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 
 // 提取用户名和仓库名，格式为 handle/<username>/<repo>/*
 func MatchUserRepo(rawPath string, cfg *config.Config, c *gin.Context, matches []string) (string, string) {
-	var gistregex = regexp.MustCompile(`^(?:https?://)?gist\.github\.com/([^/]+)/([^/]+)/.*`)
+	var gistregex = regexp.MustCompile(`^(?:https?://)?gist\.github(?:usercontent|)\.com/([^/]+)/([^/]+)/.*`)
 	var gistmatches []string
 	if gistregex.MatchString(rawPath) {
 		gistmatches = gistregex.FindStringSubmatch(rawPath)
-		logInfo("Gist Matched > Username: %s, URL: %s", gistmatches[2], rawPath)
-		return gistmatches[2], ""
+		logInfo("Gist Matched > Username: %s, URL: %s", gistmatches[1], rawPath)
+		return gistmatches[1], ""
 	}
 	pathmatches := regexp.MustCompile(`^([^/]+)/([^/]+)/([^/]+)/.*`)
 	pathParts := pathmatches.FindStringSubmatch(matches[2])
