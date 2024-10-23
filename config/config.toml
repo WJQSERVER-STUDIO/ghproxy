@@ -1,7 +1,7 @@
 [server]
 host = "127.0.0.1" 
 port = 8080 
-sizeLimit = 131072000 # 125MB
+sizeLimit = 125 # MB
 
 [pages]
 enabled = false

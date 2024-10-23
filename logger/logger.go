@@ -96,7 +96,7 @@ func Close() {
 }
 
 func monitorLogSize(logFilePath string, maxLogsize int) {
-	var maxLogsizeBytes int64 = int64(maxLogsize) * 1024 * 1024 // 最大日志文件大小，单位为MB
+	var maxLogsizeBytes int64 = int64(maxLogsize) * 1024 * 1024
 	for {
 		time.Sleep(120 * time.Minute) // 每120分钟检查一次日志文件大小
 		logFileMutex.Lock()

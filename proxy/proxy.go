@@ -47,17 +47,8 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 
 		rawPath = "https://" + matches[2]
 
-		// 提取用户名和仓库名，格式为 handle/<username>/<repo>/*
-		pathmatches := regexp.MustCompile(`^([^/]+)/([^/]+)/([^/]+)/.*`)
-		pathParts := pathmatches.FindStringSubmatch(matches[2])
-		if len(pathParts) < 4 {
-			logWarning("Invalid path: %s", rawPath)
-			c.String(http.StatusForbidden, "Invalid path; expected username/repo.")
-			return
-		}
+		username, repo := MatchUserRepo(rawPath, cfg, c, matches)
 
-		username := pathParts[2]
-		repo := pathParts[3]
 		logWarning("Blacklist Check > Username: %s, Repo: %s", username, repo)
 		fullrepo := fmt.Sprintf("%s/%s", username, repo)
 
@@ -112,6 +103,20 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 			c.String(http.StatusForbidden, "Invalid input.")
 			return
 		}
+	}
+}
+
+func MatchUserRepo(rawPath string, cfg *config.Config, c *gin.Context, matches []string) (string, string) {
+	// 提取用户名和仓库名，格式为 handle/<username>/<repo>/*
+	pathmatches := regexp.MustCompile(`^([^/]+)/([^/]+)/([^/]+)/.*`)
+	pathParts := pathmatches.FindStringSubmatch(matches[2])
+
+	if len(pathParts) < 4 {
+		logWarning("Invalid path: %s", rawPath)
+		c.String(http.StatusForbidden, "Invalid path; expected username/repo.")
+		return "", ""
+	} else {
+		return pathParts[2], pathParts[3]
 	}
 }
 
@@ -206,9 +211,10 @@ func SendRequest(req *req.Request, method, url string) (*req.Response, error) {
 
 func HandleResponseSize(resp *req.Response, cfg *config.Config, c *gin.Context) error {
 	contentLength := resp.Header.Get("Content-Length")
+	sizelimit := cfg.Server.SizeLimit * 1024 * 1024
 	if contentLength != "" {
 		size, err := strconv.Atoi(contentLength)
-		if err == nil && size > cfg.Server.SizeLimit {
+		if err == nil && size > sizelimit {
 			finalURL := resp.Request.URL.String()
 			c.Redirect(http.StatusMovedPermanently, finalURL)
 			logWarning("Size limit exceeded: %s, Size: %d", finalURL, size)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"ghproxy/api"
 	"ghproxy/auth"
@@ -12,6 +13,7 @@ import (
 	"ghproxy/logger"
 	"ghproxy/proxy"
 
+	"github.com/gin-contrib/ratelimit"
 	"github.com/gin-gonic/gin"
 )
 
@@ -76,19 +78,20 @@ func init() {
 
 	router = gin.Default()
 	router.UseH2C = true
+	router.Use(ratelimit.New(
+		ratelimit.WithTotolLimit(10),
+		ratelimit.WithDuration(1*time.Minute),
+	))
 
 	setupApi(cfg, router)
 
 	if cfg.Pages.Enabled {
 		indexPagePath := fmt.Sprintf("%s/index.html", cfg.Pages.StaticDir)
 		faviconPath := fmt.Sprintf("%s/favicon.ico", cfg.Pages.StaticDir)
-		// 静态index页
-		//router.StaticFile("/", indexPagePath)
 		router.GET("/", func(c *gin.Context) {
 			c.File(indexPagePath)
 			logInfo("IP:%s UA:%s METHOD:%s HTTPv:%s", c.ClientIP(), c.Request.UserAgent(), c.Request.Method, c.Request.Proto)
 		})
-		// 静态favicon.ico
 		router.StaticFile("/favicon.ico", faviconPath)
 	} else if !cfg.Pages.Enabled {
 		router.GET("/", func(c *gin.Context) {
@@ -97,7 +100,6 @@ func init() {
 		})
 	}
 
-	// 未匹配路由处理
 	router.NoRoute(func(c *gin.Context) {
 		proxy.NoRouteHandler(cfg)(c)
 	})
