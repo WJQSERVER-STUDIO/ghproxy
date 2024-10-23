@@ -45,7 +45,7 @@ func InitHandleRouter(cfg *config.Config, router *gin.Engine) {
 }
 
 func SizeLimitHandler(cfg *config.Config, c *gin.Context) {
-	sizeLimit := cfg.Server.SizeLimit / 1024 / 1024
+	sizeLimit := cfg.Server.SizeLimit
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
 		"MaxResponseBodySize": sizeLimit,

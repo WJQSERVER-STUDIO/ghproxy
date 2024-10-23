@@ -106,8 +106,15 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 	}
 }
 
+// 提取用户名和仓库名，格式为 handle/<username>/<repo>/*
 func MatchUserRepo(rawPath string, cfg *config.Config, c *gin.Context, matches []string) (string, string) {
-	// 提取用户名和仓库名，格式为 handle/<username>/<repo>/*
+	var gistregex = regexp.MustCompile(`^(?:https?://)?gist\.github\.com/([^/]+)/([^/]+)/.*`)
+	var gistmatches []string
+	if gistregex.MatchString(rawPath) {
+		gistmatches = gistregex.FindStringSubmatch(rawPath)
+		logInfo("Gist Matched > Username: %s, URL: %s", gistmatches[2], rawPath)
+		return gistmatches[2], ""
+	}
 	pathmatches := regexp.MustCompile(`^([^/]+)/([^/]+)/([^/]+)/.*`)
 	pathParts := pathmatches.FindStringSubmatch(matches[2])
 
