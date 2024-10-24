@@ -79,10 +79,10 @@ wget -O install.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/ma
 [server]
 host = "127.0.0.1"  # 监听地址
 port = 8080  # 监听端口
-sizeLimit = 131072000 # 125MB
+sizeLimit = 125 # 125MB
 
 [pages]
-enabled = true  # 是否开启内置静态页面
+enabled = false  # 是否开启内置静态页面(Docker版本请关闭此项)
 staticPath = "/data/www"  # 静态页面文件路径
 
 [log]

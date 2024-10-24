@@ -4,7 +4,7 @@
     https_port 443
     order cache before rewrite
     cache {
-        cache_name GhProxyCache
+        cache_name GHProxyCache
     }
     log {
         level INFO

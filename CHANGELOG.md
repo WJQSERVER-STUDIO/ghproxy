@@ -1,5 +1,15 @@
 # 更新日志
 
+v1.6.1
+---
+- CHANGE: 根据社区建议,将`sizeLimit`由过去的以`byte`为单位,改为以`MB`为单位,以便于直观理解
+- ADD: 新增`nocache`版本,供由用户自行优化缓存策略
+- CHANGE: 优化`Proxy`核心模块内部结构,提升性能
+- REMOVE: 移除`Proxy`模块内部分无用`logInfo`
+- FIX & ADD: 修复前端对gist的匹配问题,添加对`gist.githubusercontent.com`的前端转换支持
+- CHANGE: 改变部分前端匹配逻辑
+- CHANGE: 更新相关依赖库
+
 24w19d
 ---
 - PRE-RELEASE: 此版本是v1.6.1的预发布版本,请勿在生产环境中使用

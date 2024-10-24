@@ -4,15 +4,15 @@
     https_port 443
     order cache before rewrite
     cache {
-        cache_name GhProxyCache
+        cache_name GHProxyCache
     }
     log {
         level INFO
         output file /data/caddy/log/caddy.log {
             roll_size 5MB
             roll_keep 10
-        }            
-    }        
+        }
+    }
 }
 
 (log) {
