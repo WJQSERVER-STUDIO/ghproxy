@@ -14,7 +14,7 @@
         }            
     } 
     servers :80 {
-		protocols h1 h2 h2c
+		protocols h1 h2c
 	}       
 }
 
