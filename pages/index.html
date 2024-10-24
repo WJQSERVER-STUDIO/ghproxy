@@ -187,8 +187,11 @@
                 formattedLink = "https://" + currentHost + githubLinkInput.value.substring(githubLinkInput.value.indexOf("/", 7));
             } else if (githubLinkInput.value.startsWith("raw.githubusercontent.com/")) {
                 formattedLink = "https://" + currentHost + "/" + githubLinkInput.value;
-            } else if (!githubLinkInput.value.trim()) {
-                //alert('请输入有效的GitHub链接');
+            } else if (githubLinkInput.value.startsWith("https://gist.githubusercontent.com/") || githubLinkInput.value.startsWith("http://gist.githubusercontent.com/")) {
+                formattedLink = "https://" + currentHost + "/gist.github.com" + githubLinkInput.value.substring(githubLinkInput.value.indexOf("/", 18));
+            } else if (githubLinkInput.value.startsWith("gist.githubusercontent.com/")) {
+                formattedLink = "https://" + currentHost + "/" + githubLinkInput.value;
+            } else {
                 showToast('请输入有效的GitHub链接');
             }
             var formattedLinkOutput = document.getElementById('formattedLinkOutput');
@@ -276,7 +279,8 @@
 <footer>
     <p>
         Copyright &copy; 2024 WJQSERVER-STUDIO<br>
-        GitHub仓库地址：<a href="https://github.com/WJQSERVER-STUDIO/ghproxy">https://github.com/WJQSERVER-STUDIO/ghproxy</a> <br><a href="https://t.me/ghproxy_go">Telegram交流群</a>
+        GitHub仓库地址：<a href="https://github.com/WJQSERVER-STUDIO/ghproxy">https://github.com/WJQSERVER-STUDIO/ghproxy</a>
+        <br><a href="https://t.me/ghproxy_go">Telegram交流群</a>
     </p>
     <div id="visitor-info" style="text-align: center; margin-top: 15px;">
         <p>您的IP地址: <span id="visitor-ip"></span></p>

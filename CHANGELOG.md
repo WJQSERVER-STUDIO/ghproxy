@@ -1,10 +1,17 @@
 # 更新日志
 
+24w19c
+---
+- PRE-RELEASE: 此版本是v1.6.1的预发布版本,请勿在生产环境中使用
+- FIX & ADD: 修复前端对gist的匹配问题,添加对`gist.githubusercontent.com`的前端转换支持
+- CHANGE: 改变部分前端匹配逻辑
+- CHANGE: 更新相关依赖库
+
 24w19b
 ---
 - PRE-RELEASE: 此版本是v1.6.1的预发布版本,请勿在生产环境中使用
 - FIX: 修复`sizeLimit`单位更改导致API返回值错误的问题
-- FIX: 尝试修正Gist匹配
+- FIX: 修正Gist匹配
 
 24w19a
 ---
