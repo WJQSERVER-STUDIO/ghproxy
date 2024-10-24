@@ -94,10 +94,8 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 
 		switch {
 		case exps[0].MatchString(rawPath), exps[1].MatchString(rawPath), exps[3].MatchString(rawPath), exps[4].MatchString(rawPath):
-			logInfo("%s Matched - USE proxy-chrome", rawPath)
 			ProxyRequest(c, rawPath, cfg, "chrome")
 		case exps[2].MatchString(rawPath):
-			logInfo("%s Matched - USE proxy-git", rawPath)
 			ProxyRequest(c, rawPath, cfg, "git")
 		default:
 			c.String(http.StatusForbidden, "Invalid input.")
@@ -106,7 +104,7 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 	}
 }
 
-// 提取用户名和仓库名，格式为 handle/<username>/<repo>/*
+// 提取用户名和仓库名
 func MatchUserRepo(rawPath string, cfg *config.Config, c *gin.Context, matches []string) (string, string) {
 	var gistregex = regexp.MustCompile(`^(?:https?://)?gist\.github(?:usercontent|)\.com/([^/]+)/([^/]+)/.*`)
 	var gistmatches []string
@@ -115,16 +113,16 @@ func MatchUserRepo(rawPath string, cfg *config.Config, c *gin.Context, matches [
 		logInfo("Gist Matched > Username: %s, URL: %s", gistmatches[1], rawPath)
 		return gistmatches[1], ""
 	}
-	pathmatches := regexp.MustCompile(`^([^/]+)/([^/]+)/([^/]+)/.*`)
-	pathParts := pathmatches.FindStringSubmatch(matches[2])
-
-	if len(pathParts) < 4 {
-		logWarning("Invalid path: %s", rawPath)
-		c.String(http.StatusForbidden, "Invalid path; expected username/repo.")
-		return "", ""
-	} else {
-		return pathParts[2], pathParts[3]
+	// 定义路径匹配的正则表达式
+	pathRegex := regexp.MustCompile(`^([^/]+)/([^/]+)/([^/]+)/.*`)
+	if pathMatches := pathRegex.FindStringSubmatch(matches[2]); len(pathMatches) >= 4 {
+		return pathMatches[2], pathMatches[3]
 	}
+
+	// 返回错误信息
+	logWarning("Invalid path: %s", rawPath)
+	c.String(http.StatusForbidden, "Invalid path; expected username/repo.")
+	return "", ""
 }
 
 func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
@@ -166,7 +164,7 @@ func createHTTPClient(mode string) *req.Client {
 	client := req.C()
 	switch mode {
 	case "chrome":
-		client.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36").
+		client.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36").
 			SetTLSFingerprintChrome().
 			ImpersonateChrome()
 	case "git":
@@ -175,7 +173,7 @@ func createHTTPClient(mode string) *req.Client {
 	return client
 }
 
-// readRequestBody 读取请求体
+// 读取请求体
 func readRequestBody(c *gin.Context) ([]byte, error) {
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -185,7 +183,7 @@ func readRequestBody(c *gin.Context) ([]byte, error) {
 	return body, nil
 }
 
-// setRequestHeaders 设置请求头
+// 设置请求头
 func setRequestHeaders(c *gin.Context, req *req.Request) {
 	for key, values := range c.Request.Header {
 		for _, value := range values {
@@ -194,7 +192,7 @@ func setRequestHeaders(c *gin.Context, req *req.Request) {
 	}
 }
 
-// copyResponseBody 复制响应体到客户端
+// 复制响应体
 func copyResponseBody(c *gin.Context, respBody io.Reader) error {
 	_, err := io.Copy(c.Writer, respBody)
 	return err
@@ -242,7 +240,7 @@ func CopyResponseHeaders(resp *req.Response, c *gin.Context, cfg *config.Config)
 	setDefaultHeaders(c)
 }
 
-// removeHeaders 移除指定的响应头
+// 移除指定响应头
 func removeHeaders(resp *req.Response) {
 	headersToRemove := map[string]struct{}{
 		"Content-Security-Policy":   {},
@@ -255,7 +253,7 @@ func removeHeaders(resp *req.Response) {
 	}
 }
 
-// copyHeaders 复制响应头到 Gin 上下文
+// 复制响应头
 func copyHeaders(resp *req.Response, c *gin.Context) {
 	for key, values := range resp.Header {
 		for _, value := range values {
@@ -264,7 +262,7 @@ func copyHeaders(resp *req.Response, c *gin.Context) {
 	}
 }
 
-// setCORSHeaders 设置 CORS 相关的响应头
+// CORS配置
 func setCORSHeaders(c *gin.Context, cfg *config.Config) {
 	if cfg.CORS.Enabled {
 		c.Header("Access-Control-Allow-Origin", "*")
@@ -273,7 +271,7 @@ func setCORSHeaders(c *gin.Context, cfg *config.Config) {
 	}
 }
 
-// setDefaultHeaders 设置默认的响应头
+// 默认响应
 func setDefaultHeaders(c *gin.Context) {
 	c.Header("Age", "10")
 	c.Header("Cache-Control", "max-age=300")

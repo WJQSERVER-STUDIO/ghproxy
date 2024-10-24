@@ -1,5 +1,12 @@
 # 更新日志
 
+24w19d
+---
+- PRE-RELEASE: 此版本是v1.6.1的预发布版本,请勿在生产环境中使用
+- ADD: 新增nocache版本,供由用户自行优化缓存策略
+- CHANGE: 优化`Proxy`核心模块内部结构,提升性能
+- REMOVE: 移除`Proxy`模块内部分无用`logInfo`
+
 24w19c
 ---
 - PRE-RELEASE: 此版本是v1.6.1的预发布版本,请勿在生产环境中使用

@@ -22,7 +22,7 @@ var (
 	logFilePath  = "/data/ghproxy/log/ghproxy.log"
 )
 
-// 初始化，接受日志文件路径作为参数
+// 初始化
 func Init(logFilePath_input string, maxLogsize int) error {
 	logFileMutex.Lock()
 	defer logFileMutex.Unlock()
@@ -121,7 +121,6 @@ func rotateLogFile(logFilePath string) error {
 		}
 	}
 
-	// 打开当前日志文件
 	logFile, err := os.Open(logFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to open log file: %s, error: %w", logFilePath, err)
@@ -168,7 +167,6 @@ func rotateLogFile(logFilePath string) error {
 		return fmt.Errorf("failed to truncate log file: %s, error: %w", logFilePath, err)
 	}
 
-	// 重新打开日志文件
 	logFile, err = os.OpenFile(logFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return fmt.Errorf("failed to reopen log file: %s, error: %w", logFilePath, err)
