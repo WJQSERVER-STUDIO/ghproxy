@@ -13,9 +13,6 @@
             roll_keep 10
         }            
     }
-	server :80 {
-		protocols h1 h2 h2c
-	}
 }
 
 
