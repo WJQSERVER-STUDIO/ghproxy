@@ -5,10 +5,10 @@ sizeLimit = 125 # MB
 
 [pages]
 enabled = true
-staticDir = "/root/data/ghproxy/pages" 
+staticDir = "/usr/local/ghproxy/pages" 
 
 [log]
-logFilePath = "/root/data/ghproxy/log/ghproxy.log" 
+logFilePath = "/usr/local/ghproxy/log/ghproxy.log" 
 maxLogSize = 5 # MB
 
 [cors]
@@ -19,9 +19,9 @@ authToken = "token"
 enabled = false
 
 [blacklist]
-blacklistFile = "/root/data/ghproxy/config/blacklist.json"
+blacklistFile = "/usr/local/ghproxy/config/blacklist.json"
 enabled = false
 
 [whitelist]
 enabled = false
-whitelistFile = "/root/data/ghproxy/config/whitelist.json"
+whitelistFile = "/usr/local/ghproxy/config/whitelist.json"
