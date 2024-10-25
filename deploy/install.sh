@@ -1,4 +1,7 @@
 # /bin/bash
+# https://github.com/WJQSERVER-STUDIO/ghproxy
+
+ghproxy_dir="/usr/local/ghproxy"
 
 # install packages
 install() {
@@ -27,6 +30,26 @@ install() {
     return 0
 }
 
+make_systemd_service() {
+    cat <<EOF > /etc/systemd/system/ghproxy.service
+[Unit]
+Description=Github Proxy Service
+After=network.target
+
+[Service]
+ExecStart=/bin/bash -c '$ghproxy_dir/ghproxy -cfg $ghproxy_dir/config/config.toml > $ghproxy_dir/log/run.log 2>&1'
+WorkingDirectory=$ghproxy_dir
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+
+EOF
+
+}
+
 # 安装依赖包
 install curl wget sed
 
@@ -44,44 +67,66 @@ elif [ "$ARCH" == "aarch64" ]; then
     ARCH="arm64"
 fi
 
+# 获取监听端口
 read -p "请输入程序监听的端口(默认8080): " PORT
 if [ -z "$PORT" ]; then
     PORT=8080
 fi
 
+# 本机监听/泛监听(127.0.0.1/0.0.0.0)
+read -p "请键入程序监听的IP(默认127.0.0.1)(0.0.0.0为泛监听): " IP
+if [ -z "$IP" ]; then
+    IP="127.0.0.1"
+fi
+
+# 安装目录
+read -p "请输入安装目录(默认/usr/local/ghproxy): " ghproxy_dir
+if [ -z "$ghproxy_dir" ]; then
+    ghproxy_dir="/usr/local/ghproxy"
+fi
+
 # 创建目录
-mkdir -p /root/data/ghproxy
-mkdir -p /root/data/ghproxy/config
-mkdir -p /root/data/ghproxy/log
-mkdir -p /root/data/ghproxy/pages
+mkdir -p ${ghproxy_dir}
+mkdir -p ${ghproxy_dir}/config
+mkdir -p ${ghproxy_dir}/log
+mkdir -p ${ghproxy_dir}/pages
 
 # 获取最新版本号
 VERSION=$(curl -s https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/VERSION)
-wget -q -O /root/data/ghproxy/VERSION https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/VERSION
+wget -q -O ${ghproxy_dir}/VERSION https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/VERSION
 
 # 下载ghproxy
-wget -q -O /root/data/ghproxy/ghproxy https://github.com/WJQSERVER-STUDIO/ghproxy/releases/download/$VERSION/ghproxy-linux-$ARCH
-chmod +x /root/data/ghproxy/ghproxy
+wget -q -O ${ghproxy_dir}/ghproxy https://github.com/WJQSERVER-STUDIO/ghproxy/releases/download/$VERSION/ghproxy-linux-$ARCH
+chmod +x ${ghproxy_dir}/ghproxy
 
 # 下载pages
-wget -q -O /root/data/ghproxy/pages/index.html https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/pages/index.html
-wget -q -O /root/data/ghproxy/pages/favicon.ico https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/pages/favicon.ico
+wget -q -O ${ghproxy_dir}/pages/index.html https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/pages/index.html
+wget -q -O ${ghproxy_dir}/pages/favicon.ico https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/pages/favicon.ico
 
 
 # 下载配置文件
-if [ -f /root/data/ghproxy/config/config.toml ]; then
+if [ -f ${ghproxy_dir}/config/config.toml ]; then
     echo "配置文件已存在, 跳过下载"
-    echo "[WARNING] > 请检查配置文件是否正确，大版本升级时请注意配置文件兼容性"
+    echo "[WARNING] 请检查配置文件是否正确，DEV版本升级时请注意配置文件兼容性"
     sleep 2
 else
-    wget -q -O /root/data/ghproxy/config/config.toml https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/config.toml
+    wget -q -O ${ghproxy_dir}/config/config.toml https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/config.toml
 fi
 
 # 替换 port = 8080 
-sed -i "s/port = 8080/port = $PORT/g" /root/data/ghproxy/config/config.toml
+sed -i "s/port = 8080/port = $PORT/g" ${ghproxy_dir}/config/config.toml
+sed -i 's/host = "127.0.0.1"/host = "'"$IP"'"/g' ${ghproxy_dir}/config/config.toml
+sed -i "s|staticDir = \"/usr/local/ghproxy/pages\"|staticDir = \"${ghproxy_dir}/pages\"|g" ${ghproxy_dir}/config/config.toml
+sed -i "s|logFilePath = \"/usr/local/ghproxy/log/ghproxy.log\"|logFilePath = \"${ghproxy_dir}/log/ghproxy.log\"|g" ${ghproxy_dir}/config/config.toml
+sed -i "s|blacklistFile = \"/usr/local/ghproxy/config/blacklist.json\"|blacklistFile = \"${ghproxy_dir}/config/blacklist.json\"|g" ${ghproxy_dir}/config/config.toml
+sed -i "s|whitelistFile = \"/usr/local/ghproxy/config/whitelist.json\"|whitelistFile = \"${ghproxy_dir}/config/whitelist.json\"|g" ${ghproxy_dir}/config/config.toml
 
 # 下载systemd服务文件
-wget -q -O /etc/systemd/system/ghproxy.service https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/ghproxy.service
+if [ "$ghproxy_dir" = "/usr/local/ghproxy" ]; then
+    wget -q -O /etc/systemd/system/ghproxy.service https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/ghproxy.service
+else
+    make_systemd_service
+fi
 
 # 启动ghproxy
 systemctl daemon-reload
