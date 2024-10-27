@@ -9,6 +9,8 @@
 
 [TG讨论群组](https://t.me/ghproxy_go)
 
+[版本更新介绍](https://blog.wjqserver.com/categories/my-program/)
+
 ## 项目说明
 
 ### 项目特点
@@ -26,7 +28,6 @@
 ### 项目开发过程
 
 **本项目是[WJQSERVER-STUDIO/ghproxy-go](https://github.com/WJQSERVER-STUDIO/ghproxy-go)的重构版本,实现了原项目原定功能的同时,进一步优化了性能**
-本项目源于[WJQSERVER-STUDIO/ghproxy-go](https://github.com/WJQSERVER-STUDIO/ghproxy-go)与[WJQSERVER/ghproxy-go-0RTT](https://github.com/WJQSERVER/ghproxy-go-0RTT)两个项目,前者带来了实现框架与资源,后者带来了解决Git clone问题的办法,使得本项目从net/http标准库切换至Gin框架,已解决此困扰已久的问题,在此基础上,本项目进一步优化了性能,并添加了用户鉴权功能,使得部署更加安全可靠。
 关于此项目的详细开发过程,请参看Commit记录与[CHANGELOG.md](https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/CHANGELOG.md)
 
 - V1.0.0 迁移至本仓库,并再次重构内容实现
@@ -153,13 +154,9 @@ example.com {
 
 ![ghproxy-demo-v1.5.0.png](https://webp.wjqserver.com/ghproxy/ghproxy-demo-v1.5.0.png)
 
-## TODO & DEV
+结语
+---
 
-### TODO
-- [x] 用户鉴权
-- [x] 仓库黑名单
-- [x] 仓库白名单
-
-### DEV
-
-- [x] Docker Pull 代理
+本项目基于Go语言实现的GHProxy,使用Gin框架与req库
+Docker镜像基于[WJQSERVER-STUDIO/caddy](https://github.com/WJQSERVER-STUDIO/caddy)
+本项目使用WSL LICENSE Version1.2 (WJQSERVER STUDIO LICENSE Version1.2) 授权协议,请遵守相关条例。
