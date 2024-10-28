@@ -5,12 +5,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Github文件加速">
+    <meta name="keywords" content="Github,文件加速,ghproxy">
+    <meta name="color-scheme"    content="dark light">
     <title>Github文件加速</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://font.sec.miui.com/font/css?family=MiSans:400,700:MiSans">
     <style>
+
+        :root {
+            --color: #dadada;
+            --fontcolor: #333;
+            --inputcolor: #a19f9f;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color: #53535338;
+                --fontcolor: #b8b8b8;
+                --inputcolor: #012333;
+                --inputcolor-font: #969696d8;
+            }
+        }
+
         body {
-            background-color: #ecececf3;
+            background-color: var(--color);
+            color: var(--fontcolor);
             font-family: 'Misans', Arial, sans-serif;
             padding: 30px;
             display: flex;
@@ -23,14 +42,16 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 80%;
             text-align: center;
-            min-height: 45vh;
+            min-height: 65%;
+            line-height: 1.25;
         }
 
         h1 {
+            color: var(--fontcolor);
             font-weight: bold;
-            margin-bottom: 85px;
+            margin-bottom: 20%;
         }
 
         .rounded-button {
@@ -51,7 +72,8 @@
         .tips>p:first-child::before {
             position: sticky;
             color: #7b7b7b;
-            margin-bottom: 5px;
+            margin-bottom: 1%;
+            font-size: 60%;
         }
 
         footer {
@@ -61,6 +83,7 @@
             left: 0;
             right: 0;
             text-align: center;
+            font-size: 1rem;
         }
 
         pre {
@@ -91,15 +114,76 @@
             font-size: 1em;
         }
 
+        @media (max-width: 768px) {
+            footer {
+                font-size: 0.85rem;
+            }
+
+            .container {
+                max-width: 100%;
+                font-size: 0.8rem;
+            }
+
+            .tips {
+                font-size: 0.8rem;
+            }
+
+            .tips-content {
+                font-size: 0.8rem;
+            }
+
+            .status-container {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            footer {
+                font-size: 1rem;
+            }
+
+            .container {
+                max-width: 80%;
+                font-size: 1rem;
+            }
+
+            .tips {
+                font-size: 1.1rem;
+            }
+
+            .tips-content {
+                font-size: 1.1rem;
+            }
+
+            .status-container {
+                font-size: 1.05rem;
+            }
+        }
+
+        .form-control {
+            background-color: var(--inputcolor);
+            color: var(--inputcolor-font);
+        }
+
+        .form-control:focus {
+            background-color: var(--inputcolor);
+            color: var(--inputcolor-font);
+        }
+
+        .tips-content {
+            margin-bottom: 0px;
+        }
+
         .status-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 5px;
+            margin-bottom: 1px;
+            margin-top: -2%;
         }
 
         .status-container p {
-            margin: 0px 5px;
+            margin: 0px 1px;
         }
 
 
@@ -141,7 +225,7 @@
             color: white;
             padding: 15px 20px;
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 90%;
             z-index: 1000;
         }
     </style>
@@ -160,7 +244,9 @@
             <pre id="formattedLinkOutput"></pre>
         </div>
         <div class="tips">
-            <p>GitHub链接带不带协议头均可，支持release、archive以及文件，转换后链接均可使用</a>。</p>
+            <div class="tips-content">
+                <p>GitHub链接带不带协议头均可，支持release、archive以及文件，转换后链接均可使用</a>。</p>
+            </div>
             <div class="status-container">
                 <p id="sizeLimitDisplay">文件大小限制: ...</p>
                 <p id="whiteListStatus">白名单状态: ...</p>
@@ -279,7 +365,7 @@
 <footer>
     <p>
         Copyright &copy; 2024 WJQSERVER-STUDIO<br>
-        GitHub仓库地址：<a href="https://github.com/WJQSERVER-STUDIO/ghproxy">https://github.com/WJQSERVER-STUDIO/ghproxy</a>
+        GitHub仓库地址：<a href="https://github.com/WJQSERVER-STUDIO/ghproxy">WJQSERVER-STUDIO/ghproxy</a>
         <br><a href="https://t.me/ghproxy_go">Telegram交流群</a>
     </p>
     <div id="visitor-info" style="text-align: center; margin-top: 15px;">
