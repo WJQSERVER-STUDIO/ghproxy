@@ -22,7 +22,6 @@ var (
 	cfgfile    string
 )
 
-// 日志模块
 var (
 	logw       = logger.Logw
 	logInfo    = logger.LogInfo
@@ -36,7 +35,6 @@ func readFlag() {
 
 func loadConfig() {
 	var err error
-	// 初始化配置
 	cfg, err = config.LoadConfig(cfgfile)
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
@@ -46,9 +44,8 @@ func loadConfig() {
 }
 
 func setupLogger(cfg *config.Config) {
-	// 初始化日志模块
 	var err error
-	err = logger.Init(cfg.Log.LogFilePath, cfg.Log.MaxLogSize) // 传递日志文件路径
+	err = logger.Init(cfg.Log.LogFilePath, cfg.Log.MaxLogSize)
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
@@ -89,8 +86,8 @@ func init() {
 		router.StaticFile("/favicon.ico", faviconPath)
 	} else if !cfg.Pages.Enabled {
 		router.GET("/", func(c *gin.Context) {
-			c.String(http.StatusForbidden, "403 Forbidden This route is not allowed to access.")
-			logWarning("Forbidden: IP:%s UA:%s METHOD:%s HTTPv:%s", c.ClientIP(), c.Request.UserAgent(), c.Request.Method, c.Request.Proto)
+			c.String(http.StatusForbidden, "403 Forbidden Access")
+			logWarning("403 > Path:/ IP:%s UA:%s METHOD:%s HTTPv:%s", c.ClientIP(), c.Request.UserAgent(), c.Request.Method, c.Request.Proto)
 		})
 	}
 
@@ -100,11 +97,10 @@ func init() {
 }
 
 func main() {
-	// 启动服务器
 	err := router.Run(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port))
 	if err != nil {
-		logError("Error starting server: %v\n", err)
+		logError("Failed to start server: %v\n", err)
 	}
 
-	fmt.Println("Program finished")
+	fmt.Println("Program Exit")
 }

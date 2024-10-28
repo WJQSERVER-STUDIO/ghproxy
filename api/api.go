@@ -46,6 +46,7 @@ func InitHandleRouter(cfg *config.Config, router *gin.Engine) {
 
 func SizeLimitHandler(cfg *config.Config, c *gin.Context) {
 	sizeLimit := cfg.Server.SizeLimit
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.Request.UserAgent(), c.Request.Proto)
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
 		"MaxResponseBodySize": sizeLimit,
@@ -53,6 +54,7 @@ func SizeLimitHandler(cfg *config.Config, c *gin.Context) {
 }
 
 func WhiteListStatusHandler(c *gin.Context, cfg *config.Config) {
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.Request.UserAgent(), c.Request.Proto)
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
 		"Whitelist": cfg.Whitelist.Enabled,
@@ -60,6 +62,7 @@ func WhiteListStatusHandler(c *gin.Context, cfg *config.Config) {
 }
 
 func BlackListStatusHandler(c *gin.Context, cfg *config.Config) {
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.Request.UserAgent(), c.Request.Proto)
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
 		"Blacklist": cfg.Blacklist.Enabled,
@@ -67,6 +70,7 @@ func BlackListStatusHandler(c *gin.Context, cfg *config.Config) {
 }
 
 func CorsStatusHandler(c *gin.Context, cfg *config.Config) {
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.Request.UserAgent(), c.Request.Proto)
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
 		"Cors": cfg.CORS.Enabled,
@@ -74,6 +78,7 @@ func CorsStatusHandler(c *gin.Context, cfg *config.Config) {
 }
 
 func HealthcheckHandler(c *gin.Context) {
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.Request.UserAgent(), c.Request.Proto)
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
 		"Status": "OK",

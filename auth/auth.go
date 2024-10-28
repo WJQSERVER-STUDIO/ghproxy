@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"ghproxy/config"
 	"ghproxy/logger"
 
@@ -26,27 +27,29 @@ func Init(cfg *config.Config) {
 	logInfo("Auth Init")
 }
 
-func AuthHandler(c *gin.Context, cfg *config.Config) bool {
+func AuthHandler(c *gin.Context, cfg *config.Config) (isValid bool, err string) {
 	// 如果身份验证未启用，直接返回 true
 	if !cfg.Auth.Enabled {
-		return true
+		return true, ""
 	}
 
 	// 获取 auth_token 参数
 	authToken := c.Query("auth_token")
-	logInfo("auth_token received: %s", authToken)
+	// IP METHOD URL USERAGENT PROTO TOKEN
+	logInfo("%s %s %s %s %s AUTH_TOKEN: %s", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.Request.UserAgent(), c.Request.Proto, authToken)
 
 	// 验证 token
 	if authToken == "" {
-		logWarning("auth FAILED: no auth_token provided")
-		return false
+		err := "Auth token == nil"
+		return false, err
 	}
 
-	isValid := authToken == cfg.Auth.AuthToken
+	isValid = authToken == cfg.Auth.AuthToken
 	if !isValid {
-		logWarning("auth FAILED: invalid auth_token: %s", authToken)
+		err := fmt.Sprintf("Auth token incorrect: %s", authToken)
+		return false, err
 	}
 
 	logInfo("auth SUCCESS: %t", isValid)
-	return isValid
+	return isValid, ""
 }

@@ -1,4 +1,3 @@
-// proxy/proxy.go 实验性
 package proxy
 
 import (
@@ -40,8 +39,9 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 		matches := re.FindStringSubmatch(rawPath)
 
 		if len(matches) < 3 {
-			logWarning("Invalid URL: %s", rawPath)
-			c.String(http.StatusForbidden, "Invalid URL.")
+			errMsg := fmt.Sprintf("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+			logWarning(errMsg)
+			c.String(http.StatusForbidden, "Invalid URL Format. Path: %s", rawPath)
 			return
 		}
 
@@ -49,34 +49,37 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 
 		username, repo := MatchUserRepo(rawPath, cfg, c, matches)
 
-		logWarning("Blacklist Check > Username: %s, Repo: %s", username, repo)
+		logInfo("%s %s %s %s %s Matched-Username: %s, Matched-Repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, username, repo)
 		fullrepo := fmt.Sprintf("%s/%s", username, repo)
 
 		// 白名单检查
 		if cfg.Whitelist.Enabled {
-			whitelistpass := auth.CheckWhitelist(fullrepo)
-			if !whitelistpass {
+			whitelist := auth.CheckWhitelist(fullrepo)
+			if !whitelist {
+				logErrMsg := fmt.Sprintf("%s %s %s %s %s Whitelist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, fullrepo)
 				errMsg := fmt.Sprintf("Whitelist Blocked repo: %s", fullrepo)
 				c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
-				logWarning(errMsg)
+				logWarning(logErrMsg)
 				return
 			}
 		}
 
 		// 黑名单检查
 		if cfg.Blacklist.Enabled {
-			blacklistpass := auth.CheckBlacklist(fullrepo)
-			if blacklistpass {
+			blacklist := auth.CheckBlacklist(fullrepo)
+			if blacklist {
+				logErrMsg := fmt.Sprintf("%s %s %s %s %s Whitelist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, fullrepo)
 				errMsg := fmt.Sprintf("Blacklist Blocked repo: %s", fullrepo)
 				c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
-				logWarning(errMsg)
+				logWarning(logErrMsg)
 				return
 			}
 		}
 
-		matches = CheckURL(rawPath)
+		matches = CheckURL(rawPath, c)
 		if matches == nil {
 			c.AbortWithStatus(http.StatusNotFound)
+			logError("%s %s %s %s %s 404-NOMATCH", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 			return
 		}
 
@@ -84,13 +87,16 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 			rawPath = strings.Replace(rawPath, "/blob/", "/raw/", 1)
 		}
 
-		if !auth.AuthHandler(c, cfg) {
+		// 鉴权
+		authcheck, err := auth.AuthHandler(c, cfg)
+		if !authcheck {
 			c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
-			logWarning("Unauthorized request: %s", rawPath)
+			logWarning("%s %s %s %s %s Auth-Error: %v", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 			return
 		}
 
-		logInfo("Matches: %v", matches)
+		// IP METHOD URL USERAGENT PROTO MATCHES
+		logInfo("%s %s %s %s %s Matches: %v", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, matches)
 
 		switch {
 		case exps[0].MatchString(rawPath), exps[1].MatchString(rawPath), exps[3].MatchString(rawPath), exps[4].MatchString(rawPath):
@@ -99,6 +105,7 @@ func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
 			ProxyRequest(c, rawPath, cfg, "git")
 		default:
 			c.String(http.StatusForbidden, "Invalid input.")
+			fmt.Println("Invalid input.")
 			return
 		}
 	}
@@ -110,24 +117,24 @@ func MatchUserRepo(rawPath string, cfg *config.Config, c *gin.Context, matches [
 	var gistmatches []string
 	if gistregex.MatchString(rawPath) {
 		gistmatches = gistregex.FindStringSubmatch(rawPath)
-		logInfo("Gist Matched > Username: %s, URL: %s", gistmatches[1], rawPath)
+		logInfo("%s %s %s %s %s Matched-Username: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, gistmatches[1])
 		return gistmatches[1], ""
 	}
-	// 定义路径匹配的正则表达式
+	// 定义路径
 	pathRegex := regexp.MustCompile(`^([^/]+)/([^/]+)/([^/]+)/.*`)
 	if pathMatches := pathRegex.FindStringSubmatch(matches[2]); len(pathMatches) >= 4 {
 		return pathMatches[2], pathMatches[3]
 	}
 
 	// 返回错误信息
-	logWarning("Invalid path: %s", rawPath)
-	c.String(http.StatusForbidden, "Invalid path; expected username/repo.")
+	errMsg := fmt.Sprintf("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+	logWarning(errMsg)
+	c.String(http.StatusForbidden, "Invalid path; expected username/repo, Path: %s", rawPath)
 	return "", ""
 }
 
 func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 	method := c.Request.Method
-	// 记录日志 IP 地址、请求方法、请求 URL、请求头 User-Agent 、HTTP版本
 	logInfo("%s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 
 	client := createHTTPClient(mode)
@@ -141,7 +148,7 @@ func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 	req := client.R().SetBody(body)
 	setRequestHeaders(c, req)
 
-	resp, err := SendRequest(req, method, u)
+	resp, err := SendRequest(c, req, method, u)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
@@ -149,17 +156,18 @@ func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 	defer resp.Body.Close()
 
 	if err := HandleResponseSize(resp, cfg, c); err != nil {
-		logWarning("Error handling response size: %v", err)
+		logWarning("%s %s %s %s %s Response-Size-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 		return
 	}
 
 	CopyResponseHeaders(resp, c, cfg)
 	c.Status(resp.StatusCode)
 	if err := copyResponseBody(c, resp.Body); err != nil {
-		logError("Failed to copy response body: %v", err)
+		logError("%s %s %s %s %s Response-Copy-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 	}
 }
 
+// 判断并选择TLS指纹
 func createHTTPClient(mode string) *req.Client {
 	client := req.C()
 	switch mode {
@@ -198,7 +206,7 @@ func copyResponseBody(c *gin.Context, respBody io.Reader) error {
 	return err
 }
 
-func SendRequest(req *req.Request, method, url string) (*req.Response, error) {
+func SendRequest(c *gin.Context, req *req.Request, method, url string) (*req.Response, error) {
 	switch method {
 	case "GET":
 		return req.Get(url)
@@ -209,8 +217,10 @@ func SendRequest(req *req.Request, method, url string) (*req.Response, error) {
 	case "DELETE":
 		return req.Delete(url)
 	default:
-		logInfo("Unsupported method: %s", method)
-		return nil, fmt.Errorf("unsupported method: %s", method)
+		// IP METHOD URL USERAGENT PROTO UNSUPPORTED-METHOD
+		errmsg := fmt.Sprintf("%s %s %s %s %s Unsupported method", c.ClientIP(), method, url, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+		logWarning(errmsg)
+		return nil, fmt.Errorf(errmsg)
 	}
 }
 
@@ -222,8 +232,8 @@ func HandleResponseSize(resp *req.Response, cfg *config.Config, c *gin.Context) 
 		if err == nil && size > sizelimit {
 			finalURL := resp.Request.URL.String()
 			c.Redirect(http.StatusMovedPermanently, finalURL)
-			logWarning("Size limit exceeded: %s, Size: %d", finalURL, size)
-			return fmt.Errorf("size limit exceeded: %d", size)
+			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto, finalURL, size)
+			return fmt.Errorf("Path: %s size limit exceeded: %d", finalURL, size)
 		}
 	}
 	return nil
@@ -282,14 +292,13 @@ func HandleError(c *gin.Context, message string) {
 	logWarning(message)
 }
 
-func CheckURL(u string) []string {
+func CheckURL(u string, c *gin.Context) []string {
 	for _, exp := range exps {
 		if matches := exp.FindStringSubmatch(u); matches != nil {
-			logInfo("URL matched: %s, Matches: %v", u, matches[1:])
 			return matches[1:]
 		}
 	}
-	errMsg := fmt.Sprintf("Invalid URL: %s", u)
+	errMsg := fmt.Sprintf("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Request.Method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 	logWarning(errMsg)
 	return nil
 }
