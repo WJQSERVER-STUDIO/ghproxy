@@ -12,6 +12,7 @@ type Config struct {
 	Auth      AuthConfig
 	Blacklist BlacklistConfig
 	Whitelist WhitelistConfig
+	RateLimit RateLimitConfig
 }
 
 type ServerConfig struct {
@@ -47,6 +48,12 @@ type BlacklistConfig struct {
 type WhitelistConfig struct {
 	Enabled       bool   `toml:"enabled"`
 	WhitelistFile string `toml:"whitelistFile"`
+}
+
+type RateLimitConfig struct {
+	Enabled       bool `toml:"enabled"`
+	RatePerMinute int  `toml:"ratePerMinute"`
+	Burst         int  `toml:"burst"`
 }
 
 // LoadConfig 从 TOML 配置文件加载配置

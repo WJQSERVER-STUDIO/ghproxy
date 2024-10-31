@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"ghproxy/api"
 	"ghproxy/auth"
 	"ghproxy/config"
 	"ghproxy/logger"
 	"ghproxy/proxy"
+	"ghproxy/rate"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,6 +22,7 @@ var (
 	router     *gin.Engine
 	configfile = "/data/ghproxy/config/config.toml"
 	cfgfile    string
+	limiter    *rate.RateLimiter
 )
 
 var (
@@ -62,6 +65,13 @@ func setupApi(cfg *config.Config, router *gin.Engine) {
 	api.InitHandleRouter(cfg, router)
 }
 
+func setupRateLimit(cfg *config.Config) {
+	if cfg.RateLimit.Enabled {
+		limiter = rate.New(cfg.RateLimit.RatePerMinute, cfg.RateLimit.Burst, 1*time.Minute)
+		logInfo("Rate Limit Loaded")
+	}
+}
+
 func init() {
 	readFlag()
 	flag.Parse()
@@ -92,7 +102,7 @@ func init() {
 	}
 
 	router.NoRoute(func(c *gin.Context) {
-		proxy.NoRouteHandler(cfg)(c)
+		proxy.NoRouteHandler(cfg, limiter)(c)
 	})
 }
 

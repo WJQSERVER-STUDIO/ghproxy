@@ -11,6 +11,7 @@ import (
 	"ghproxy/auth"
 	"ghproxy/config"
 	"ghproxy/logger"
+	"ghproxy/rate"
 
 	"github.com/gin-gonic/gin"
 	"github.com/imroc/req/v3"
@@ -32,8 +33,17 @@ var exps = []*regexp.Regexp{
 	regexp.MustCompile(`^(?:https?://)?gist\.github(?:usercontent|)\.com/([^/]+)/.+?/.+`),
 }
 
-func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
+func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// 限制访问频率
+		if cfg.RateLimit.Enabled {
+			if !limiter.Allow() {
+				c.JSON(http.StatusTooManyRequests, gin.H{"error": "Too Many Requests"})
+				logWarning("%s %s %s %s %s 429-TooManyRequests", c.ClientIP(), c.Request.Method, c.Request.URL.RequestURI(), c.Request.Header.Get("User-Agent"), c.Request.Proto)
+				return
+			}
+		}
+
 		rawPath := strings.TrimPrefix(c.Request.URL.RequestURI(), "/")
 		re := regexp.MustCompile(`^(http:|https:)?/?/?(.*)`)
 		matches := re.FindStringSubmatch(rawPath)
