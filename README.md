@@ -1,4 +1,4 @@
-# GhProxy
+# GHProxy
 
 ![pull](https://img.shields.io/docker/pulls/wjqserver/ghproxy.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/WJQSERVER-STUDIO/ghproxy)](https://goreportcard.com/report/github.com/WJQSERVER-STUDIO/ghproxy)
@@ -31,7 +31,7 @@
 关于此项目的详细开发过程,请参看Commit记录与[CHANGELOG.md](https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/CHANGELOG.md)
 
 - V1.0.0 迁移至本仓库,并再次重构内容实现
-- v0.2.0 重构项目实现,Git clone的实现完全自主化
+- v0.2.0 重构项目实现
 
 ### LICENSE
 
