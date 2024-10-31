@@ -1,4 +1,4 @@
-FROM wjqserver/caddy:daily-alpine AS builder
+FROM wjqserver/caddy:2.9.0-rc-alpine AS builder
 
 ARG USER=WJQSERVER-STUDIO
 ARG REPO=ghproxy
@@ -34,7 +34,7 @@ RUN wget -O /data/${APPLICATION}/whitelist.json https://raw.githubusercontent.co
 RUN chmod +x /data/${APPLICATION}/${APPLICATION}
 RUN chmod +x /usr/local/bin/init.sh
 
-FROM wjqserver/caddy:daily-alpine
+FROM wjqserver/caddy:2.9.0-rc-alpine
 
 COPY --from=builder /data/www /data/www
 COPY --from=builder /data/caddy /data/caddy

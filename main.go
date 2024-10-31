@@ -78,6 +78,7 @@ func init() {
 	loadConfig()
 	setupLogger(cfg)
 	loadlist(cfg)
+	setupRateLimit(cfg)
 
 	gin.SetMode(gin.ReleaseMode)
 
