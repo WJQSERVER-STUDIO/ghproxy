@@ -13,7 +13,6 @@ var (
 	cfg    *config.Config
 )
 
-// 日志模块
 var (
 	logw       = logger.Logw
 	logInfo    = logger.LogInfo
@@ -21,8 +20,7 @@ var (
 	logError   = logger.LogError
 )
 
-func InitHandleRouter(cfg *config.Config, router *gin.Engine) {
-	// 设置路由
+func InitHandleRouter(cfg *config.Config, router *gin.Engine, version string) {
 	apiRouter := router.Group("api")
 	{
 		apiRouter.GET("/size_limit", func(c *gin.Context) {
@@ -39,6 +37,12 @@ func InitHandleRouter(cfg *config.Config, router *gin.Engine) {
 		})
 		apiRouter.GET("/healthcheck", func(c *gin.Context) {
 			HealthcheckHandler(c)
+		})
+		apiRouter.GET("/version", func(c *gin.Context) {
+			VersionHandler(c, version)
+		})
+		apiRouter.GET("/rate_limit/status", func(c *gin.Context) {
+			RateLimitStatusHandler(c, cfg)
 		})
 	}
 	logInfo("API router Init success")
@@ -82,5 +86,21 @@ func HealthcheckHandler(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
 		"Status": "OK",
+	})
+}
+
+func VersionHandler(c *gin.Context, version string) {
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.Request.UserAgent(), c.Request.Proto)
+	c.Writer.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
+		"Version": version,
+	})
+}
+
+func RateLimitStatusHandler(c *gin.Context, cfg *config.Config) {
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.Request.UserAgent(), c.Request.Proto)
+	c.Writer.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
+		"RateLimit": cfg.RateLimit.Enabled,
 	})
 }

@@ -21,31 +21,34 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Load VERSION
+      - name: 加载版本号
         run: |
           if [ -f DEV-VERSION ]; then
             echo "VERSION=$(cat DEV-VERSION)" >> $GITHUB_ENV
           else
             echo "DEV-VERSION file not found!" && exit 1
           fi
-      - name: Set up Go
+      - name: 安装 Go
         uses: actions/setup-go@v3
         with:
           go-version: ${{ env.GO_VERSION }}
-      - name: Install UPX    
+      - name: 安装UPX   
         run: |
           sudo apt update
           sudo apt install upx -y
-      - name: Build
+      - name: 编译
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          CGO_ENABLED=0 go build -o  ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}} ./main.go
+          CGO_ENABLED=0 go build -ldflags "-X main.version=${{ env.VERSION }}" -o ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}} ./main.go
           upx -9 ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}}
-      - name: Package
+      - name: 打包
         run: |
-          tar -czvf ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}}.tar.gz ./${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}}
+          mkdir ghproxyd
+          cp ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}} ./ghproxyd/
+          cp LICENSE ./ghproxyd/
+          tar -czf ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}}.tar.gz -C ghproxyd .
       - name: Upload to GitHub Artifacts
         uses: actions/upload-artifact@v3
         with:

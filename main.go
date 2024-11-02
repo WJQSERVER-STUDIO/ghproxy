@@ -23,6 +23,7 @@ var (
 	configfile = "/data/ghproxy/config/config.toml"
 	cfgfile    string
 	limiter    *rate.RateLimiter
+	version    string
 )
 
 var (
@@ -61,8 +62,8 @@ func loadlist(cfg *config.Config) {
 	auth.Init(cfg)
 }
 
-func setupApi(cfg *config.Config, router *gin.Engine) {
-	api.InitHandleRouter(cfg, router)
+func setupApi(cfg *config.Config, router *gin.Engine, version string) {
+	api.InitHandleRouter(cfg, router, version)
 }
 
 func setupRateLimit(cfg *config.Config) {
@@ -85,7 +86,7 @@ func init() {
 	router = gin.Default()
 	router.UseH2C = true
 
-	setupApi(cfg, router)
+	setupApi(cfg, router, version)
 
 	if cfg.Pages.Enabled {
 		indexPagePath := fmt.Sprintf("%s/index.html", cfg.Pages.StaticDir)
