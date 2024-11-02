@@ -47,6 +47,7 @@ jobs:
         run: |
           mkdir ghproxyd
           cp ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}} ./ghproxyd/
+          mv ./ghproxyd/${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}} ./ghproxyd/${{ env.OUTPUT_BINARY }}
           cp LICENSE ./ghproxyd/
           tar -czf ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}}.tar.gz -C ghproxyd .
           ls
