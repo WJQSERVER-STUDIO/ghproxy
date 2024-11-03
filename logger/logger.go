@@ -56,7 +56,6 @@ func Log(customMessage string) {
 	logChannel <- customMessage
 }
 
-// 格式化日志记录
 func Logw(format string, args ...interface{}) {
 	message := fmt.Sprintf(format, args...)
 	Log(message)
@@ -82,7 +81,6 @@ func LogError(format string, args ...interface{}) {
 	Log(message)
 }
 
-// 关闭日志文件
 func Close() {
 	logFileMutex.Lock()
 	defer logFileMutex.Unlock()

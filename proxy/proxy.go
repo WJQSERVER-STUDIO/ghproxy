@@ -60,14 +60,14 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter) gin.HandlerFu
 		username, repo := MatchUserRepo(rawPath, cfg, c, matches)
 
 		logInfo("%s %s %s %s %s Matched-Username: %s, Matched-Repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, username, repo)
-		fullrepo := fmt.Sprintf("%s/%s", username, repo)
+		repouser := fmt.Sprintf("%s/%s", username, repo)
 
 		// 白名单检查
 		if cfg.Whitelist.Enabled {
-			whitelist := auth.CheckWhitelist(fullrepo)
+			whitelist := auth.CheckWhitelist(repouser)
 			if !whitelist {
-				logErrMsg := fmt.Sprintf("%s %s %s %s %s Whitelist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, fullrepo)
-				errMsg := fmt.Sprintf("Whitelist Blocked repo: %s", fullrepo)
+				logErrMsg := fmt.Sprintf("%s %s %s %s %s Whitelist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, repouser)
+				errMsg := fmt.Sprintf("Whitelist Blocked repo: %s", repouser)
 				c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
 				logWarning(logErrMsg)
 				return
@@ -76,10 +76,10 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter) gin.HandlerFu
 
 		// 黑名单检查
 		if cfg.Blacklist.Enabled {
-			blacklist := auth.CheckBlacklist(fullrepo)
+			blacklist := auth.CheckBlacklist(repouser, username, repo)
 			if blacklist {
-				logErrMsg := fmt.Sprintf("%s %s %s %s %s Whitelist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, fullrepo)
-				errMsg := fmt.Sprintf("Blacklist Blocked repo: %s", fullrepo)
+				logErrMsg := fmt.Sprintf("%s %s %s %s %s Whitelist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, repouser)
+				errMsg := fmt.Sprintf("Blacklist Blocked repo: %s", repouser)
 				c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
 				logWarning(logErrMsg)
 				return

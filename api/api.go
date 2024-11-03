@@ -44,6 +44,9 @@ func InitHandleRouter(cfg *config.Config, router *gin.Engine, version string) {
 		apiRouter.GET("/rate_limit/status", func(c *gin.Context) {
 			RateLimitStatusHandler(c, cfg)
 		})
+		apiRouter.GET("/rate_limit/limit", func(c *gin.Context) {
+			RateLimitLimitHandler(c, cfg)
+		})
 	}
 	logInfo("API router Init success")
 }
@@ -102,5 +105,13 @@ func RateLimitStatusHandler(c *gin.Context, cfg *config.Config) {
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
 		"RateLimit": cfg.RateLimit.Enabled,
+	})
+}
+
+func RateLimitLimitHandler(c *gin.Context, cfg *config.Config) {
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.Request.UserAgent(), c.Request.Proto)
+	c.Writer.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
+		"RatePerMinute": cfg.RateLimit.RatePerMinute,
 	})
 }

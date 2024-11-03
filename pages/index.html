@@ -6,12 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Github文件加速">
     <meta name="keywords" content="Github,文件加速,ghproxy">
-    <meta name="color-scheme"    content="dark light">
+    <meta name="color-scheme" content="dark light">
     <title>Github文件加速</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://font.sec.miui.com/font/css?family=MiSans:400,700:MiSans">
     <style>
-
         :root {
             --color: #dadada;
             --fontcolor: #333;
@@ -39,6 +38,35 @@
             min-height: 100vh;
             margin: 0;
             position: relative;
+        }
+
+        .version {
+            width: 12.5%;
+            height: 2%;
+            background-color: #39c5bb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            border-radius: 0.5rem;
+            position: fixed;
+            bottom: 0%;
+            right: 0%;
+        }
+
+        *::-webkit-scrollbar {
+            height: 10px;
+            margin-top: 0px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background-color: black;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background: #39c5bb;
+            border-radius: 10px;
         }
 
         .container {
@@ -89,9 +117,9 @@
         pre {
             background: #012333;
             color: #39c5bc;
-            padding: 20px 20px;
-            margin: 10px 0;
-            border-radius: 8px;
+            padding: 15px 20px 15px 20px;
+            margin: 0px 0;
+            border-radius: 0.5rem;
             overflow-x: auto;
             position: relative;
         }
@@ -100,10 +128,10 @@
             content: " ";
             display: block;
             position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 12px;
-            height: 12px;
+            top: 6px;
+            left: 6px;
+            width: 10px;
+            height: 10px;
             background: #bd3c35;
             border-radius: 50%;
             box-shadow: 20px 0 0 #d69f27, 40px 0 0 #39c5bb;
@@ -111,7 +139,8 @@
 
         code {
             font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
-            font-size: 1em;
+            font-size: 0.9em;
+            margin-bottom: 0px;
         }
 
         @media (max-width: 768px) {
@@ -158,8 +187,13 @@
             .status-container {
                 font-size: 1.05rem;
             }
+
             h1 {
                 margin-bottom: 10%;
+            }
+
+            .version {
+                width: 7.5%;
             }
         }
 
@@ -201,7 +235,7 @@
 
         .copy-button {
             position: absolute;
-            top: 5px;
+            top: 10px;
             right: 10px;
             background: rgba(0, 217, 224, 0.822);
             color: white;
@@ -211,6 +245,24 @@
             cursor: pointer;
             transition: opacity 0.3s;
             z-index: 1;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        .redir-button {
+            position: absolute;
+            top: 10px;
+            right: 65px;
+            background: rgba(0, 217, 224, 0.822);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            z-index: 1;
+            font-size: 0.85rem;
+            display: none;
         }
 
         pre:hover .copy-button {
@@ -239,6 +291,9 @@
 </head>
 
 <body>
+    <div class="version">
+        <p id="version"></p>
+    </div>
     <div class="container">
         <h1>Github文件加速</h1>
         <div class="form-group">
@@ -248,6 +303,7 @@
 
         <div class="code" id="outputBlock">
             <button class="copy-button" id="copyButton">复制</button>
+            <button class="redir-button" id="redirButton">打开</button>
             <pre id="formattedLinkOutput"></pre>
         </div>
         <div class="tips">
@@ -274,21 +330,40 @@
 
             if (githubLinkInput.value.startsWith("https://github.com/") || githubLinkInput.value.startsWith("http://github.com/")) {
                 formattedLink = "https://" + currentHost + "/github.com" + githubLinkInput.value.substring(githubLinkInput.value.indexOf("/", 8));
+                displayButton();
             } else if (githubLinkInput.value.startsWith("github.com/")) {
                 formattedLink = "https://" + currentHost + "/" + githubLinkInput.value;
+                displayButton();
             } else if (githubLinkInput.value.startsWith("https://raw.githubusercontent.com/") || githubLinkInput.value.startsWith("http://raw.githubusercontent.com/")) {
                 formattedLink = "https://" + currentHost + githubLinkInput.value.substring(githubLinkInput.value.indexOf("/", 7));
+                displayButton();
             } else if (githubLinkInput.value.startsWith("raw.githubusercontent.com/")) {
                 formattedLink = "https://" + currentHost + "/" + githubLinkInput.value;
+                displayButton();
             } else if (githubLinkInput.value.startsWith("https://gist.githubusercontent.com/") || githubLinkInput.value.startsWith("http://gist.githubusercontent.com/")) {
                 formattedLink = "https://" + currentHost + "/gist.github.com" + githubLinkInput.value.substring(githubLinkInput.value.indexOf("/", 18));
+                displayButton();
             } else if (githubLinkInput.value.startsWith("gist.githubusercontent.com/")) {
                 formattedLink = "https://" + currentHost + "/" + githubLinkInput.value;
+                displayButton();
             } else {
                 showToast('请输入有效的GitHub链接');
             }
             var formattedLinkOutput = document.getElementById('formattedLinkOutput');
             formattedLinkOutput.textContent = formattedLink;
+        }
+
+        function displayButton() {
+            var copyButton = document.getElementById('copyButton');
+            var redirButton = document.getElementById('redirButton');
+            copyButton.style.display = 'block';
+            redirButton.style.display = 'block';
+        }
+
+        function redirToFormattedLink() {
+            var formattedLinkOutput = document.getElementById('formattedLinkOutput');
+            console.log(formattedLinkOutput.textContent);
+            window.open(formattedLinkOutput.textContent);
         }
 
         document.getElementById('formatButton').addEventListener('click', formatGithubLink);
@@ -300,9 +375,9 @@
             window.getSelection().addRange(range);
             document.execCommand('copy');
             window.getSelection().removeAllRanges();
-            //alert('链接已复制到剪贴板');
             showToast('链接已复制到剪贴板');
         });
+        document.getElementById('redirButton').addEventListener('click', redirToFormattedLink);
 
         function showToast(message) {
             const toast = document.getElementById('toast');
@@ -360,10 +435,22 @@
                     console.error('Error fetching API:', error);
                 });
         }
+        function fetchVersion() {
+            fetch(window.location.origin + '/api/version')
+                .then(response => response.json())
+                .then(data => {
+                    const version = document.getElementById('version');
+                    version.textContent = `${data.Version}`;
+                })
+                .catch(error => {
+                    console.error('Error fetching API:', error);
+                });
+        }
         function fetchAPI() {
             fetchSizeLimit();
             fetchWhiteList();
             fetchBlackList();
+            fetchVersion();
         }
         document.addEventListener('DOMContentLoaded', fetchAPI);
     </script>
