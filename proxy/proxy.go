@@ -37,6 +37,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter) gin.HandlerFu
 	return func(c *gin.Context) {
 		// 限制访问频率
 		if cfg.RateLimit.Enabled {
+			logInfo("Rate_Limit Enabled")
 			if !limiter.Allow() {
 				c.JSON(http.StatusTooManyRequests, gin.H{"error": "Too Many Requests"})
 				logWarning("%s %s %s %s %s 429-TooManyRequests", c.ClientIP(), c.Request.Method, c.Request.URL.RequestURI(), c.Request.Header.Get("User-Agent"), c.Request.Proto)
@@ -64,7 +65,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter) gin.HandlerFu
 
 		// 白名单检查
 		if cfg.Whitelist.Enabled {
-			whitelist := auth.CheckWhitelist(repouser)
+			whitelist := auth.CheckWhitelist(repouser, username, repo)
 			if !whitelist {
 				logErrMsg := fmt.Sprintf("%s %s %s %s %s Whitelist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, repouser)
 				errMsg := fmt.Sprintf("Whitelist Blocked repo: %s", repouser)

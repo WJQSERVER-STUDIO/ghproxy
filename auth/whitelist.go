@@ -31,8 +31,8 @@ func LoadWhitelist(cfg *config.Config) {
 	}
 }
 
-func CheckWhitelist(fullrepo string) bool {
-	return forRangeCheckWhitelist(whitelist.Whitelist, fullrepo)
+func CheckWhitelist(fullrepo string, user string, repo string) bool {
+	return forRangeCheckWhitelist(whitelist.Whitelist, fullrepo, user)
 }
 
 func sliceRepoName_Whitelist(fullrepo string) (string, string) {
@@ -43,11 +43,16 @@ func sliceRepoName_Whitelist(fullrepo string) (string, string) {
 	return s[0], s[1]
 }
 
-func forRangeCheckWhitelist(wlist []string, fullrepo string) bool {
-	repoUser, _ := sliceRepoName_Whitelist(fullrepo)
-	for _, blocked := range wlist {
-		if blocked == fullrepo || (strings.HasSuffix(blocked, "/*") && strings.HasPrefix(repoUser, blocked[:len(blocked)-2])) {
-			return true
+func forRangeCheckWhitelist(wlist []string, fullrepo string, user string) bool {
+	for _, passd := range wlist {
+		users, _ := sliceRepoName_Whitelist(passd)
+		if users == user {
+			if strings.HasSuffix(passd, "/*") {
+				return true
+			}
+			if fullrepo == passd {
+				return true
+			}
 		}
 	}
 	return false

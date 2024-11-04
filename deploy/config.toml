@@ -25,3 +25,8 @@ enabled = false
 [whitelist]
 enabled = false
 whitelistFile = "/usr/local/ghproxy/config/whitelist.json"
+
+[rateLimit]
+enabled = false
+ratePerMinute = 180
+burst = 5
