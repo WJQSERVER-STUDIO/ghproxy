@@ -125,8 +125,6 @@ jobs:
           else
             echo "VERSION file not found!" && exit 1
           fi
-      - name: Wait for Compile
-        run: sleep 300s
           
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3

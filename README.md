@@ -105,6 +105,10 @@ enabled = false  # 是否开启黑名单
 enabled = false  # 是否开启白名单
 whitelistFile = "/data/ghproxy/config/whitelist.json"  # 白名单文件路径
 
+[rateLimit]
+enabled = false  # 是否开启速率限制
+ratePerMinute = 180  # 每分钟限制请求数量
+burst = 5  # 突发请求数量
 ```
 
 ### 黑名单配置
