@@ -22,6 +22,10 @@ fi
 
 /data/${APPLICATION}/${APPLICATION} -cfg /data/${APPLICATION}/config/config.toml > /data/${APPLICATION}/log/run.log 2>&1 &
 
-while true; do
-    sleep 1
-done
+sleep 30
+
+while [[ true ]]; do
+    # 健康检查
+    curl -f http://localhost:8080/api/healthcheck || exit 1
+    sleep 120
+done    
