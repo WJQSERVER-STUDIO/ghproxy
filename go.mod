@@ -1,6 +1,6 @@
 module ghproxy
 
-go 1.23.2
+go 1.23.3
 
 require (
 	github.com/BurntSushi/toml v1.4.0
@@ -11,7 +11,7 @@ require (
 
 require (
 	github.com/andybalholm/brotli v1.1.1 // indirect
-	github.com/bytedance/sonic v1.12.3 // indirect
+	github.com/bytedance/sonic v1.12.4 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
 	github.com/cloudflare/circl v1.5.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
