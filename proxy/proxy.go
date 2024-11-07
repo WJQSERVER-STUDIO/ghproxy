@@ -150,6 +150,22 @@ func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 
 	client := createHTTPClient(mode)
 
+	// 发送HEAD请求, 预获取Content-Length
+	headReq := client.R()
+	setRequestHeaders(c, headReq)
+
+	headResp, err := headReq.Head(u)
+	if err != nil {
+		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
+		return
+	}
+	defer headResp.Body.Close()
+
+	if err := HandleResponseSize(headResp, cfg, c); err != nil {
+		logWarning("%s %s %s %s %s Response-Size-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+		return
+	}
+
 	body, err := readRequestBody(c)
 	if err != nil {
 		HandleError(c, err.Error())
