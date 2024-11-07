@@ -1,4 +1,4 @@
-FROM wjqserver/caddy:2.9.0-rc-alpine AS builder
+FROM alpine:latest AS builder
 
 ARG USER=WJQSERVER-STUDIO
 ARG REPO=ghproxy
@@ -27,8 +27,8 @@ RUN VERSION=$(curl -s https://raw.githubusercontent.com/${USER}/${REPO}/main/VER
 RUN wget -O /usr/local/bin/init.sh https://raw.githubusercontent.com/${USER}/${REPO}/main/docker/dockerfile/nocache/init.sh
 
 # 拉取配置
-RUN wget -O /data/caddy/Caddyfile https://raw.githubusercontent.com/${USER}/${REPO}/main/caddyfile/nocache/Caddyfile
-RUN wget -O /data/${APPLICATION}/config.toml https://raw.githubusercontent.com/${USER}/${REPO}/main/config/config.toml
+#RUN wget -O /data/caddy/Caddyfile https://raw.githubusercontent.com/${USER}/${REPO}/main/caddyfile/nocache/Caddyfile
+RUN wget -O /data/${APPLICATION}/config.toml https://raw.githubusercontent.com/${USER}/${REPO}/main/docker/dockerfile/nocache/config.toml
 RUN wget -O /data/${APPLICATION}/blacklist.json https://raw.githubusercontent.com/${USER}/${REPO}/main/config/blacklist.json
 RUN wget -O /data/${APPLICATION}/whitelist.json https://raw.githubusercontent.com/${USER}/${REPO}/main/config/whitelist.json
 
@@ -36,10 +36,11 @@ RUN wget -O /data/${APPLICATION}/whitelist.json https://raw.githubusercontent.co
 RUN chmod +x /data/${APPLICATION}/${APPLICATION}
 RUN chmod +x /usr/local/bin/init.sh
 
-FROM wjqserver/caddy:2.9.0-rc-alpine
+FROM alpine:latest
+
+RUN apk add --no-cache curl
 
 COPY --from=builder /data/www /data/www
-COPY --from=builder /data/caddy /data/caddy
 COPY --from=builder /data/${APPLICATION} /data/${APPLICATION}
 COPY --from=builder /usr/local/bin/init.sh /usr/local/bin/init.sh
 

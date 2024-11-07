@@ -1,0 +1,32 @@
+[server]
+host = "0.0.0.0" 
+port = 80
+sizeLimit = 125 # MB
+
+[pages]
+enabled = true
+staticDir = "/data/www" 
+
+[log]
+logFilePath = "/data/ghproxy/log/ghproxy.log" 
+maxLogSize = 5 # MB
+
+[cors]
+enabled = true
+
+[auth]
+authToken = "token"
+enabled = false
+
+[blacklist]
+blacklistFile = "/data/ghproxy/config/blacklist.json"
+enabled = false
+
+[whitelist]
+enabled = false
+whitelistFile = "/data/ghproxy/config/whitelist.json"
+
+[rateLimit]
+enabled = false
+ratePerMinute = 180
+burst = 5
