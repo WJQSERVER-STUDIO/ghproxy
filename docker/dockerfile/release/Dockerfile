@@ -38,6 +38,8 @@ RUN chmod +x /usr/local/bin/init.sh
 
 FROM wjqserver/caddy:2.9.0-rc4-alpine
 
+RUN apk add --no-cache curl
+
 COPY --from=builder /data/www /data/www
 COPY --from=builder /data/caddy /data/caddy
 COPY --from=builder /data/${APPLICATION} /data/${APPLICATION}

@@ -113,6 +113,6 @@ func main() {
 	if err != nil {
 		logError("Failed to start server: %v\n", err)
 	}
-
+	defer logger.Close()
 	fmt.Println("Program Exit")
 }

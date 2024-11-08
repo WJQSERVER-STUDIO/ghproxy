@@ -1,5 +1,14 @@
 # 更新日志
 
+v1.7.1
+---
+- CHANGE: 更新Go版本至1.23.3
+- CHANGE: 更新相关依赖库
+- ADD: 对`Proxy`模块进行优化,增加使用`HEAD`方式预获取`Content-Length`头
+- CHANGE: 将`release`与`dev`版本的底包切换至`wjqserver/caddy:2.9.0-rc4-alpine`，将`nocache`版本的底包切换至`alpine:latest`
+- CHANGE: 对`nocache`版本的`config.toml`与`init.sh`进行适配性修改
+- CHANGE: 加入测试性的故障熔断机制(Failure Circuit Breaker) (nocache版本暂不支持)
+
 24w22b
 ---
 - PRE-RELEASE: 此版本是v1.7.1的预发布版本,请勿在生产环境中使用

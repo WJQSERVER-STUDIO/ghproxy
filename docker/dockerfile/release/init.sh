@@ -22,6 +22,10 @@ fi
 
 /data/${APPLICATION}/${APPLICATION} -cfg /data/${APPLICATION}/config/config.toml > /data/${APPLICATION}/log/run.log 2>&1 &
 
-while true; do
-    sleep 1
+sleep 30
+
+while [[ true ]]; do
+    # Failure Circuit Breaker
+    curl -f -max-time 5 -retry 3 http://localhost:8080/api/healthcheck || exit 1
+    sleep 120
 done
