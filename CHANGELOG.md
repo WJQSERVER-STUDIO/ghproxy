@@ -1,8 +1,13 @@
 # 更新日志
 
+v1.7.3
+---
+- CHANGE: Bump golang.org/x/time from 0.7.0 to 0.8.0
+- FIX: 修复故障熔断的相关问题
+
 v1.7.2
 ---
-CHANGE: 为`nocache`版本加入测试性的故障熔断机制
+- CHANGE: 为`nocache`版本加入测试性的故障熔断机制
 
 v1.7.1
 ---

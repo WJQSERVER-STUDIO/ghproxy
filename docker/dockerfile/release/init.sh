@@ -26,6 +26,6 @@ sleep 30
 
 while [[ true ]]; do
     # Failure Circuit Breaker
-    curl -f -max-time 5 -retry 3 http://localhost:8080/api/healthcheck || exit 1
+    curl -f --max-time 5 -retry 3 http://127.0.0.1:8080/api/healthcheck || exit 1
     sleep 120
 done
