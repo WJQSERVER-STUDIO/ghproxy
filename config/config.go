@@ -19,6 +19,7 @@ type ServerConfig struct {
 	Port      int    `toml:"port"`
 	Host      string `toml:"host"`
 	SizeLimit int    `toml:"sizeLimit"`
+	EnableH2C bool   `toml:"enableH2C"`
 }
 
 type PagesConfig struct {
@@ -36,8 +37,9 @@ type CORSConfig struct {
 }
 
 type AuthConfig struct {
-	Enabled   bool   `toml:"enabled"`
-	AuthToken string `toml:"authToken"`
+	Enabled    bool   `toml:"enabled"`
+	AuthMethod string `toml:"authMethod"`
+	AuthToken  string `toml:"authToken"`
 }
 
 type BlacklistConfig struct {

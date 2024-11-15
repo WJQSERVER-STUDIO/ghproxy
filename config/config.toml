@@ -2,6 +2,7 @@
 host = "127.0.0.1" 
 port = 8080 
 sizeLimit = 125 # MB
+enableH2C = true 
 
 [pages]
 enabled = false
@@ -15,6 +16,7 @@ maxLogSize = 5 # MB
 enabled = true
 
 [auth]
+authMethod = "parameters" # "header" or "parameters"
 authToken = "token"
 enabled = false
 

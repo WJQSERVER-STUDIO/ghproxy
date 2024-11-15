@@ -50,6 +50,12 @@ EOF
 
 }
 
+# 检查是否为root用户
+if [ "$EUID" -ne 0 ]; then
+    echo "请以root用户运行此脚本"
+    exit 1
+fi
+
 # 安装依赖包
 install curl wget sed
 
@@ -96,7 +102,7 @@ VERSION=$(curl -s https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/mai
 wget -q -O ${ghproxy_dir}/VERSION https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/VERSION
 
 # 下载ghproxy
-wget -q -O ${ghproxy_dir}/ghproxy https://github.com/WJQSERVER-STUDIO/ghproxy/releases/download/$VERSION/ghproxy-linux-$ARCH.tar.gz
+wget -q -O ${ghproxy_dir}/ghproxy https://github.com/WJQSERVER-STUDIO/ghproxy/releases/download/${VERSION}/ghproxy-linux-${ARCH}.tar.gz
 install tar
 tar -zxvf ${ghproxy_dir}/ghproxy-linux-$ARCH.tar.gz -C ${ghproxy_dir}
 chmod +x ${ghproxy_dir}/ghproxy

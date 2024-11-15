@@ -84,7 +84,9 @@ func init() {
 	gin.SetMode(gin.ReleaseMode)
 
 	router = gin.Default()
-	router.UseH2C = true
+	if cfg.Server.EnableH2C {
+		router.UseH2C = true
+	}
 
 	setupApi(cfg, router, version)
 

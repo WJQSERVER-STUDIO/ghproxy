@@ -1,5 +1,12 @@
 # 更新日志
 
+24w23a
+---
+- PRE-RELEASE: 此版本是v1.7.4的预发布版本,请勿在生产环境中使用
+- ADD: `Auth`模块加入`Header`鉴权,使用`GH-Auth`的值进行鉴权
+- CHANGE: 对二进制文件部署脚本进行优化
+- CHANGE&ADD: 新增H2C相关配置
+
 v1.7.3
 ---
 - CHANGE: Bump golang.org/x/time from 0.7.0 to 0.8.0

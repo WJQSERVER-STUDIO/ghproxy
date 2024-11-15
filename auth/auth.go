@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"ghproxy/config"
 	"ghproxy/logger"
 
@@ -26,24 +25,17 @@ func Init(cfg *config.Config) {
 }
 
 func AuthHandler(c *gin.Context, cfg *config.Config) (isValid bool, err string) {
-	if !cfg.Auth.Enabled {
+	if cfg.Auth.AuthMethod == "parameters" {
+		isValid, err = AuthParametersHandler(c, cfg)
+		return isValid, err
+	} else if cfg.Auth.AuthMethod == "header" {
+		isValid, err = AuthHeaderHandler(c, cfg)
+		return isValid, err
+	} else if cfg.Auth.AuthMethod == "" {
+		logWarning("Auth method not set")
 		return true, ""
+	} else {
+		logWarning("Auth method not supported")
+		return false, "Auth method not supported"
 	}
-
-	authToken := c.Query("auth_token")
-	logInfo("%s %s %s %s %s AUTH_TOKEN: %s", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.Request.UserAgent(), c.Request.Proto, authToken)
-
-	if authToken == "" {
-		err := "Auth token == nil"
-		return false, err
-	}
-
-	isValid = authToken == cfg.Auth.AuthToken
-	if !isValid {
-		err := fmt.Sprintf("Auth token incorrect: %s", authToken)
-		return false, err
-	}
-
-	logInfo("auth SUCCESS: %t", isValid)
-	return isValid, ""
 }

@@ -50,6 +50,12 @@ EOF
 
 }
 
+# 检查是否为root用户
+if [ "$EUID" -ne 0 ]; then
+    echo "请以root用户运行此脚本"
+    exit 1
+fi
+
 # 安装依赖包
 install curl wget sed
 

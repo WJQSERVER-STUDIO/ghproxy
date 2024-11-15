@@ -25,7 +25,6 @@ fi
 sleep 30
 
 while [[ true ]]; do
-    # 健康检查
     curl -f http://localhost:8080/api/healthcheck || exit 1
     sleep 120
 done    
