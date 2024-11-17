@@ -81,6 +81,7 @@ wget -O install.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/ma
 host = "127.0.0.1"  # 监听地址
 port = 8080  # 监听端口
 sizeLimit = 125 # 125MB
+enableH2C = false  # 是否开启H2C传输
 
 [pages]
 enabled = false  # 是否开启内置静态页面(Docker版本请关闭此项)
@@ -94,6 +95,7 @@ maxLogSize = 5 # MB 日志文件最大大小
 enabled = true  # 是否开启跨域
 
 [auth]
+authMethod = "parameters" # 鉴权方式,支持parameters,header
 authToken = "token"  # 用户鉴权Token
 enabled = false  # 是否开启用户鉴权
 
