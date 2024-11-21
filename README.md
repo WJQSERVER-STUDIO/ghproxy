@@ -158,8 +158,7 @@ example.com {
 
 ### 前端页面
 
-![ghproxy-demo-v1.5.0.png](https://webp.wjqserver.com/ghproxy/ghproxy-demo-v1.5.0.png)
-
+![ghproxy-demo.png](https://webp.wjqserver.com/ghproxy/ghproxy-demo-v1.7.0-mobile-night.png)
 结语
 ---
 
