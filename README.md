@@ -159,9 +159,10 @@ example.com {
 ### 前端页面
 
 ![ghproxy-demo.png](https://webp.wjqserver.com/ghproxy/ghproxy-demo-v1.7.0-mobile-night.png)
+
 结语
 ---
 
-本项目基于Go语言实现的GHProxy,使用Gin框架与req库
+本项目基于Go语言实现,使用Gin框架与req库
 Docker镜像基于[WJQSERVER-STUDIO/caddy](https://github.com/WJQSERVER-STUDIO/caddy)
 本项目使用WSL LICENSE Version1.2 (WJQSERVER STUDIO LICENSE Version1.2) 授权协议,请遵守相关条例。
