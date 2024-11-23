@@ -1,5 +1,25 @@
 # 更新日志
 
+24w24a
+---
+- PRE-RELEASE: 此版本是v1.7.5的预发布版本,请勿在生产环境中使用
+- ADD: `Rate`模块加入`IP`速率限制,可限制单个IP的请求速率
+- CHANGE: 处理积攒的依赖库更新,更新如下依赖库:
+- **github.com/gabriel-vasile/mimetype**: 从 v1.4.6 升级到 v1.4.7
+- **github.com/go-playground/validator/v10**: 从 v10.22.1 升级到 v10.23.0
+- **github.com/klauspost/cpuid/v2**: 从 v2.2.8 升级到 v2.2.9
+- **github.com/onsi/ginkgo/v2**: 从 v2.21.0 升级到 v2.22.0
+- **golang.org/x/arch**: 从 v0.11.0 升级到 v0.12.0
+- **golang.org/x/crypto**: 从 v0.28.0 升级到 v0.29.0
+- **golang.org/x/exp**: 从 v0.0.0-20241009180824-f66d83c29e7c 升级到 v0.0.0-20241108190413-2d47ceb2692f
+- **golang.org/x/mod**: 从 v0.21.0 升级到 v0.22.0
+- **golang.org/x/net**: 从 v0.30.0 升级到 v0.31.0
+- **golang.org/x/sync**: 从 v0.8.0 升级到 v0.9.0
+- **golang.org/x/sys**: 从 v0.26.0 升级到 v0.27.0
+- **golang.org/x/text**: 从 v0.19.0 升级到 v0.20.0
+- **golang.org/x/tools**: 从 v0.26.0 升级到 v0.27.0
+- **google.golang.org/protobuf**: 从 v1.35.1 升级到 v1.35.2
+
 v1.7.4
 ---
 - CHANGE: 对二进制文件部署脚本进行优化

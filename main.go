@@ -22,8 +22,9 @@ var (
 	router     *gin.Engine
 	configfile = "/data/ghproxy/config/config.toml"
 	cfgfile    string
-	limiter    *rate.RateLimiter
 	version    string
+	limiter    *rate.RateLimiter
+	iplimiter  *rate.IPRateLimiter
 )
 
 var (
@@ -68,7 +69,13 @@ func setupApi(cfg *config.Config, router *gin.Engine, version string) {
 
 func setupRateLimit(cfg *config.Config) {
 	if cfg.RateLimit.Enabled {
-		limiter = rate.New(cfg.RateLimit.RatePerMinute, cfg.RateLimit.Burst, 1*time.Minute)
+		if cfg.RateLimit.RateMethod == "ip" {
+			iplimiter = rate.NewIPRateLimiter(cfg.RateLimit.RatePerMinute, cfg.RateLimit.Burst, 1*time.Minute)
+		} else if cfg.RateLimit.RateMethod == "total" {
+			limiter = rate.New(cfg.RateLimit.RatePerMinute, cfg.RateLimit.Burst, 1*time.Minute)
+		} else {
+			logError("Invalid RateLimit Method: %s", cfg.RateLimit.RateMethod)
+		}
 		logInfo("Rate Limit Loaded")
 	}
 }
@@ -106,7 +113,7 @@ func init() {
 	}
 
 	router.NoRoute(func(c *gin.Context) {
-		proxy.NoRouteHandler(cfg, limiter)(c)
+		proxy.NoRouteHandler(cfg, limiter, iplimiter)(c)
 	})
 }
 

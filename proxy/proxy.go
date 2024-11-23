@@ -33,12 +33,24 @@ var exps = []*regexp.Regexp{
 	regexp.MustCompile(`^(?:https?://)?gist\.github(?:usercontent|)\.com/([^/]+)/.+?/.+`),
 }
 
-func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter) gin.HandlerFunc {
+func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 限制访问频率
 		if cfg.RateLimit.Enabled {
-			logInfo("Rate_Limit Enabled")
-			if !limiter.Allow() {
+
+			var allowed bool
+
+			switch cfg.RateLimit.RateMethod {
+			case "ip":
+				allowed = iplimiter.Allow(c.ClientIP())
+			case "total":
+				allowed = limiter.Allow()
+			default:
+				logWarning("Invalid RateLimit Method")
+				return
+			}
+
+			if !allowed {
 				c.JSON(http.StatusTooManyRequests, gin.H{"error": "Too Many Requests"})
 				logWarning("%s %s %s %s %s 429-TooManyRequests", c.ClientIP(), c.Request.Method, c.Request.URL.RequestURI(), c.Request.Header.Get("User-Agent"), c.Request.Proto)
 				return

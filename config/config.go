@@ -53,9 +53,10 @@ type WhitelistConfig struct {
 }
 
 type RateLimitConfig struct {
-	Enabled       bool `toml:"enabled"`
-	RatePerMinute int  `toml:"ratePerMinute"`
-	Burst         int  `toml:"burst"`
+	Enabled       bool   `toml:"enabled"`
+	RateMethod    string `toml:"rateMethod"`
+	RatePerMinute int    `toml:"ratePerMinute"`
+	Burst         int    `toml:"burst"`
 }
 
 // LoadConfig 从 TOML 配置文件加载配置
