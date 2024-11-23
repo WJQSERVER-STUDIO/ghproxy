@@ -3,7 +3,7 @@
 24w24a
 ---
 - PRE-RELEASE: 此版本是v1.7.5的预发布版本,请勿在生产环境中使用
-- ADD: `Rate`模块加入`IP`速率限制,可限制单个IP的请求速率
+- ADD: `Rate`模块加入`IP`速率限制,可限制单个IP的请求速率 (需要更多测试)
 - CHANGE: 处理积攒的依赖库更新,更新如下依赖库:
 - **github.com/gabriel-vasile/mimetype**: 从 v1.4.6 升级到 v1.4.7
 - **github.com/go-playground/validator/v10**: 从 v10.22.1 升级到 v10.23.0
