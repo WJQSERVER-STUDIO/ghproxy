@@ -81,7 +81,7 @@ wget -O install.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/ma
 host = "127.0.0.1"  # 监听地址
 port = 8080  # 监听端口
 sizeLimit = 125 # 125MB
-enableH2C = false  # 是否开启H2C传输
+enableH2C = true  # 是否开启H2C传输(latest和dev版本请开启)
 
 [pages]
 enabled = false  # 是否开启内置静态页面(Docker版本请关闭此项)
@@ -109,6 +109,7 @@ whitelistFile = "/data/ghproxy/config/whitelist.json"  # 白名单文件路径
 
 [rateLimit]
 enabled = false  # 是否开启速率限制
+rateMrthod = "total" # "ip" or "total" 速率限制方式
 ratePerMinute = 180  # 每分钟限制请求数量
 burst = 5  # 突发请求数量
 ```
