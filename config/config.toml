@@ -2,7 +2,7 @@
 host = "127.0.0.1" 
 port = 8080 
 sizeLimit = 125 # MB
-enableH2C = true
+enableH2C = "on" # "on" or "off"
 
 [pages]
 enabled = false

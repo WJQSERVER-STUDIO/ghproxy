@@ -19,7 +19,7 @@ type ServerConfig struct {
 	Port      int    `toml:"port"`
 	Host      string `toml:"host"`
 	SizeLimit int    `toml:"sizeLimit"`
-	EnableH2C bool   `toml:"enableH2C"`
+	EnableH2C string `toml:"enableH2C"`
 }
 
 type PagesConfig struct {

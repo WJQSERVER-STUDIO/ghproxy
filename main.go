@@ -91,9 +91,19 @@ func init() {
 	gin.SetMode(gin.ReleaseMode)
 
 	router = gin.Default()
-	if cfg.Server.EnableH2C {
+	//H2C默认值为true，而后遵循cfg.Server.EnableH2C的设置
+	if cfg.Server.EnableH2C == "on" {
 		router.UseH2C = true
+	} else if cfg.Server.EnableH2C == "" {
+		router.UseH2C = true
+	} else {
+		router.UseH2C = false
 	}
+	/*if !cfg.Server.EnableH2C {
+		router.UseH2C = false
+	} else {
+		router.UseH2C = true
+	}*/
 
 	setupApi(cfg, router, version)
 
