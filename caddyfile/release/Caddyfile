@@ -13,6 +13,9 @@
             roll_keep 10
         }
     }
+    servers :80 {
+        protocols h1 h2c
+    }    
 }
 
 (log) {
@@ -68,8 +71,11 @@
 
 :80 {
     reverse_proxy {
-        to h2c://127.0.0.1:8080
+        to 127.0.0.1:8080
         import header_realip
+        transport http {
+            versions 1.1 h2c
+        }
     }
     import log ghproxy
     import cache 0s 300s

@@ -81,7 +81,7 @@ wget -O install.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/ma
 host = "127.0.0.1"  # 监听地址
 port = 8080  # 监听端口
 sizeLimit = 125 # 125MB
-enableH2C = true  # 是否开启H2C传输(latest和dev版本请开启)
+enableH2C = "on"  # 是否开启H2C传输(latest和dev版本请开启) on/off
 
 [pages]
 enabled = false  # 是否开启内置静态页面(Docker版本请关闭此项)
