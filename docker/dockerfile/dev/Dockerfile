@@ -1,4 +1,4 @@
-FROM wjqserver/caddy:2.9.0-rc4-alpine AS builder
+FROM wjqserver/caddy:2.9.0-rc5-alpine AS builder
 
 ARG USER=WJQSERVER-STUDIO
 ARG REPO=ghproxy
@@ -36,7 +36,7 @@ RUN wget -O /data/${APPLICATION}/whitelist.json https://raw.githubusercontent.co
 RUN chmod +x /data/${APPLICATION}/${APPLICATION}
 RUN chmod +x /usr/local/bin/init.sh
 
-FROM wjqserver/caddy:2.9.0-rc4-alpine
+FROM wjqserver/caddy:2.9.0-rc5-alpine
 
 RUN apk add --no-cache curl
 
