@@ -1,5 +1,11 @@
 # 更新日志
 
+v1.7.7
+---
+- CHANGE: 更新相关依赖库
+- CHANGE: 更新Go版本至1.23.4
+- CHANGE: 更新release及dev版本底包
+
 24w26a
 ---
 - PRE-RELEASE: 此版本是v1.7.7的预发布版本,请勿在生产环境中使用
