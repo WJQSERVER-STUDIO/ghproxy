@@ -31,6 +31,7 @@ var exps = []*regexp.Regexp{
 	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:info|git-).*`),
 	regexp.MustCompile(`^(?:https?://)?raw\.github(?:usercontent|)\.com/([^/]+)/([^/]+)/.+?/.+`),
 	regexp.MustCompile(`^(?:https?://)?gist\.github(?:usercontent|)\.com/([^/]+)/.+?/.+`),
+	regexp.MustCompile(`^(?:https?://)?api\.github\.com/repos/([^/]+)/([^/]+)/.*`),
 }
 
 func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter) gin.HandlerFunc {
@@ -106,6 +107,16 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 			return
 		}
 
+		// 若匹配api.github.com/repos/用户名/仓库名/路径, 则检查是否开启HeaderAuth
+		if exps[5].MatchString(rawPath) {
+			if cfg.Auth.AuthMethod != "header" || !cfg.Auth.Enabled {
+				c.JSON(http.StatusForbidden, gin.H{"error": "HeaderAuth is not enabled."})
+				logWarning("%s %s %s %s %s HeaderAuth-Error: HeaderAuth is not enabled.", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+				return
+			}
+		}
+
+		// 处理blob/raw路径
 		if exps[1].MatchString(rawPath) {
 			rawPath = strings.Replace(rawPath, "/blob/", "/raw/", 1)
 		}

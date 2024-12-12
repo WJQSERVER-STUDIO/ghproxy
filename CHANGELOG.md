@@ -1,5 +1,10 @@
 # 更新日志
 
+24w27a
+---
+- PRE-RELEASE: 此版本做为实验性功能测试版本,请勿在生产环境中使用
+- ADD: 新增`api.github.com`反代支持, 强制性要求开启`Header Auth`功能
+
 v1.7.7
 ---
 - CHANGE: 更新相关依赖库
