@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"github.com/satomitoka/ghproxy/config"
-	"github.com/satomitoka/ghproxy/logger"
+	"ghproxy/config"
+	"ghproxy/logger"
 
 	"github.com/gin-gonic/gin"
 )
