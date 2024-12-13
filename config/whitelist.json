@@ -1,8 +1,7 @@
 {
-    "whitelist": [
-      "white/list",
-      "white/test1",
-      "example/white"
-    ]
-  }
-  
+  "whitelist": [
+    "white/list",
+    "white/test1",
+    "example/*"
+  ]
+}

@@ -1,11 +1,372 @@
 # 更新日志
 
+24w27a
+---
+- PRE-RELEASE: 此版本做为实验性功能测试版本,请勿在生产环境中使用
+- ADD: 新增`api.github.com`反代支持, 强制性要求开启`Header Auth`功能
+
+v1.7.7
+---
+- CHANGE: 更新相关依赖库
+- CHANGE: 更新Go版本至1.23.4
+- CHANGE: 更新release及dev版本底包
+
+24w26a
+---
+- PRE-RELEASE: 此版本是v1.7.7的预发布版本,请勿在生产环境中使用
+- CHANGE: 更新相关依赖库
+- CHANGE: 更新Go版本至1.23.4
+- CHANGE: 更新release及dev版本底包
+
+v1.7.6
+---
+- RELEASE: 版本在v1.7.4及以上的用户,我们建议升级到此版本以解决于v1.7.4版本功能更新所引入的问题
+- FIX: 进一步修正 H2C相关配置逻辑问题
+- CHANGE: 对Caddy配置进行实验性修改,优化H2C配置
+- CHANGE: 更新相关依赖库
+
+24w25b
+---
+- PRE-RELEASE: 此版本是v1.7.6的预发布版本,请勿在生产环境中使用
+- 说明: 本版本为24w25a-fix0
+- FIX: 进一步修正 H2C相关配置逻辑问题
+
+24w25a
+---
+- PRE-RELEASE: 此版本是v1.7.6的预发布版本,请勿在生产环境中使用
+- 说明: 本版本为v1.7.6的其中一个候选与开发测试版本,相关改动不一定实装
+- FIX: 进一步修正 H2C相关配置逻辑问题
+- CHANGE: 对Caddy配置进行实验性修改,优化H2C配置
+- CHANGE: 更新相关依赖库
+
+v1.7.5
+---
+- FIX: 修复 v1.7.4 版本 Docker 镜像默认配置导致的 403 问题
+- ADD: `Rate`模块加入`IP`速率限制,可限制单个IP的请求速率 (需要更多测试)
+- CHANGE: 处理积攒的依赖库更新
+
+24w24c
+---
+- PRE-RELEASE: 此版本是v1.7.5的预发布版本,请勿在生产环境中使用
+- CHANGE: 更新依赖
+
+24w24b
+---
+- PRE-RELEASE: 此版本是v1.7.5的预发布版本,请勿在生产环境中使用
+- FIX: 修复 Docker 默认配置导致的 403 问题
+
+24w24a
+---
+- PRE-RELEASE: 此版本是v1.7.5的预发布版本,请勿在生产环境中使用
+- ADD: `Rate`模块加入`IP`速率限制,可限制单个IP的请求速率 (需要更多测试)
+- CHANGE: 处理积攒的依赖库更新,更新如下依赖库:
+- **github.com/gabriel-vasile/mimetype**: 从 v1.4.6 升级到 v1.4.7
+- **github.com/go-playground/validator/v10**: 从 v10.22.1 升级到 v10.23.0
+- **github.com/klauspost/cpuid/v2**: 从 v2.2.8 升级到 v2.2.9
+- **github.com/onsi/ginkgo/v2**: 从 v2.21.0 升级到 v2.22.0
+- **golang.org/x/arch**: 从 v0.11.0 升级到 v0.12.0
+- **golang.org/x/crypto**: 从 v0.28.0 升级到 v0.29.0
+- **golang.org/x/exp**: 从 v0.0.0-20241009180824-f66d83c29e7c 升级到 v0.0.0-20241108190413-2d47ceb2692f
+- **golang.org/x/mod**: 从 v0.21.0 升级到 v0.22.0
+- **golang.org/x/net**: 从 v0.30.0 升级到 v0.31.0
+- **golang.org/x/sync**: 从 v0.8.0 升级到 v0.9.0
+- **golang.org/x/sys**: 从 v0.26.0 升级到 v0.27.0
+- **golang.org/x/text**: 从 v0.19.0 升级到 v0.20.0
+- **golang.org/x/tools**: 从 v0.26.0 升级到 v0.27.0
+- **google.golang.org/protobuf**: 从 v1.35.1 升级到 v1.35.2
+
+v1.7.4
+---
+- CHANGE: 对二进制文件部署脚本进行优化
+- CHANGE&ADD: 新增H2C相关配置
+- ADD: `Auth`模块加入`Header`鉴权,使用`GH-Auth`的值进行鉴权
+
+24w23a
+---
+- PRE-RELEASE: 此版本是v1.7.4的预发布版本,请勿在生产环境中使用
+- ADD: `Auth`模块加入`Header`鉴权,使用`GH-Auth`的值进行鉴权
+- CHANGE: 对二进制文件部署脚本进行优化
+- CHANGE&ADD: 新增H2C相关配置
+
+v1.7.3
+---
+- CHANGE: Bump golang.org/x/time from 0.7.0 to 0.8.0
+- FIX: 修复故障熔断的相关问题
+
+v1.7.2
+---
+- CHANGE: 为`nocache`版本加入测试性的故障熔断机制
+
+v1.7.1
+---
+- CHANGE: 更新Go版本至1.23.3
+- CHANGE: 更新相关依赖库
+- ADD: 对`Proxy`模块进行优化,增加使用`HEAD`方式预获取`Content-Length`头
+- CHANGE: 将`release`与`dev`版本的底包切换至`wjqserver/caddy:2.9.0-rc4-alpine`，将`nocache`版本的底包切换至`alpine:latest`
+- CHANGE: 对`nocache`版本的`config.toml`与`init.sh`进行适配性修改
+- CHANGE: 加入测试性的故障熔断机制(Failure Circuit Breaker) (nocache版本暂不支持)
+
+24w22b
+---
+- PRE-RELEASE: 此版本是v1.7.1的预发布版本,请勿在生产环境中使用
+- CHANGE: 更新Go版本至1.23.3
+- CHANGE: 更新相关依赖库
+- ADD: 对`Proxy`模块进行优化,增加使用`HEAD`方式预获取`Content-Length`头
+- CHANGE: 将`release`与`dev`版本的底包切换至`wjqserver/caddy:2.9.0-rc4-alpine`，将`nocache`版本的底包切换至`alpine:latest`
+- CHANGE: 对`nocache`版本的`config.toml`与`init.sh`进行适配性修改
+
+24w22a
+---
+- PRE-RELEASE: 此版本是v1.7.1的预发布版本,请勿在生产环境中使用
+- CHANGE: 更新底包
+- CHANGE: 加入测试性的故障熔断机制(Failure Circuit Breaker)
+
+v1.7.0
+---
+- ADD: 加入`rate`模块,实现内置速率限制
+- CHANGE: 优化`blacklist`与`whitelist`模块的匹配算法,提升性能；由原先的完整匹配改为切片匹配，提升匹配效率
+- ADD: 加入`version`相关表示与API接口
+- ADD: 加入`rate`相关API接口
+- CHANGE: 优化前端界面,优化部分样式
+- CHANGE: 更新相关依赖库
+- CHANGE: 对编译打包进行改进,此后不再提供独立可执行文件,请改为拉取`tar.gz`压缩包
+
+24w21d
+---
+- PRE-RELEASE: 此版本是v1.7.0的预发布版本,请勿在生产环境中使用
+- ADD: 新增`ratePerMinute` API可供查询
+- ADD: 前端新增 version 标识
+- ADD: 前端新增 `重定向` 按钮,用于重定向到代理后的链接
+- CHANGE: 优化输出代码块,使样式更加美观
+- CHANGE: 更新相关依赖库
+- CHANGE: 对黑名单模块进行实验性功能优化,提升性能(改进匹配算法,在切片后优先匹配user,减少无效匹配)
+
+24w21c
+---
+- PRE-RELEASE: 此版本是v1.7.0的预发布版本,请勿在生产环境中使用
+- CHANGE: 对编译打包进行改进,此后不再提供独立可执行文件,请改为拉取`tar.gz`压缩包
+- CHANGE: 由于上述原因,对Docker打包进行相应改进
+
+24w21b
+---
+- PRE-RELEASE: 此版本是v1.7.0的预发布版本,请勿在生产环境中使用
+- ADD: 加入版本号标识与对应API接口
+- ADD: 加入速率限制API接口
+- CHANGE: 修改打包部分
+
+24w21a
+---
+- PRE-RELEASE: 此版本是v1.7.0的预发布版本,请勿在生产环境中使用
+- ADD: 尝试加入程序内置速率限制
+- CHANGE: 更新相关依赖库
+- CHANGE: 更换Dev版本底包,于release版本保持一致
+
+v1.6.2
+---
+- CHANGE: 优化前端界面,优化部分样式
+- ADD: 前端加入黑夜模式
+- CHANGE: 优化移动端适配
+- CHANGE: 优化一键部署脚本,使其更加易用,并增加更多的功能(已于早些时候hotfix)
+- CHANGE: 优化部分代码结构,提升性能
+- CHANGE: 优化日志记录,对各个部分的日志记录进行统一格式,并对部分重复日志进行合并
+
+24w20b
+---
+- PRE-RELEASE: 此版本是v1.6.2的预发布版本,请勿在生产环境中使用
+- CHANGE: 优化前端界面,优化部分样式
+- ADD: 前端加入黑夜模式
+- CHANGE: 优化移动端适配
+
+24w20a
+---
+- PRE-RELEASE: 此版本是v1.6.2的预发布版本,请勿在生产环境中使用
+- CHANGE: 大幅修改日志记录,对各个部分的日志记录进行统一格式,并对部分重复日志进行合并
+- CHANGE: 大幅优化一键部署脚本,使其更加易用,并增加更多的功能(已于早些时候hotfix)
+- CHANGE: 优化部分代码结构,提升性能
+
+v1.6.1
+---
+- CHANGE: 根据社区建议,将`sizeLimit`由过去的以`byte`为单位,改为以`MB`为单位,以便于直观理解
+- ADD: 新增`nocache`版本,供由用户自行优化缓存策略
+- CHANGE: 优化`Proxy`核心模块内部结构,提升性能
+- REMOVE: 移除`Proxy`模块内部分无用`logInfo`
+- FIX & ADD: 修复前端对gist的匹配问题,添加对`gist.githubusercontent.com`的前端转换支持
+- CHANGE: 改变部分前端匹配逻辑
+- CHANGE: 更新相关依赖库
+
+24w19d
+---
+- PRE-RELEASE: 此版本是v1.6.1的预发布版本,请勿在生产环境中使用
+- ADD: 新增nocache版本,供由用户自行优化缓存策略
+- CHANGE: 优化`Proxy`核心模块内部结构,提升性能
+- REMOVE: 移除`Proxy`模块内部分无用`logInfo`
+
+24w19c
+---
+- PRE-RELEASE: 此版本是v1.6.1的预发布版本,请勿在生产环境中使用
+- FIX & ADD: 修复前端对gist的匹配问题,添加对`gist.githubusercontent.com`的前端转换支持
+- CHANGE: 改变部分前端匹配逻辑
+- CHANGE: 更新相关依赖库
+
+24w19b
+---
+- PRE-RELEASE: 此版本是v1.6.1的预发布版本,请勿在生产环境中使用
+- FIX: 修复`sizeLimit`单位更改导致API返回值错误的问题
+- FIX: 修正Gist匹配
+
+24w19a
+---
+- PRE-RELEASE: 此版本是v1.6.1的预发布版本,请勿在生产环境中使用
+- CHANGE: 根据社区建议,将`sizeLimit`由过去的以`byte`为单位,改为以`MB`为单位,以便于直观理解
+- CHANGE: 更新相关依赖
+- CHANGE: 对`Proxy`模块的核心函数进行模块化,为后续修改和扩展提供空间
+
+v1.6.0
+---
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: 引入H2C支持,支持无加密HTTP/2请求,一定程度上提升传输性能
+- ADD: 在核心程序内加入静态页面支持,支持不通过caddy等web server提供前端页面
+- CHANGE: 优化日志记录,带来更多的可观测性
+- CHANGE: 改进前端界面,优化用户体验; 对原有Alert提示进行优化，改为ShowToast提示
+- CHANGE: 规范化部分函数命名,提升可读性; 同时对config.toml内的参数命名进行规范化(部分参数名称已过时，请注意更新)
+- CHANGE: 修改日志检查周期,降低检查频率,避免不必要的资源浪费
+- ADD: 增加CORS状态API
+
+24w18f
+---
+- PRE-RELEASE: 此版本是v1.6.0的预发布版本,请勿在生产环境中使用
+- CHANGE: 修正前端页面的部分样式问题
+- FIX: 修正部分问题
+
+24w18e
+---
+- PRE-RELEASE: 此版本是预发布版本,请勿在生产环境中使用
+- CHANGE: 引入H2C协议支持,支持无加密HTTP/2请求
+- ADD: 尝试在核心程序内加入静态页面支持
+- CHANGE: 优化日志记录
+- CHANGE: 去除部分无用/重复配置
+- CHANGE: 规范化部分函数命名
+
+24w18d
+---
+- PRE-RELEASE: 此版本是预发布版本,请勿在生产环境中使用
+- CHANGE: 更新相关依赖库
+- ADD: 增加CORS状态API
+- CHANGE: 优化部分函数执行顺序
+- CHANGE: 优化前端界面
+
+24w18c
+---
+- PRE-RELEASE: 此版本是预发布版本,请勿在生产环境中使用
+- CHANGE: 修正配置命名,改为驼峰式命名
+- CHANGE: 修正函数命名
+
+24w18b
+---
+- PRE-RELEASE: 此版本是预发布版本,请勿在生产环境中使用
+- CHANGE: 经团队考量,移除 Docker 代理功能，若造成了不便敬请谅解
+- CHANGE: 修改日志检查周期
+
+24w18a
+---
+- PRE-RELEASE: 此版本是预发布版本,请勿在生产环境中使用
+- CHANGE: 改进Docker 代理
+- CHANGE: 改进前端页面的copy提示,弃用alert提示
+
+v1.5.2
+---
+- FIX: 修正flag传入问题
+- CHANGE: 去除/路径重定向,改为返回403,并记录对应请求日志
+- CHANGE: 优化Proxy模块的日志记录,记录请求详细信息
+
+24w17b
+---
+- PRE-RELEASE: 此版本是v1.5.2的预发布版本,请勿在生产环境中使用
+- FIX: 修正flag传入问题
+- CHANGE: 去除/路径重定向,改为返回403,并记录对应请求日志
+- CHANGE: 优化Proxy模块的日志记录,记录请求详细信息
+
+24w17a
+---
+- PRE-RELEASE: 此版本是v1.5.2的预发布版本,请勿在生产环境中使用
+- FIX: 初步修正flag传入问题,但仍有可能存在其他问题
+
+v1.5.1
+---
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: Bump github.com/imroc/req/v3 from 3.48.0 to 3.49.0 by @dependabot in https://github.com/WJQSERVER-STUDIO/ghproxy/pull/7
+- ADD: 新增一键部署脚本,简化二进制文件部署流程
+
+24w16a
+---
+- PRE-RELEASE: 此版本是v1.5.1的预发布版本,请勿在生产环境中使用
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: Bump github.com/imroc/req/v3 from 3.47.0 to 3.48.0 by @dependabot in https://github.com/WJQSERVER-STUDIO/ghproxy/pull/6
+- ADD: 新增一键部署脚本,简化二进制文件部署流程
+
+v1.5.0
+---
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: 改进核心部分,即proxy模块的转发部分,对请求体处理与响应体处理进行优化
+- CHANGE: 配置文件格式由yaml切换至toml,使其具备更好的可读性
+- ADD: 黑白名单引入通配符支持,支持完全屏蔽或放行某个用户,例如`onwer/*`表示匹配`owner`的所有仓库
+- ADD: 新增API模块,新增配置开关状态接口,以在前端指示功能状态
+- CHANGE: 由于API变动,对前端进行相应调整
+- ADD: 日志模块引入日志级别,排障更加直观
+- CHANGE: 改进黑白名单机制,若禁用相关功能,则不对相关模块进行初始化
+
+24w15d
+---
+- PRE-RELEASE: 此版本是v1.5.0的预发布版本,请勿在生产环境中使用
+- CHANGE: 优化代码结构,提升性能
+- ADD: 新增API模块,新增配置开关状态接口,以在前端指示功能状态
+- CHANGE: 由于API变动,对前端进行相应调整
+
+24w15c
+---
+- PRE-RELEASE: 此版本是v1.5.0的预发布版本,请勿在生产环境中使用
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: 改进核心部分,即proxy模块的转发部分,对请求体处理与响应体处理进行优化
+- CHANGE: 改进黑白名单机制,若禁用相关功能,则不对对应模块进行初始化
+- ADD: 黑白名单引入通配符支持,支持完全屏蔽或放行某个用户,例如`onwer/*`表示匹配`owner`的所有仓库
+- ADD: 日志模块引入日志级别,排障更加直观
+
+24w15b
+---
+- PRE-RELEASE: 此版本是v1.5.0的预发布版本,请勿在生产环境中使用
+- CHANGE: 优化代码结构,提升性能
+- FIX: 修正24w15a版本的部分问题
+
+24w15a
+---
+- PRE-RELEASE: 此版本是v1.5.0的预发布版本,请勿在生产环境中使用
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: 将配置文件由yaml切换至toml
+
+v1.4.3
+---
+- CHANGE: 优化代码结构,提升性能
+- ADD: 新增命令行参数 `-cfg string` 用于指定配置文件路径
+- CHANGE: 对二进制文件大小进行改进
+
+24w14a
+---
+- PRE-RELEASE: 此版本是v1.4.3的预发布版本,请勿在生产环境中使用
+- CHANGE: 优化代码结构,提升性能
+- ADD: 新增命令行参数 `-cfg string` 用于指定配置文件路径
+
 v1.4.2
 ---
 - CHANGE: 优化代码结构,提升性能
 - CHANGE: 初步引入ARM64架构支持
 - CHANGE: 对Docker镜像构建进行优化，大幅减少镜像体积,从v1.4.0的`111 MB`,到v1.4.1的`58 MB`,再到v1.4.2的`28 MB`
 - CHANGE: 切换至wjqserver/caddy:2.9.0-rc-alpine作为基础镜像
+
+24w13c
+---
+- PRE-RELEASE: 此版本是v1.4.2的预发布版本,请勿在生产环境中使用
+- CHANGE: 优化代码结构,提升性能
+- CHANGE: 修正交叉编译问题
 
 24w13b
 ---

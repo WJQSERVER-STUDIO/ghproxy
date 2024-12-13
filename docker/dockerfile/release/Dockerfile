@@ -1,4 +1,4 @@
-FROM wjqserver/caddy:2.9.0-rc-alpine AS builder
+FROM wjqserver/caddy:2.9.0-rc5-alpine AS builder
 
 ARG USER=WJQSERVER-STUDIO
 ARG REPO=ghproxy
@@ -13,7 +13,7 @@ RUN mkdir -p /data/${APPLICATION}/config
 RUN mkdir -p /data/${APPLICATION}/log 
 
 # 安装依赖
-RUN apk add --no-cache curl wget
+RUN apk add --no-cache curl wget tar
 
 # 前端
 RUN wget -O /data/www/index.html https://raw.githubusercontent.com/${USER}/${REPO}/main/pages/index.html
@@ -21,12 +21,14 @@ RUN wget -O /data/www/favicon.ico https://raw.githubusercontent.com/${USER}/${RE
 
 # 后端
 RUN VERSION=$(curl -s https://raw.githubusercontent.com/${USER}/${REPO}/main/VERSION) && \
-    wget -O /data/${APPLICATION}/${APPLICATION} https://github.com/${USER}/${REPO}/releases/download/$VERSION/${APPLICATION}-${TARGETOS}-${TARGETARCH}
+    wget -O /data/${APPLICATION}/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz https://github.com/${USER}/${REPO}/releases/download/$VERSION/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz && \
+    tar -zxvf /data/${APPLICATION}/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz -C /data/${APPLICATION} && \
+    rm -rf /data/${APPLICATION}/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz
 RUN wget -O /usr/local/bin/init.sh https://raw.githubusercontent.com/${USER}/${REPO}/main/docker/dockerfile/release/init.sh
 
 # 拉取配置
 RUN wget -O /data/caddy/Caddyfile https://raw.githubusercontent.com/${USER}/${REPO}/main/caddyfile/release/Caddyfile
-RUN wget -O /data/${APPLICATION}/config.yaml https://raw.githubusercontent.com/${USER}/${REPO}/main/config/config.yaml
+RUN wget -O /data/${APPLICATION}/config.toml https://raw.githubusercontent.com/${USER}/${REPO}/main/config/config.toml
 RUN wget -O /data/${APPLICATION}/blacklist.json https://raw.githubusercontent.com/${USER}/${REPO}/main/config/blacklist.json
 RUN wget -O /data/${APPLICATION}/whitelist.json https://raw.githubusercontent.com/${USER}/${REPO}/main/config/whitelist.json
 
@@ -34,7 +36,9 @@ RUN wget -O /data/${APPLICATION}/whitelist.json https://raw.githubusercontent.co
 RUN chmod +x /data/${APPLICATION}/${APPLICATION}
 RUN chmod +x /usr/local/bin/init.sh
 
-FROM wjqserver/caddy:2.9.0-rc-alpine
+FROM wjqserver/caddy:2.9.0-rc5-alpine
+
+RUN apk add --no-cache curl
 
 COPY --from=builder /data/www /data/www
 COPY --from=builder /data/caddy /data/caddy

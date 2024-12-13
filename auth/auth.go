@@ -7,29 +7,35 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var logw = logger.Logw
+var (
+	logw       = logger.Logw
+	logInfo    = logger.LogInfo
+	logWarning = logger.LogWarning
+	logError   = logger.LogError
+)
 
-func AuthHandler(c *gin.Context, cfg *config.Config) bool {
-	// 如果身份验证未启用，直接返回 true
-	if !cfg.Auth.Enabled {
-		return true
+func Init(cfg *config.Config) {
+	if cfg.Blacklist.Enabled {
+		LoadBlacklist(cfg)
 	}
-
-	// 获取 auth_token 参数
-	authToken := c.Query("auth_token")
-	logw("auth_token received: %s", authToken)
-
-	// 验证 token
-	if authToken == "" {
-		logw("auth FAILED: no auth_token provided")
-		return false
+	if cfg.Whitelist.Enabled {
+		LoadWhitelist(cfg)
 	}
+	logInfo("Auth Init")
+}
 
-	isValid := authToken == cfg.Auth.AuthToken
-	if !isValid {
-		logw("auth FAILED: invalid auth_token: %s", authToken)
+func AuthHandler(c *gin.Context, cfg *config.Config) (isValid bool, err string) {
+	if cfg.Auth.AuthMethod == "parameters" {
+		isValid, err = AuthParametersHandler(c, cfg)
+		return isValid, err
+	} else if cfg.Auth.AuthMethod == "header" {
+		isValid, err = AuthHeaderHandler(c, cfg)
+		return isValid, err
+	} else if cfg.Auth.AuthMethod == "" {
+		logWarning("Auth method not set")
+		return true, ""
+	} else {
+		logWarning("Auth method not supported")
+		return false, "Auth method not supported"
 	}
-
-	logw("auth SUCCESS: %t", isValid)
-	return isValid
 }

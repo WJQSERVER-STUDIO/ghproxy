@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/satomitoka/ghproxy/config"
 	"os"
+	"strings"
 )
 
 type BlacklistConfig struct {
@@ -22,23 +23,37 @@ func LoadBlacklist(cfg *config.Config) {
 
 	data, err := os.ReadFile(blacklistfile)
 	if err != nil {
-		logw("Failed to read blacklist file: %v", err)
+		logError("Failed to read blacklist file: %v", err)
 	}
 
 	err = json.Unmarshal(data, blacklist)
 	if err != nil {
-		logw("Failed to unmarshal blacklist JSON: %v", err)
+		logError("Failed to unmarshal blacklist JSON: %v", err)
 	}
 }
 
-func CheckBlacklist(fullrepo string) bool {
-	return forRangeCheckBlacklist(blacklist.Blacklist, fullrepo)
+func CheckBlacklist(repouser string, user string, repo string) bool {
+	return forRangeCheckBlacklist(blacklist.Blacklist, repouser, user)
 }
 
-func forRangeCheckBlacklist(blist []string, fullrepo string) bool {
+func sliceRepoName_Blacklist(fullrepo string) (string, string) {
+	s := strings.Split(fullrepo, "/")
+	if len(s) != 2 {
+		return "", ""
+	}
+	return s[0], s[1]
+}
+
+func forRangeCheckBlacklist(blist []string, fullrepo string, user string) bool {
 	for _, blocked := range blist {
-		if blocked == fullrepo {
-			return true
+		users, _ := sliceRepoName_Blacklist(blocked)
+		if user == users {
+			if strings.HasSuffix(blocked, "/*") {
+				return true
+			}
+			if fullrepo == blocked {
+				return true
+			}
 		}
 	}
 	return false

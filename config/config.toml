@@ -1,0 +1,35 @@
+[server]
+host = "127.0.0.1" 
+port = 8080 
+sizeLimit = 125 # MB
+enableH2C = "on" # "on" or "off"
+
+[pages]
+enabled = false
+staticDir = "/data/www" 
+
+[log]
+logFilePath = "/data/ghproxy/log/ghproxy.log" 
+maxLogSize = 5 # MB
+
+[cors]
+enabled = true
+
+[auth]
+authMethod = "parameters" # "header" or "parameters"
+authToken = "token"
+enabled = false
+
+[blacklist]
+blacklistFile = "/data/ghproxy/config/blacklist.json"
+enabled = false
+
+[whitelist]
+enabled = false
+whitelistFile = "/data/ghproxy/config/whitelist.json"
+
+[rateLimit]
+enabled = false
+rateMrthod = "total" # "ip" or "total"
+ratePerMinute = 180
+burst = 5

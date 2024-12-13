@@ -1,57 +1,69 @@
 package config
 
 import (
-	"os"
-
-	"gopkg.in/yaml.v3"
+	"github.com/BurntSushi/toml"
 )
 
 type Config struct {
-	Server struct {
-		Port      int    `yaml:"port"`
-		Host      string `yaml:"host"`
-		SizeLimit int    `yaml:"sizelimit"`
-	} `yaml:"server"`
-
-	Log struct {
-		LogFilePath string `yaml:"logfilepath"`
-		MaxLogSize  int    `yaml:"maxlogsize"`
-	} `yaml:"logger"`
-
-	CORS struct {
-		Enabled bool `yaml:"enabled"`
-	} `yaml:"cors"`
-
-	Auth struct {
-		Enabled   bool   `yaml:"enabled"`
-		AuthToken string `yaml:"authtoken"`
-	} `yaml:"auth"`
-
-	Blacklist struct {
-		Enabled       bool   `yaml:"enabled"`
-		BlacklistFile string `yaml:"blacklistfile"`
-	} `yaml:"blacklist"`
-
-	Whitelist struct {
-		Enabled       bool   `yaml:"enabled"`
-		WhitelistFile string `yaml:"whitelistfile"`
-	} `yaml:"whitelist"`
+	Server    ServerConfig
+	Pages     PagesConfig
+	Log       LogConfig
+	CORS      CORSConfig
+	Auth      AuthConfig
+	Blacklist BlacklistConfig
+	Whitelist WhitelistConfig
+	RateLimit RateLimitConfig
 }
 
-// LoadConfig 从 YAML 配置文件加载配置
+type ServerConfig struct {
+	Port      int    `toml:"port"`
+	Host      string `toml:"host"`
+	SizeLimit int    `toml:"sizeLimit"`
+	EnableH2C string `toml:"enableH2C"`
+}
+
+type PagesConfig struct {
+	Enabled   bool   `toml:"enabled"`
+	StaticDir string `toml:"staticDir"`
+}
+
+type LogConfig struct {
+	LogFilePath string `toml:"logFilePath"`
+	MaxLogSize  int    `toml:"maxLogSize"`
+}
+
+type CORSConfig struct {
+	Enabled bool `toml:"enabled"`
+}
+
+type AuthConfig struct {
+	Enabled    bool   `toml:"enabled"`
+	AuthMethod string `toml:"authMethod"`
+	AuthToken  string `toml:"authToken"`
+}
+
+type BlacklistConfig struct {
+	Enabled       bool   `toml:"enabled"`
+	BlacklistFile string `toml:"blacklistFile"`
+}
+
+type WhitelistConfig struct {
+	Enabled       bool   `toml:"enabled"`
+	WhitelistFile string `toml:"whitelistFile"`
+}
+
+type RateLimitConfig struct {
+	Enabled       bool   `toml:"enabled"`
+	RateMethod    string `toml:"rateMethod"`
+	RatePerMinute int    `toml:"ratePerMinute"`
+	Burst         int    `toml:"burst"`
+}
+
+// LoadConfig 从 TOML 配置文件加载配置
 func LoadConfig(filePath string) (*Config, error) {
 	var config Config
-	if err := loadYAML(filePath, &config); err != nil {
+	if _, err := toml.DecodeFile(filePath, &config); err != nil {
 		return nil, err
 	}
 	return &config, nil
-}
-
-// LoadyamlConfig 从 YAML 配置文件加载配置
-func loadYAML(filePath string, out interface{}) error {
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		return err
-	}
-	return yaml.Unmarshal(data, out)
 }

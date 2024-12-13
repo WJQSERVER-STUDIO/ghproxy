@@ -5,12 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Github文件加速">
+    <meta name="keywords" content="Github,文件加速,ghproxy">
+    <meta name="color-scheme" content="dark light">
     <title>Github文件加速</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://font.sec.miui.com/font/css?family=MiSans:400,700:MiSans">
     <style>
+        :root {
+            --color: #dadada;
+            --fontcolor: #333;
+            --inputcolor: #a19f9f;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color: #53535338;
+                --fontcolor: #b8b8b8;
+                --inputcolor: #012333;
+                --inputcolor-font: #969696d8;
+            }
+        }
+
         body {
-            background-color: #f8f9fac5;
+            background-color: var(--color);
+            color: var(--fontcolor);
             font-family: 'Misans', Arial, sans-serif;
             padding: 30px;
             display: flex;
@@ -22,25 +40,61 @@
             position: relative;
         }
 
+        .version {
+            width: 12.5%;
+            height: 2%;
+            background-color: #39c5bb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            border-radius: 0.5rem;
+            position: fixed;
+            bottom: 0%;
+            right: 0%;
+        }
+
+        .version p {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        *::-webkit-scrollbar {
+            height: 10px;
+            margin-top: 0px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background-color: black;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background: #39c5bb;
+            border-radius: 10px;
+        }
+
         .container {
-            max-width: 800px;
+            max-width: 80%;
             text-align: center;
-            min-height: 45vh;
+            min-height: 65%;
+            line-height: 1.25;
         }
 
         h1 {
+            color: var(--fontcolor);
             font-weight: bold;
-            margin-bottom: 75px;
+            margin-bottom: 20%;
         }
 
         .rounded-button {
             border-radius: 6px;
             transition: background-color 0.3s, transform 0.2s;
             padding: 10px 30px;
-            background-color: #39c5bb;
-            color: white;
+            background-color: #555c5c;
+            color: rgb(255, 255, 255);
             border: none;
-            margin-bottom: 10px;
+            margin-bottom: 3%;
         }
 
         .rounded-button:hover {
@@ -51,23 +105,26 @@
         .tips>p:first-child::before {
             position: sticky;
             color: #7b7b7b;
-            margin-bottom: 5px;
+            margin-bottom: 1%;
+            font-size: 60%;
         }
 
         footer {
+            line-height: 1.25;
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
             text-align: center;
+            font-size: 1rem;
         }
 
         pre {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 20px 20px;
-            margin: 10px 0;
-            border-radius: 8px;
+            background: #012333;
+            color: #39c5bc;
+            padding: 15px 20px 15px 20px;
+            margin: 0px 0;
+            border-radius: 0.5rem;
             overflow-x: auto;
             position: relative;
         }
@@ -76,20 +133,105 @@
             content: " ";
             display: block;
             position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 12px;
-            height: 12px;
-            background: #ff5f56;
+            top: 6px;
+            left: 6px;
+            width: 10px;
+            height: 10px;
+            background: #bd3c35;
             border-radius: 50%;
-            box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f;
+            box-shadow: 20px 0 0 #d69f27, 40px 0 0 #39c5bb;
         }
 
         code {
-            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-            font-size: 0.875em;
-
+            font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 0.9em;
+            margin-bottom: 0px;
         }
+
+        @media (max-width: 768px) {
+            footer {
+                font-size: 0.85rem;
+            }
+
+            .container {
+                max-width: 100%;
+                font-size: 0.8rem;
+            }
+
+            .tips {
+                font-size: 0.8rem;
+            }
+
+            .tips-content {
+                font-size: 0.8rem;
+            }
+
+            .status-container {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            footer {
+                font-size: 1rem;
+            }
+
+            .container {
+                max-width: 65%;
+                font-size: 1rem;
+            }
+
+            .tips {
+                font-size: 1.1rem;
+            }
+
+            .tips-content {
+                font-size: 1.1rem;
+            }
+
+            .status-container {
+                font-size: 1.05rem;
+            }
+
+            h1 {
+                margin-bottom: 10%;
+            }
+
+            .version {
+                width: 7.5%;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 3%;
+        }
+
+        .form-control {
+            background-color: var(--inputcolor);
+            color: var(--inputcolor-font);
+        }
+
+        .form-control:focus {
+            background-color: var(--inputcolor);
+            color: var(--inputcolor-font);
+        }
+
+        .tips-content {
+            margin-bottom: 0px;
+        }
+
+        .status-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1px;
+            margin-top: -2%;
+        }
+
+        .status-container p {
+            margin: 0px 1px;
+        }
+
 
         .code {
             position: relative;
@@ -98,9 +240,9 @@
 
         .copy-button {
             position: absolute;
-            top: 5px;
+            top: 10px;
             right: 10px;
-            background: rgba(118, 119, 121, 0.7);
+            background: rgba(0, 217, 224, 0.822);
             color: white;
             border: none;
             padding: 5px 10px;
@@ -108,6 +250,24 @@
             cursor: pointer;
             transition: opacity 0.3s;
             z-index: 1;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        .redir-button {
+            position: absolute;
+            top: 10px;
+            right: 65px;
+            background: rgba(0, 217, 224, 0.822);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            z-index: 1;
+            font-size: 0.85rem;
+            display: none;
         }
 
         pre:hover .copy-button {
@@ -117,28 +277,55 @@
         #visitor-info {
             margin-top: 10px;
             text-align: center;
-            line-height: 0.5;
+            line-height: 0;
+        }
+
+        #toast {
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #39c5bcde;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 90%;
+            z-index: 1000;
         }
     </style>
 </head>
 
 <body>
+    <div class="version">
+        <p id="version"></p>
+    </div>
     <div class="container">
         <h1>Github文件加速</h1>
         <div class="form-group">
-            <input type="text" class="form-control" id="githubLinkInput" placeholder="键入Github链接">
+            <input type="text" class="form-control" id="githubLinkInput" placeholder="请键入需要代理Github链接">
         </div>
         <button class="btn rounded-button" id="formatButton">获取文件链接</button>
 
         <div class="code" id="outputBlock">
-            <button class="copy-button" id="copyButton" onclick="copyCode(this)">Copy</button>
+            <button class="copy-button" id="copyButton">复制</button>
+            <button class="redir-button" id="redirButton">打开</button>
             <pre id="formattedLinkOutput"></pre>
         </div>
         <div class="tips">
-            <p>GitHub链接带不带协议头均可，支持release、archive以及文件，转换后链接均可使用</a>。</p>
-            <p id="sizeLimitDisplay">文件大小限制: ...</p>
+            <div class="tips-content">
+                <p>GitHub链接带不带协议头均可，支持release、archive以及文件，转换后链接均可使用</a>。</p><br>
+            </div>
+            <div class="status-container">
+                <p id="sizeLimitDisplay">文件大小限制: ...</p>
+                <p id="whiteListStatus">白名单状态: ...</p>
+                <p id="blackListStatus">黑名单状态: ...</p>
+            </div>
         </div>
     </div>
+    <div id="toast" style="display:none;">
+        链接已复制到剪贴板
+    </div>
+
 
     <script>
         function formatGithubLink() {
@@ -148,17 +335,40 @@
 
             if (githubLinkInput.value.startsWith("https://github.com/") || githubLinkInput.value.startsWith("http://github.com/")) {
                 formattedLink = "https://" + currentHost + "/github.com" + githubLinkInput.value.substring(githubLinkInput.value.indexOf("/", 8));
+                displayButton();
             } else if (githubLinkInput.value.startsWith("github.com/")) {
                 formattedLink = "https://" + currentHost + "/" + githubLinkInput.value;
+                displayButton();
             } else if (githubLinkInput.value.startsWith("https://raw.githubusercontent.com/") || githubLinkInput.value.startsWith("http://raw.githubusercontent.com/")) {
                 formattedLink = "https://" + currentHost + githubLinkInput.value.substring(githubLinkInput.value.indexOf("/", 7));
+                displayButton();
             } else if (githubLinkInput.value.startsWith("raw.githubusercontent.com/")) {
                 formattedLink = "https://" + currentHost + "/" + githubLinkInput.value;
-            } else if (!githubLinkInput.value.trim()) {
-                alert('请输入有效的GitHub链接');
+                displayButton();
+            } else if (githubLinkInput.value.startsWith("https://gist.githubusercontent.com/") || githubLinkInput.value.startsWith("http://gist.githubusercontent.com/")) {
+                formattedLink = "https://" + currentHost + "/gist.github.com" + githubLinkInput.value.substring(githubLinkInput.value.indexOf("/", 18));
+                displayButton();
+            } else if (githubLinkInput.value.startsWith("gist.githubusercontent.com/")) {
+                formattedLink = "https://" + currentHost + "/" + githubLinkInput.value;
+                displayButton();
+            } else {
+                showToast('请输入有效的GitHub链接');
             }
             var formattedLinkOutput = document.getElementById('formattedLinkOutput');
             formattedLinkOutput.textContent = formattedLink;
+        }
+
+        function displayButton() {
+            var copyButton = document.getElementById('copyButton');
+            var redirButton = document.getElementById('redirButton');
+            copyButton.style.display = 'block';
+            redirButton.style.display = 'block';
+        }
+
+        function redirToFormattedLink() {
+            var formattedLinkOutput = document.getElementById('formattedLinkOutput');
+            console.log(formattedLinkOutput.textContent);
+            window.open(formattedLinkOutput.textContent);
         }
 
         document.getElementById('formatButton').addEventListener('click', formatGithubLink);
@@ -170,21 +380,82 @@
             window.getSelection().addRange(range);
             document.execCommand('copy');
             window.getSelection().removeAllRanges();
-            alert('链接已复制到剪贴板');
+            showToast('链接已复制到剪贴板');
         });
+        document.getElementById('redirButton').addEventListener('click', redirToFormattedLink);
 
-        function fetchAPI() {
-            fetch(window.location.origin + '/api')
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000); // 3秒后隐藏
+        }
+
+        function fetchSizeLimit() {
+            fetch(window.location.origin + '/api/size_limit')
                 .then(response => response.json())
                 .then(data => {
                     const sizeLimitDisplay = document.getElementById('sizeLimitDisplay');
-                    const sizeInMB = (data.MaxResponseBodySize / (1024 * 1024)).toFixed(0);
-                    sizeLimitDisplay.textContent = `文件大小限制: ${sizeInMB} MB`;
+                    sizeLimitDisplay.textContent = `文件大小限制: ${data.MaxResponseBodySize} MB`;
                 })
                 .catch(error => {
                     console.error('Error fetching API:', error);
 
                 });
+        }
+        function fetchWhiteList() {
+            fetch(window.location.origin + '/api/whitelist/status')
+                .then(response => response.json())
+                .then(data => {
+                    const whiteListStatus = document.getElementById('whiteListStatus');
+                    if (data.Whitelist) {
+                        whiteListStatus.textContent = `白名单状态: 已开启`;
+                    } else if (!data.Whitelist) {
+                        whiteListStatus.textContent = `白名单状态: 已关闭`;
+                    } else {
+                        whiteListStatus.textContent = `白名单状态: 未知`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching API:', error);
+                });
+        }
+        function fetchBlackList() {
+            fetch(window.location.origin + '/api/blacklist/status')
+                .then(response => response.json())
+                .then(data => {
+                    const blackListStatus = document.getElementById('blackListStatus');
+                    if (data.Blacklist) {
+                        blackListStatus.textContent = `黑名单状态: 已开启`;
+                    } else if (!data.Blacklist) {
+                        blackListStatus.textContent = `黑名单状态: 已关闭`;
+                    } else {
+                        blackListStatus.textContent = `黑名单状态: 未知`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching API:', error);
+                });
+        }
+        function fetchVersion() {
+            fetch(window.location.origin + '/api/version')
+                .then(response => response.json())
+                .then(data => {
+                    const version = document.getElementById('version');
+                    version.textContent = `${data.Version}`;
+                })
+                .catch(error => {
+                    console.error('Error fetching API:', error);
+                });
+        }
+        function fetchAPI() {
+            fetchSizeLimit();
+            fetchWhiteList();
+            fetchBlackList();
+            fetchVersion();
         }
         document.addEventListener('DOMContentLoaded', fetchAPI);
     </script>
@@ -192,11 +463,9 @@
 
 <footer>
     <p>
-        Copyright &copy; 2024 WJQSERVER-STUDIO
-    </p>
-    <p>
-        GitHub仓库地址：<a
-            href="https://github.com/WJQSERVER-STUDIO/ghproxy">https://github.com/WJQSERVER-STUDIO/ghproxy</a>
+        Copyright &copy; 2024 WJQSERVER-STUDIO<br>
+        GitHub仓库地址：<a href="https://github.com/WJQSERVER-STUDIO/ghproxy">WJQSERVER-STUDIO/ghproxy</a>
+        <br><a href="https://t.me/ghproxy_go">Telegram交流群</a>
     </p>
     <div id="visitor-info" style="text-align: center; margin-top: 15px;">
         <p>您的IP地址: <span id="visitor-ip"></span></p>

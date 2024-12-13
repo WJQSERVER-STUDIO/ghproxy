@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/satomitoka/ghproxy/config"
 	"os"
+	"strings"
 )
 
 type WhitelistConfig struct {
@@ -21,23 +22,37 @@ func LoadWhitelist(cfg *config.Config) {
 
 	data, err := os.ReadFile(whitelistfile)
 	if err != nil {
-		logw("Failed to read whitelist file: %v", err)
+		logError("Failed to read whitelist file: %v", err)
 	}
 
 	err = json.Unmarshal(data, whitelist)
 	if err != nil {
-		logw("Failed to unmarshal whitelist JSON: %v", err)
+		logError("Failed to unmarshal whitelist JSON: %v", err)
 	}
 }
 
-func CheckWhitelist(fullrepo string) bool {
-	return forRangeCheckWhitelist(whitelist.Whitelist, fullrepo)
+func CheckWhitelist(fullrepo string, user string, repo string) bool {
+	return forRangeCheckWhitelist(whitelist.Whitelist, fullrepo, user)
 }
 
-func forRangeCheckWhitelist(blist []string, fullrepo string) bool {
-	for _, blocked := range blist {
-		if blocked == fullrepo {
-			return true
+func sliceRepoName_Whitelist(fullrepo string) (string, string) {
+	s := strings.Split(fullrepo, "/")
+	if len(s) != 2 {
+		return "", ""
+	}
+	return s[0], s[1]
+}
+
+func forRangeCheckWhitelist(wlist []string, fullrepo string, user string) bool {
+	for _, passd := range wlist {
+		users, _ := sliceRepoName_Whitelist(passd)
+		if users == user {
+			if strings.HasSuffix(passd, "/*") {
+				return true
+			}
+			if fullrepo == passd {
+				return true
+			}
 		}
 	}
 	return false

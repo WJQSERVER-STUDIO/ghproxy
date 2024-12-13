@@ -4,7 +4,7 @@
     https_port 443
     order cache before rewrite
     cache {
-        cache_name GhProxyCache
+        cache_name GHProxyCache
     }
     log {
         level INFO
@@ -12,7 +12,10 @@
             roll_size 5MB
             roll_keep 10
         }            
-    }        
+    }
+    servers :80 {
+        protocols h1 h2c
+    }
 }
 
 (log) {
@@ -70,14 +73,15 @@
     reverse_proxy {
         to 127.0.0.1:8080
         import header_realip
+        transport http {
+            versions 1.1 h2c
+        }
     }
     import log ghproxy
     import cache 0s 300s
     import error_page  
     import encode
     import rate_limit 60 
-    header Age 10
-    header Cache-Control "max-age=300"
     route / {
         root /data/www
         file_server
@@ -88,22 +92,11 @@
         file_server
         import cache 0s 24h
     }
-    handle_errors {
-        @redirects `{err.status_code} in [301, 302, 307]`
-        reverse_proxy @redirects {
-            header_up Location {http.response.header.Location}
-        }
-    }
 
-    route /v2* {
-        reverse_proxy https://registry-1.docker.io {
-            header_up Host registry-1.docker.io
-            header_up X-Real-IP {remote}
-            header_up X-Forwarded-For {http.request.header.X-Forwarded-For}
-            header_up X-Forwarded-Proto {scheme}
-            header_up Authorization {http.request.header.Authorization}
-        }
-    }    
+    route /api* {
+        rate_limit {remote.ip} 15r/m 10000 429
+        import cache 0s 6h
+    }   
 }
 
 import /data/caddy/config.d/*

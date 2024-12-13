@@ -11,12 +11,13 @@
         output file /data/caddy/log/caddy.log {
             roll_size 5MB
             roll_keep 10
-        }
+        }            
     }
     servers :80 {
         protocols h1 h2c
-    }    
+    }
 }
+
 
 (log) {
     log {
@@ -44,7 +45,7 @@
         zstd best
         br 5 v2
         gzip 5
-        minimum_length 512
+        minimum_length 256
     }
 }
 
@@ -71,32 +72,27 @@
 
 :80 {
     reverse_proxy {
-        to 127.0.0.1:8080
+        to h2c://127.0.0.1:8080
         import header_realip
-        transport http {
-            versions 1.1 h2c
-        }
     }
     import log ghproxy
-    import cache 0s 300s
     import error_page  
     import encode
     import rate_limit 60  
     route / {
         root /data/www
         file_server
-        import cache 0s 24h
+		import cache 300s
     }
     route /favicon.ico {
         root /data/www
         file_server
-        import cache 0s 24h
-    
+		import cache 300s
     }
     
     route /api* {
         rate_limit {remote.ip} 15r/m 10000 429
-        import cache 0s 6h
+		import cache 300s
     }
 }
 

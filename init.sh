@@ -20,9 +20,12 @@ fi
 
 /data/caddy/caddy run --config /data/caddy/config/Caddyfile > /data/${APPLICATON}/log/caddy.log 2>&1 &
 
-/data/${APPLICATON}/${APPLICATON} > /data/ghproxy/log/run.log 2>&1 &
+/data/${APPLICATON}/${APPLICATON} > /data/${APPLICATON}/log/run.log 2>&1 &
+
+sleep 30
 
 while [[ true ]]; do
-    sleep 1
+    curl -f http://localhost:8080/api/healthcheck || exit 1
+    sleep 120
 done    
 

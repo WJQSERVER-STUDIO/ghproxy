@@ -3,6 +3,12 @@ services:
     ghproxy:
         image: 'wjqserver/ghproxy:latest'
         restart: always
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://127.0.0.1:80/api/healthcheck"]
+          interval: 60s  
+          timeout: 10s  
+          retries: 3  
+          start_period: 30s  
         volumes:
             - './ghproxy/log/run:/data/ghproxy/log'
             - './ghproxy/log/caddy:/data/caddy/log'

@@ -1,4 +1,3 @@
-// proxy/proxy.go 实验性
 package proxy
 
 import (
@@ -9,137 +8,197 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/satomitoka/ghproxy/auth"
-	"github.com/satomitoka/ghproxy/config"
-	"github.com/satomitoka/ghproxy/logger"
+	"ghproxy/auth"
+	"ghproxy/config"
+	"ghproxy/logger"
+	"ghproxy/rate"
 
 	"github.com/gin-gonic/gin"
 	"github.com/imroc/req/v3"
 )
 
-var logw = logger.Logw
+// 日志模块
+var (
+	logw       = logger.Logw
+	logInfo    = logger.LogInfo
+	logWarning = logger.LogWarning
+	logError   = logger.LogError
+)
 
 var exps = []*regexp.Regexp{
 	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:releases|archive)/.*`),
 	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:blob|raw)/.*`),
 	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:info|git-).*`),
 	regexp.MustCompile(`^(?:https?://)?raw\.github(?:usercontent|)\.com/([^/]+)/([^/]+)/.+?/.+`),
-	regexp.MustCompile(`^(?:https?://)?gist\.github\.com/([^/]+)/.+?/.+`),
+	regexp.MustCompile(`^(?:https?://)?gist\.github(?:usercontent|)\.com/([^/]+)/.+?/.+`),
+	regexp.MustCompile(`^(?:https?://)?api\.github\.com/repos/([^/]+)/([^/]+)/.*`),
 }
 
-func NoRouteHandler(cfg *config.Config) gin.HandlerFunc {
+func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// 限制访问频率
+		if cfg.RateLimit.Enabled {
+
+			var allowed bool
+
+			switch cfg.RateLimit.RateMethod {
+			case "ip":
+				allowed = iplimiter.Allow(c.ClientIP())
+			case "total":
+				allowed = limiter.Allow()
+			default:
+				logWarning("Invalid RateLimit Method")
+				return
+			}
+
+			if !allowed {
+				c.JSON(http.StatusTooManyRequests, gin.H{"error": "Too Many Requests"})
+				logWarning("%s %s %s %s %s 429-TooManyRequests", c.ClientIP(), c.Request.Method, c.Request.URL.RequestURI(), c.Request.Header.Get("User-Agent"), c.Request.Proto)
+				return
+			}
+		}
+
 		rawPath := strings.TrimPrefix(c.Request.URL.RequestURI(), "/")
 		re := regexp.MustCompile(`^(http:|https:)?/?/?(.*)`)
 		matches := re.FindStringSubmatch(rawPath)
 
 		if len(matches) < 3 {
-			logw("Invalid URL: %s", rawPath)
-			c.String(http.StatusForbidden, "Invalid URL.")
+			errMsg := fmt.Sprintf("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+			logWarning(errMsg)
+			c.String(http.StatusForbidden, "Invalid URL Format. Path: %s", rawPath)
 			return
 		}
 
 		rawPath = "https://" + matches[2]
 
-		// 提取用户名和仓库名，格式为 handle/<username>/<repo>/*
-		pathmatches := regexp.MustCompile(`^([^/]+)/([^/]+)/([^/]+)/.*`)
-		pathParts := pathmatches.FindStringSubmatch(matches[2])
-		if len(pathParts) < 4 {
-			logw("Invalid path: %s", rawPath)
-			c.String(http.StatusForbidden, "Invalid path; expected username/repo.")
-			return
-		}
+		username, repo := MatchUserRepo(rawPath, cfg, c, matches)
 
-		username := pathParts[2]
-		repo := pathParts[3]
-		logw("Blacklist Check > Username: %s, Repo: %s", username, repo)
-		fullrepo := fmt.Sprintf("%s/%s", username, repo)
+		logInfo("%s %s %s %s %s Matched-Username: %s, Matched-Repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, username, repo)
+		repouser := fmt.Sprintf("%s/%s", username, repo)
 
 		// 白名单检查
 		if cfg.Whitelist.Enabled {
-			whitelistpass := auth.CheckWhitelist(fullrepo)
-			if !whitelistpass {
-				errMsg := fmt.Sprintf("Whitelist Blocked repo: %s", fullrepo)
+			whitelist := auth.CheckWhitelist(repouser, username, repo)
+			if !whitelist {
+				logErrMsg := fmt.Sprintf("%s %s %s %s %s Whitelist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, repouser)
+				errMsg := fmt.Sprintf("Whitelist Blocked repo: %s", repouser)
 				c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
-				logw(errMsg)
+				logWarning(logErrMsg)
 				return
 			}
 		}
 
 		// 黑名单检查
 		if cfg.Blacklist.Enabled {
-			blacklistpass := auth.CheckBlacklist(fullrepo)
-			if blacklistpass {
-				errMsg := fmt.Sprintf("Blacklist Blocked repo: %s", fullrepo)
+			blacklist := auth.CheckBlacklist(repouser, username, repo)
+			if blacklist {
+				logErrMsg := fmt.Sprintf("%s %s %s %s %s Whitelist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, repouser)
+				errMsg := fmt.Sprintf("Blacklist Blocked repo: %s", repouser)
 				c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
-				logw(errMsg)
+				logWarning(logErrMsg)
 				return
 			}
 		}
 
-		matches = CheckURL(rawPath)
+		matches = CheckURL(rawPath, c)
 		if matches == nil {
 			c.AbortWithStatus(http.StatusNotFound)
+			logError("%s %s %s %s %s 404-NOMATCH", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 			return
 		}
 
+		// 若匹配api.github.com/repos/用户名/仓库名/路径, 则检查是否开启HeaderAuth
+		if exps[5].MatchString(rawPath) {
+			if cfg.Auth.AuthMethod != "header" || !cfg.Auth.Enabled {
+				c.JSON(http.StatusForbidden, gin.H{"error": "HeaderAuth is not enabled."})
+				logWarning("%s %s %s %s %s HeaderAuth-Error: HeaderAuth is not enabled.", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+				return
+			}
+		}
+
+		// 处理blob/raw路径
 		if exps[1].MatchString(rawPath) {
 			rawPath = strings.Replace(rawPath, "/blob/", "/raw/", 1)
 		}
 
-		if !auth.AuthHandler(c, cfg) {
+		// 鉴权
+		authcheck, err := auth.AuthHandler(c, cfg)
+		if !authcheck {
 			c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
-			logw("Unauthorized request: %s", rawPath)
+			logWarning("%s %s %s %s %s Auth-Error: %v", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 			return
 		}
 
-		logw("Matches: %v", matches)
+		// IP METHOD URL USERAGENT PROTO MATCHES
+		logInfo("%s %s %s %s %s Matches: %v", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, matches)
 
 		switch {
 		case exps[0].MatchString(rawPath), exps[1].MatchString(rawPath), exps[3].MatchString(rawPath), exps[4].MatchString(rawPath):
-			logw("%s Matched - USE proxy-chrome", rawPath)
 			ProxyRequest(c, rawPath, cfg, "chrome")
 		case exps[2].MatchString(rawPath):
-			logw("%s Matched - USE proxy-git", rawPath)
 			ProxyRequest(c, rawPath, cfg, "git")
 		default:
 			c.String(http.StatusForbidden, "Invalid input.")
+			fmt.Println("Invalid input.")
 			return
 		}
 	}
 }
 
+// 提取用户名和仓库名
+func MatchUserRepo(rawPath string, cfg *config.Config, c *gin.Context, matches []string) (string, string) {
+	var gistregex = regexp.MustCompile(`^(?:https?://)?gist\.github(?:usercontent|)\.com/([^/]+)/([^/]+)/.*`)
+	var gistmatches []string
+	if gistregex.MatchString(rawPath) {
+		gistmatches = gistregex.FindStringSubmatch(rawPath)
+		logInfo("%s %s %s %s %s Matched-Username: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, gistmatches[1])
+		return gistmatches[1], ""
+	}
+	// 定义路径
+	pathRegex := regexp.MustCompile(`^([^/]+)/([^/]+)/([^/]+)/.*`)
+	if pathMatches := pathRegex.FindStringSubmatch(matches[2]); len(pathMatches) >= 4 {
+		return pathMatches[2], pathMatches[3]
+	}
+
+	// 返回错误信息
+	errMsg := fmt.Sprintf("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+	logWarning(errMsg)
+	c.String(http.StatusForbidden, "Invalid path; expected username/repo, Path: %s", rawPath)
+	return "", ""
+}
+
 func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 	method := c.Request.Method
-	logw("%s %s", method, u)
+	logInfo("%s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 
-	client := req.C()
+	client := createHTTPClient(mode)
 
-	switch mode {
-	case "chrome":
-		client.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36").
-			SetTLSFingerprintChrome().
-			ImpersonateChrome()
-	case "git":
-		client.SetUserAgent("git/2.33.1")
-	}
+	// 发送HEAD请求, 预获取Content-Length
+	headReq := client.R()
+	setRequestHeaders(c, headReq)
 
-	body, err := io.ReadAll(c.Request.Body)
+	headResp, err := headReq.Head(u)
 	if err != nil {
-		HandleError(c, fmt.Sprintf("Failed to read request body: %v", err))
+		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
 	}
-	defer c.Request.Body.Close()
+	defer headResp.Body.Close()
 
-	req := client.R().SetBody(body)
-
-	for key, values := range c.Request.Header {
-		for _, value := range values {
-			req.SetHeader(key, value)
-		}
+	if err := HandleResponseSize(headResp, cfg, c); err != nil {
+		logWarning("%s %s %s %s %s Response-Size-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+		return
 	}
 
-	resp, err := SendRequest(req, method, u)
+	body, err := readRequestBody(c)
+	if err != nil {
+		HandleError(c, err.Error())
+		return
+	}
+
+	req := client.R().SetBody(body)
+	setRequestHeaders(c, req)
+
+	resp, err := SendRequest(c, req, method, u)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
@@ -147,18 +206,57 @@ func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 	defer resp.Body.Close()
 
 	if err := HandleResponseSize(resp, cfg, c); err != nil {
-		logw("Error handling response size: %v", err)
+		logWarning("%s %s %s %s %s Response-Size-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 		return
 	}
 
 	CopyResponseHeaders(resp, c, cfg)
 	c.Status(resp.StatusCode)
-	if _, err := io.Copy(c.Writer, resp.Body); err != nil {
-		logw("Failed to copy response body: %v", err)
+	if err := copyResponseBody(c, resp.Body); err != nil {
+		logError("%s %s %s %s %s Response-Copy-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 	}
 }
 
-func SendRequest(req *req.Request, method, url string) (*req.Response, error) {
+// 判断并选择TLS指纹
+func createHTTPClient(mode string) *req.Client {
+	client := req.C()
+	switch mode {
+	case "chrome":
+		client.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36").
+			SetTLSFingerprintChrome().
+			ImpersonateChrome()
+	case "git":
+		client.SetUserAgent("git/2.33.1")
+	}
+	return client
+}
+
+// 读取请求体
+func readRequestBody(c *gin.Context) ([]byte, error) {
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read request body: %v", err)
+	}
+	defer c.Request.Body.Close()
+	return body, nil
+}
+
+// 设置请求头
+func setRequestHeaders(c *gin.Context, req *req.Request) {
+	for key, values := range c.Request.Header {
+		for _, value := range values {
+			req.SetHeader(key, value)
+		}
+	}
+}
+
+// 复制响应体
+func copyResponseBody(c *gin.Context, respBody io.Reader) error {
+	_, err := io.Copy(c.Writer, respBody)
+	return err
+}
+
+func SendRequest(c *gin.Context, req *req.Request, method, url string) (*req.Response, error) {
 	switch method {
 	case "GET":
 		return req.Get(url)
@@ -169,26 +267,41 @@ func SendRequest(req *req.Request, method, url string) (*req.Response, error) {
 	case "DELETE":
 		return req.Delete(url)
 	default:
-		logw("Unsupported method: %s", method)
-		return nil, fmt.Errorf("unsupported method: %s", method)
+		// IP METHOD URL USERAGENT PROTO UNSUPPORTED-METHOD
+		errmsg := fmt.Sprintf("%s %s %s %s %s Unsupported method", c.ClientIP(), method, url, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+		logWarning(errmsg)
+		return nil, fmt.Errorf(errmsg)
 	}
 }
 
 func HandleResponseSize(resp *req.Response, cfg *config.Config, c *gin.Context) error {
 	contentLength := resp.Header.Get("Content-Length")
+	sizelimit := cfg.Server.SizeLimit * 1024 * 1024
 	if contentLength != "" {
 		size, err := strconv.Atoi(contentLength)
-		if err == nil && size > cfg.Server.SizeLimit {
+		if err == nil && size > sizelimit {
 			finalURL := resp.Request.URL.String()
 			c.Redirect(http.StatusMovedPermanently, finalURL)
-			logw("Redirecting to %s due to size limit (%d bytes)", finalURL, size)
-			return fmt.Errorf("response size exceeds limit")
+			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto, finalURL, size)
+			return fmt.Errorf("Path: %s size limit exceeded: %d", finalURL, size)
 		}
 	}
 	return nil
 }
 
 func CopyResponseHeaders(resp *req.Response, c *gin.Context, cfg *config.Config) {
+
+	copyHeaders(resp, c)
+
+	removeHeaders(resp)
+
+	setCORSHeaders(c, cfg)
+
+	setDefaultHeaders(c)
+}
+
+// 移除指定响应头
+func removeHeaders(resp *req.Response) {
 	headersToRemove := map[string]struct{}{
 		"Content-Security-Policy":   {},
 		"Referrer-Policy":           {},
@@ -198,35 +311,44 @@ func CopyResponseHeaders(resp *req.Response, c *gin.Context, cfg *config.Config)
 	for header := range headersToRemove {
 		resp.Header.Del(header)
 	}
+}
 
+// 复制响应头
+func copyHeaders(resp *req.Response, c *gin.Context) {
 	for key, values := range resp.Header {
 		for _, value := range values {
 			c.Header(key, value)
 		}
 	}
+}
 
-	c.Header("Access-Control-Allow-Origin", "")
+// CORS配置
+func setCORSHeaders(c *gin.Context, cfg *config.Config) {
 	if cfg.CORS.Enabled {
 		c.Header("Access-Control-Allow-Origin", "*")
+	} else {
+		c.Header("Access-Control-Allow-Origin", "")
 	}
+}
 
+// 默认响应
+func setDefaultHeaders(c *gin.Context) {
 	c.Header("Age", "10")
 	c.Header("Cache-Control", "max-age=300")
 }
 
 func HandleError(c *gin.Context, message string) {
 	c.String(http.StatusInternalServerError, fmt.Sprintf("server error %v", message))
-	logw(message)
+	logWarning(message)
 }
 
-func CheckURL(u string) []string {
+func CheckURL(u string, c *gin.Context) []string {
 	for _, exp := range exps {
 		if matches := exp.FindStringSubmatch(u); matches != nil {
-			logw("URL matched: %s, Matches: %v", u, matches[1:])
 			return matches[1:]
 		}
 	}
-	errMsg := fmt.Sprintf("Invalid URL: %s", u)
-	logw(errMsg)
+	errMsg := fmt.Sprintf("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Request.Method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+	logWarning(errMsg)
 	return nil
 }
