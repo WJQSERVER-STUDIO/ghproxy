@@ -1,4 +1,4 @@
-module ghproxy
+module github.com/satomitoka/ghproxy
 
 go 1.23.4
 

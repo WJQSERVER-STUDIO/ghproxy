@@ -2,7 +2,7 @@ package auth
 
 import (
 	"encoding/json"
-	"ghproxy/config"
+	"github.com/satomitoka/ghproxy/config"
 	"os"
 	"strings"
 )
