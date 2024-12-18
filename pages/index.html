@@ -472,7 +472,7 @@
         <p>当前位置: <span id="visitor-country"></span> <img id="visitor-flag" src="" alt="" width="24" height="16"></p>
     </div>
     <script>
-        fetch('https://ip.1888866.xyz/ip-lookup')
+        fetch('https://ip.1888866.xyz/api/ip-lookup')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('网络响应失败');
