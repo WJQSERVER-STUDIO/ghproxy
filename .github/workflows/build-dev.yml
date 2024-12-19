@@ -42,7 +42,6 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
         run: |
           CGO_ENABLED=0 go build -ldflags "-X main.version=${{ env.VERSION }}" -o ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}} ./main.go
-          upx -9 ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}}
       - name: 打包
         run: |
           mkdir ghproxyd
