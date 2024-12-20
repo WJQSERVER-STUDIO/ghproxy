@@ -32,10 +32,6 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ${{ env.GO_VERSION }}
-      - name: 安装UPX   
-        run: |
-          sudo apt update
-          sudo apt install upx -y
       - name: 编译
         env:
           GOOS: ${{ matrix.goos }}
