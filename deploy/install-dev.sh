@@ -30,25 +30,7 @@ install() {
     return 0
 }
 
-make_systemd_service() {
-    cat <<EOF > /etc/systemd/system/ghproxy.service
-[Unit]
-Description=Github Proxy Service
-After=network.target
 
-[Service]
-ExecStart=/bin/bash -c '$ghproxy_dir/ghproxy -cfg $ghproxy_dir/config/config.toml > $ghproxy_dir/log/run.log 2>&1'
-WorkingDirectory=$ghproxy_dir
-Restart=always
-User=root
-Group=root
-
-[Install]
-WantedBy=multi-user.target
-
-EOF
-
-}
 
 # 检查是否为root用户
 if [ "$EUID" -ne 0 ]; then
@@ -90,6 +72,26 @@ read -p "请输入安装目录(默认/usr/local/ghproxy): " ghproxy_dir
 if [ -z "$ghproxy_dir" ]; then
     ghproxy_dir="/usr/local/ghproxy"
 fi
+
+make_systemd_service() {
+    cat <<EOF > /etc/systemd/system/ghproxy.service
+[Unit]
+Description=Github Proxy Service
+After=network.target
+
+[Service]
+ExecStart=/bin/bash -c '$ghproxy_dir/ghproxy -cfg $ghproxy_dir/config/config.toml > $ghproxy_dir/log/run.log 2>&1'
+WorkingDirectory=$ghproxy_dir
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+
+EOF
+
+}
 
 # 创建目录
 mkdir -p ${ghproxy_dir}
@@ -133,7 +135,7 @@ sed -i "s|whitelistFile = \"/usr/local/ghproxy/config/whitelist.json\"|whitelist
 if [ "$ghproxy_dir" = "/usr/local/ghproxy" ]; then
     wget -q -O /etc/systemd/system/ghproxy.service https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/ghproxy.service
 else
-    make_systemd_service
+    make_systemd_service()
 fi
 
 # 启动ghproxy
