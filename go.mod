@@ -4,13 +4,13 @@ go 1.23.4
 
 require (
 	github.com/BurntSushi/toml v1.4.0
+	github.com/WJQSERVER-STUDIO/go-utils/logger v1.1.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/imroc/req/v3 v3.49.1
 	golang.org/x/time v0.8.0
 )
 
 require (
-	github.com/WJQSERVER-STUDIO/go-utils/logger v1.1.0 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/bytedance/sonic v1.12.6 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
