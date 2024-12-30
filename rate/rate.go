@@ -1,9 +1,9 @@
 package rate
 
 import (
-	"ghproxy/logger"
 	"time"
 
+	"github.com/WJQSERVER-STUDIO/go-utils/logger"
 	"golang.org/x/time/rate"
 )
 

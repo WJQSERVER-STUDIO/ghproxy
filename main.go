@@ -10,9 +10,10 @@ import (
 	"ghproxy/api"
 	"ghproxy/auth"
 	"ghproxy/config"
-	"ghproxy/logger"
 	"ghproxy/proxy"
 	"ghproxy/rate"
+
+	"github.com/WJQSERVER-STUDIO/go-utils/logger"
 
 	"github.com/gin-gonic/gin"
 )

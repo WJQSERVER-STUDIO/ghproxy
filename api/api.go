@@ -3,8 +3,8 @@ package api
 import (
 	"encoding/json"
 	"ghproxy/config"
-	"ghproxy/logger"
 
+	"github.com/WJQSERVER-STUDIO/go-utils/logger"
 	"github.com/gin-gonic/gin"
 )
 

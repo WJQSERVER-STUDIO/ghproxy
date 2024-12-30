@@ -2,8 +2,8 @@ package auth
 
 import (
 	"ghproxy/config"
-	"ghproxy/logger"
 
+	"github.com/WJQSERVER-STUDIO/go-utils/logger"
 	"github.com/gin-gonic/gin"
 )
 
