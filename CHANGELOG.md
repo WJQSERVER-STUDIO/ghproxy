@@ -1,5 +1,11 @@
 # 更新日志
 
+24w29a
+---
+- PRE-RELEASE: 此版本是一个实验性功能测试版本,请勿在生产环境中使用; 同时,这也是2024年的最后一个pre-release版本
+- ADD: `Auth` token参数透传至`"Authorization: token {token}"`, 为私有仓库拉取提供一定便利性(需要更多测试)
+- CHANGE: 更新相关依赖库
+
 v1.7.9
 ---
 - RELEASE: 安全性及小型修复, 建议用户自行选择是否升级

@@ -197,6 +197,7 @@ func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 
 	req := client.R().SetBody(body)
 	setRequestHeaders(c, req)
+	authPassThrough(c, cfg)
 
 	resp, err := SendRequest(c, req, method, u)
 	if err != nil {
@@ -247,6 +248,16 @@ func setRequestHeaders(c *gin.Context, req *req.Request) {
 		for _, value := range values {
 			req.SetHeader(key, value)
 		}
+	}
+}
+
+func authPassThrough(c *gin.Context, cfg *config.Config) {
+	// 判断
+	if cfg.Auth.AuthMethod == "parameters" && !cfg.Auth.Enabled {
+		// 获取参数(token)
+		token := c.Query("token")
+		// 写入Header
+		c.Header("Authorization", "token "+token)
 	}
 }
 

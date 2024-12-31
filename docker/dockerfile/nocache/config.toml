@@ -19,6 +19,7 @@ enabled = true
 authMethod = "parameters" # "header" or "parameters"
 authToken = "token"
 enabled = false
+passThrough = false
 
 [blacklist]
 blacklistFile = "/data/ghproxy/config/blacklist.json"

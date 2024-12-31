@@ -37,9 +37,10 @@ type CORSConfig struct {
 }
 
 type AuthConfig struct {
-	Enabled    bool   `toml:"enabled"`
-	AuthMethod string `toml:"authMethod"`
-	AuthToken  string `toml:"authToken"`
+	Enabled     bool   `toml:"enabled"`
+	AuthMethod  string `toml:"authMethod"`
+	AuthToken   string `toml:"authToken"`
+	PassThrough bool   `toml:"passThrough"`
 }
 
 type BlacklistConfig struct {

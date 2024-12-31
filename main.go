@@ -100,11 +100,6 @@ func init() {
 	} else {
 		router.UseH2C = false
 	}
-	/*if !cfg.Server.EnableH2C {
-		router.UseH2C = false
-	} else {
-		router.UseH2C = true
-	}*/
 
 	setupApi(cfg, router, version)
 
