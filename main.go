@@ -26,7 +26,7 @@ var (
 	configfile = "/data/ghproxy/config/config.toml"
 	cfgfile    string
 	version    string
-	dev        bool
+	dev        string
 	runMode    string
 	limiter    *rate.RateLimiter
 	iplimiter  *rate.IPRateLimiter
@@ -99,9 +99,9 @@ func init() {
 	setupRateLimit(cfg)
 
 	if cfg.Server.Debug {
-		dev = true
+		dev = "true"
 	}
-	if dev {
+	if dev == "true" {
 		gin.SetMode(gin.DebugMode)
 		runMode = "dev"
 	} else {
