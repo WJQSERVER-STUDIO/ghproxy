@@ -34,7 +34,7 @@ var exps = []*regexp.Regexp{
 	regexp.MustCompile(`^(?:https?://)?api\.github\.com/repos/([^/]+)/([^/]+)/.*`),
 }
 
-func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter) gin.HandlerFunc {
+func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter, runMode string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 限制访问频率
 		if cfg.RateLimit.Enabled {
@@ -134,9 +134,9 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 
 		switch {
 		case exps[0].MatchString(rawPath), exps[1].MatchString(rawPath), exps[3].MatchString(rawPath), exps[4].MatchString(rawPath):
-			ProxyRequest(c, rawPath, cfg, "chrome")
+			ProxyRequest(c, rawPath, cfg, "chrome", runMode)
 		case exps[2].MatchString(rawPath):
-			ProxyRequest(c, rawPath, cfg, "git")
+			ProxyRequest(c, rawPath, cfg, "git", runMode)
 		default:
 			c.String(http.StatusForbidden, "Invalid input.")
 			fmt.Println("Invalid input.")
@@ -167,11 +167,14 @@ func MatchUserRepo(rawPath string, cfg *config.Config, c *gin.Context, matches [
 	return "", ""
 }
 
-func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
+func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string, runMode string) {
 	method := c.Request.Method
 	logInfo("%s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 
 	client := createHTTPClient(mode)
+	if runMode == "dev" {
+		client.DevMode()
+	}
 
 	// 发送HEAD请求, 预获取Content-Length
 	headReq := client.R()
@@ -197,7 +200,7 @@ func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string) {
 
 	req := client.R().SetBody(body)
 	setRequestHeaders(c, req)
-	authPassThrough(c, cfg)
+	authPassThrough(c, cfg, req)
 
 	resp, err := SendRequest(c, req, method, u)
 	if err != nil {
@@ -251,13 +254,46 @@ func setRequestHeaders(c *gin.Context, req *req.Request) {
 	}
 }
 
-func authPassThrough(c *gin.Context, cfg *config.Config) {
-	// 判断
-	if cfg.Auth.AuthMethod == "parameters" && !cfg.Auth.Enabled {
-		// 获取参数(token)
+/*
+	func authPassThrough(c *gin.Context, cfg *config.Config, req *req.Request) {
+		if cfg.Auth.PassThrough && cfg.Auth.AuthMethod == "parameters" && !cfg.Auth.Enabled {
+			// only mode
+			token := c.Query("token")
+			req.SetHeader("Authorization", "token "+token)
+		} else if cfg.Auth.PassThrough && cfg.Auth.AuthMethod == "header" && cfg.Auth.Enabled {
+			// mix mode
+			token := c.Query("token")
+			req.SetHeader("Authorization", "token "+token)
+		} else if cfg.Auth.PassThrough && cfg.Auth.AuthMethod == "parameters" && cfg.Auth.Enabled {
+			// conflict
+			logWarning("%s %s %s %s %s Auth-Error: Conflict Auth Method", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto)
+			c.JSON(http.StatusForbidden, gin.H{"error": "Conflict Auth Method"})
+			return
+		} else if cfg.Auth.PassThrough && cfg.Auth.AuthMethod == "header" && !cfg.Auth.Enabled {
+			// only mode
+			token := c.Query("token")
+			req.SetHeader("Authorization", "token "+token)
+		}
+	}
+*/
+
+func authPassThrough(c *gin.Context, cfg *config.Config, req *req.Request) {
+	if cfg.Auth.PassThrough {
 		token := c.Query("token")
-		// 写入Header
-		c.Header("Authorization", "token "+token)
+		switch cfg.Auth.AuthMethod {
+		case "parameters":
+			if !cfg.Auth.Enabled {
+				req.SetHeader("Authorization", "token "+token)
+			} else {
+				logWarning("%s %s %s %s %s Auth-Error: Conflict Auth Method", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto)
+			}
+		case "header":
+			if cfg.Auth.Enabled {
+				req.SetHeader("Authorization", "token "+token)
+			}
+		default:
+			logWarning("%s %s %s %s %s Invalid Auth Method / Auth Method is not be set", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto)
+		}
 	}
 }
 
