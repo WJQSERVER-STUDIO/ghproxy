@@ -20,6 +20,7 @@ type ServerConfig struct {
 	Host      string `toml:"host"`
 	SizeLimit int    `toml:"sizeLimit"`
 	EnableH2C string `toml:"enableH2C"`
+	Debug     bool   `toml:"debug"`
 }
 
 type PagesConfig struct {

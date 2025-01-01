@@ -1,8 +1,10 @@
 package main
 
 import (
+	"embed"
 	"flag"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 	"time"
@@ -24,8 +26,15 @@ var (
 	configfile = "/data/ghproxy/config/config.toml"
 	cfgfile    string
 	version    string
+	dev        bool
+	runMode    string
 	limiter    *rate.RateLimiter
 	iplimiter  *rate.IPRateLimiter
+)
+
+var (
+	//go:embed pages/*
+	pagesFS embed.FS
 )
 
 var (
@@ -89,7 +98,16 @@ func init() {
 	loadlist(cfg)
 	setupRateLimit(cfg)
 
-	gin.SetMode(gin.ReleaseMode)
+	if cfg.Server.Debug {
+		dev = true
+	}
+	if dev {
+		gin.SetMode(gin.DebugMode)
+		runMode = "dev"
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+		runMode = "release"
+	}
 
 	router = gin.Default()
 	//H2C默认值为true，而后遵循cfg.Server.EnableH2C的设置
@@ -112,14 +130,16 @@ func init() {
 		})
 		router.StaticFile("/favicon.ico", faviconPath)
 	} else if !cfg.Pages.Enabled {
-		router.GET("/", func(c *gin.Context) {
-			c.String(http.StatusForbidden, "403 Forbidden Access")
-			logWarning("403 > Path:/ IP:%s UA:%s METHOD:%s HTTPv:%s", c.ClientIP(), c.Request.UserAgent(), c.Request.Method, c.Request.Proto)
-		})
+		pages, err := fs.Sub(pagesFS, "pages")
+		if err != nil {
+			log.Fatalf("Failed when processing pages: %s", err)
+		}
+		router.GET("/", gin.WrapH(http.FileServer(http.FS(pages))))
+		router.GET("/favicon.ico", gin.WrapH(http.FileServer(http.FS(pages))))
 	}
 
 	router.NoRoute(func(c *gin.Context) {
-		proxy.NoRouteHandler(cfg, limiter, iplimiter)(c)
+		proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
 	})
 }
 

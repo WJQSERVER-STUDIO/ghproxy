@@ -3,6 +3,7 @@ host = "0.0.0.0"
 port = 80 #修改此配置会导致容器异常
 sizeLimit = 125 # MB
 enableH2C = "off" # on / off
+debug = false
 
 [pages]
 enabled = true
