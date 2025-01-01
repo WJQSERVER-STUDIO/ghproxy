@@ -1,5 +1,13 @@
 # 更新日志
 
+25w01a
+---
+- PRE-RELEASE: 此版本是v1.8.0的预发布版本,请勿在生产环境中使用; 同时,这也是2025年的第一个pre-release版本,祝各位新年快乐! (同时,请注意版本号的变化)
+- ADD: 加入`dev`参数, 以便pre-release版本调试(实验性)
+- ADD: 加入基于`embed.FS`的内嵌前端, config.toml中的`[pages]`配置为false时自动使用内嵌前端
+- CHANGE: 完善24w29a版本新加入的`Auth`参数透传至`"Authorization: token {token}"`功能，对相关逻辑进行完善
+- FIX: 修正24w29a版本新加入的`Auth`参数透传至`"Authorization: token {token}"`功能的一些问题
+
 24w29a
 ---
 - PRE-RELEASE: 此版本是一个实验性功能测试版本,请勿在生产环境中使用; 同时,这也是2024年的最后一个pre-release版本
