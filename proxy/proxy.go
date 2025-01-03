@@ -179,6 +179,7 @@ func ProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string, run
 	// 发送HEAD请求, 预获取Content-Length
 	headReq := client.R()
 	setRequestHeaders(c, headReq)
+	authPassThrough(c, cfg, headReq)
 
 	headResp, err := headReq.Head(u)
 	if err != nil {
