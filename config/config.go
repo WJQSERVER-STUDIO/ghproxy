@@ -12,7 +12,7 @@ type Config struct {
 	Auth      AuthConfig
 	Blacklist BlacklistConfig
 	Whitelist WhitelistConfig
-	RateLimit RateLimitConfig
+	//RateLimit RateLimitConfig
 }
 
 type ServerConfig struct {
