@@ -1,5 +1,13 @@
 # 更新日志
 
+v1.8.0
+---
+- RELEASE: v1.8.0正式版发布; 这是2025年的第一个正式版本发版,祝各位新年快乐!
+- CHANGE: 更新底包至`v2.9.0`
+- CHANGE: 优化`Auth`参数透传至`"Authorization: token {token}"`功能, 增加`dev`参数以便调试
+- CHANGE: 优化`config.toml`默认配置, 增加`embed.FS`内嵌前端支持, 并优化相关逻辑
+- CHANGE: 更新前端页面版权声明
+
 25w01e
 ---
 - PRE-RELEASE: 此版本是v1.8.0的预发布版本,请勿在生产环境中使用
