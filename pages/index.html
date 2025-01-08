@@ -4,492 +4,438 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Github文件加速">
-    <meta name="keywords" content="Github,文件加速,ghproxy">
-    <meta name="color-scheme" content="dark light">
     <title>Github文件加速</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://font.sec.miui.com/font/css?family=MiSans:400,700:MiSans">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100..900&display=swap" rel="stylesheet">
     <style>
+        /* 通用样式 */
         :root {
-            --color: #dadada;
-            --fontcolor: #333;
-            --inputcolor: #a19f9f;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --color: #53535338;
-                --fontcolor: #b8b8b8;
-                --inputcolor: #012333;
-                --inputcolor-font: #969696d8;
-            }
+            --primary-color: #007aff;
+            /* 主要按钮颜色 */
+            --secondary-color: #34c759;
+            /* 次要按钮颜色 */
+            --background-color: #f9f9f9;
+            /* 亮色模式背景 */
+            --card-background: #ffffff;
+            /* 卡片背景 */
+            --text-color: #333333;
+            /* 亮色模式文本颜色 */
+            --border-color: #e0e0e0;
+            /* 边框颜色 */
+            --input-background: #ffffff;
+            /* 输入框背景 */
+            --input-border: #d1d1d6;
+            /* 输入框边框 */
+            --pre-background: #f1f3f4;
+            /* 代码块背景 */
+            --pre-text-color: #333333;
+            /* 代码块文本颜色 */
+            --version-badge-hover: #39c5bb;
+            /* 说明文字颜色 */
+            --muted-text-color: #6c757d;
         }
 
         body {
-            background-color: var(--color);
-            color: var(--fontcolor);
-            font-family: 'Misans', Arial, sans-serif;
-            padding: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            min-height: 100vh;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: "Noto Sans SC", sans-serif;
+            line-height: 1.8;
+            font-size: 15px;
             margin: 0;
-            position: relative;
+            padding: 0;
         }
 
-        .version {
-            width: 12.5%;
-            height: 2%;
-            background-color: #39c5bb;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 0.8rem;
-            border-radius: 0.5rem;
-            position: fixed;
-            bottom: 0%;
-            right: 0%;
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-color);
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            margin: 1rem 0;
         }
 
-        .version p {
-            margin: 0px;
-            padding: 0px;
+        p, span, a, li {
+            color: var(--text-color);
+            margin-bottom: 1rem;
         }
 
-        *::-webkit-scrollbar {
-            height: 10px;
-            margin-top: 0px;
+        a {
+            text-decoration: none;
+            color: var(--primary-color);
         }
 
-        *::-webkit-scrollbar-track {
-            background-color: black;
+        a:hover {
+            color: #0056b3;
         }
 
-        *::-webkit-scrollbar-thumb {
-            background: #39c5bb;
-            border-radius: 10px;
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .container {
-            max-width: 80%;
-            text-align: center;
-            min-height: 65%;
-            line-height: 1.25;
+        .card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
         }
 
-        h1 {
-            color: var(--fontcolor);
-            font-weight: bold;
-            margin-bottom: 20%;
-        }
-
-        .rounded-button {
-            border-radius: 6px;
-            transition: background-color 0.3s, transform 0.2s;
-            padding: 10px 30px;
-            background-color: #555c5c;
-            color: rgb(255, 255, 255);
-            border: none;
-            margin-bottom: 3%;
-        }
-
-        .rounded-button:hover {
-            background-color: #39c5bcda;
-            transform: scale(1.05);
-        }
-
-        .tips>p:first-child::before {
-            position: sticky;
-            color: #7b7b7b;
-            margin-bottom: 1%;
-            font-size: 60%;
-        }
-
-        footer {
-            line-height: 1.25;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 1rem;
-        }
-
-        pre {
-            background: #012333;
-            color: #39c5bc;
-            padding: 15px 20px 15px 20px;
-            margin: 0px 0;
-            border-radius: 0.5rem;
-            overflow-x: auto;
-            position: relative;
-        }
-
-        pre::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 6px;
-            left: 6px;
-            width: 10px;
-            height: 10px;
-            background: #bd3c35;
+        .btn-outline-secondary {
             border-radius: 50%;
-            box-shadow: 20px 0 0 #d69f27, 40px 0 0 #39c5bb;
+            padding: 6px;
+            transition: #e9e9e9 0.3s ease-in-out, color 0.3s ease-in-out;
         }
 
-        code {
-            font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
-            font-size: 0.9em;
-            margin-bottom: 0px;
-        }
-
-        @media (max-width: 768px) {
-            footer {
-                font-size: 0.85rem;
-            }
-
-            .container {
-                max-width: 100%;
-                font-size: 0.8rem;
-            }
-
-            .tips {
-                font-size: 0.8rem;
-            }
-
-            .tips-content {
-                font-size: 0.8rem;
-            }
-
-            .status-container {
-                font-size: 0.8rem;
-            }
-        }
-
-        @media (min-width: 768px) {
-            footer {
-                font-size: 1rem;
-            }
-
-            .container {
-                max-width: 65%;
-                font-size: 1rem;
-            }
-
-            .tips {
-                font-size: 1.1rem;
-            }
-
-            .tips-content {
-                font-size: 1.1rem;
-            }
-
-            .status-container {
-                font-size: 1.05rem;
-            }
-
-            h1 {
-                margin-bottom: 10%;
-            }
-
-            .version {
-                width: 7.5%;
-            }
-        }
-
-        .form-group {
-            margin-bottom: 3%;
+        .btn-outline-secondary:hover {
+            background-color: var(--primary-color);
+            color: white;
         }
 
         .form-control {
-            background-color: var(--inputcolor);
-            color: var(--inputcolor-font);
+            background-color: var(--input-background);
+            border: 1px solid var(--input-border);
+            color: var(--text-color);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .form-control:focus {
-            background-color: var(--inputcolor);
-            color: var(--inputcolor-font);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.3);
         }
 
-        .tips-content {
-            margin-bottom: 0px;
+        .text-muted {
+            color: var(--muted-text-color) !important;
         }
 
-        .status-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 1px;
-            margin-top: -2%;
+        .bg-light {
+            background-color: var(--card-background) !important;
         }
 
-        .status-container p {
-            margin: 0px 1px;
+        pre {
+            background-color: var(--pre-background);
+            color: var(--pre-text-color);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.6;
         }
 
-
-        .code {
-            position: relative;
-            padding-right: 0px;
-        }
-
-        .copy-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 217, 224, 0.822);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: opacity 0.3s;
-            z-index: 1;
-            font-size: 0.85rem;
-            display: none;
-        }
-
-        .redir-button {
-            position: absolute;
-            top: 10px;
-            right: 65px;
-            background: rgba(0, 217, 224, 0.822);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: opacity 0.3s;
-            z-index: 1;
-            font-size: 0.85rem;
-            display: none;
-        }
-
-        pre:hover .copy-button {
-            opacity: 1;
-        }
-
-        #visitor-info {
-            margin-top: 10px;
-            text-align: center;
-            line-height: 0;
-        }
-
-        #toast {
+        .version-badge {
             position: fixed;
-            top: 10%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #39c5bcde;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--secondary-color);
             color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            font-size: 90%;
-            z-index: 1000;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .version-badge:hover {
+            background-color: var(--version-badge-hover);
+        }
+
+        footer {
+            padding: 16px;
+            text-align: center;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            background-color: var(--card-background);
+        }
+
+        footer a {
+            color: var(--primary-color);
+        }
+
+        footer a:hover {
+            color: #0056b3;
+        }
+
+        /* 暗色模式 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: #121212;
+                /* 深灰色背景 */
+                --card-background: #1e1e1e;
+                /* 卡片背景稍浅 */
+                --text-color: #ffffff;
+                /* 纯白文本 */
+                --primary-color: #0a84ff;
+                /* 按钮蓝色 */
+                --secondary-color: #30d158;
+                /* 次要按钮绿色 */
+                --border-color: #3a3a3a;
+                /* 边框颜色 */
+                --input-background: #2c2c2c;
+                /* 输入框背景 */
+                --input-border: #4a4a4a;
+                /* 输入框边框 */
+                --pre-background: #3b3636;
+                /* 代码块背景 */
+                --pre-text-color: #ffffff;
+                /* 代码块文本颜色 */
+                --version-badge-hover: #39c5bc9a;
+                /* 说明文字颜色 */
+                --muted-text-color: #a0a0a0;
+            }
+
+            body {
+                background-color: var(--background-color);
+                color: var(--text-color);
+            }
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6,
+            p,
+            span,
+            a,
+            li {
+                color: var(--text-color);
+            }
+
+            .card {
+                background-color: var(--card-background);
+                color: var(--text-color);
+                border: 1px solid var(--border-color);
+            }
+
+            .btn-outline-secondary {
+                border-radius: 50%;
+                padding: 6px;
+                transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+            }
+
+            .btn-outline-secondary:hover {
+                background-color: var(--primary-color);
+                color: white;
+            }
+
+            .toast {
+                background-color: var(--card-background);
+                color: var(--text-color);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .toast-body {
+                padding: 12px;
+            }
+
+
+            .form-control {
+                background-color: var(--input-background);
+                border: 1px solid var(--input-border);
+                color: var(--text-color);
+            }
+
+            .bg-light {
+                background-color: var(--card-background) !important;
+            }
+
+            pre {
+                background-color: var(--pre-background);
+                color: var(--pre-text-color);
+            }
+
+            footer {
+                background-color: var(--card-background);
+                color: var(--text-color);
+            }
+
+            footer a {
+                color: var(--primary-color);
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="version">
-        <p id="version"></p>
-    </div>
-    <div class="container">
-        <h1>Github文件加速</h1>
-        <div class="form-group">
-            <input type="text" class="form-control" id="githubLinkInput" placeholder="请键入需要代理Github链接">
-        </div>
-        <button class="btn rounded-button" id="formatButton">获取文件链接</button>
-
-        <div class="code" id="outputBlock">
-            <button class="copy-button" id="copyButton">复制</button>
-            <button class="redir-button" id="redirButton">打开</button>
-            <pre id="formattedLinkOutput"></pre>
-        </div>
-        <div class="tips">
-            <div class="tips-content">
-                <p>GitHub链接带不带协议头均可，支持release、archive以及文件，转换后链接均可使用</a>。</p><br>
+    <div class="container py-4 py-md-5">
+        <main>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h1 class="text-center mb-4">Github文件加速</h1>
+                    <p class="lead text-center mb-4">为访问Github文件进行加速</p>
+                    <form id="github-form">
+                        <div class="mb-3">
+                            <input type="text" class="form-control form-control-lg" id="githubLinkInput"
+                                placeholder="请键入需要代理的 Github 链接">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">获取文件链接</button>
+                    </form>
+                    <div id="output" class="mt-3 bg-light p-3 rounded position-relative" style="display: none;">
+                        <pre id="formattedLinkOutput" class="mb-0"></pre>
+                        <button id="copyButton"
+                            class="btn btn-outline-secondary btn-sm position-absolute top-0 end-0 m-2" title="复制链接">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-clipboard" viewBox="0 0 16 16">
+                                <path
+                                    d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z" />
+                                <path
+                                    d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z" />
+                            </svg>
+                        </button>
+                        <button id="openButton"
+                            class="btn btn-outline-secondary btn-sm position-absolute top-0 end-0 m-2 me-5"
+                            title="在新标签页中打开">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd"
+                                    d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z" />
+                                <path fill-rule="evenodd"
+                                    d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="text-muted small mt-3 mb-0">GitHub 链接带不带协议头均可，支持 release、archive 以及文件，转换后链接均可使用。</p>
+                </div>
             </div>
-            <div class="status-container">
-                <p id="sizeLimitDisplay">文件大小限制: ...</p>
-                <p id="whiteListStatus">白名单状态: ...</p>
-                <p id="blackListStatus">黑名单状态: ...</p>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">文件大小限制</h5>
+                            <p class="card-text" id="sizeLimitDisplay">...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">白名单状态</h5>
+                            <p class="card-text" id="whiteListStatus">...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">黑名单状态</h5>
+                            <p class="card-text" id="blackListStatus">...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </main>
+        <footer class="text-center mt-4">
+            <p class="text-muted">
+                Copyright &copy; 2024-2025 WJQSERVER-STUDIO<br>
+                <a href="https://github.com/WJQSERVER-STUDIO/ghproxy" class="text-decoration-none">GitHub 仓库</a> |
+                <a href="https://t.me/ghproxy_go" class="text-decoration-none">Telegram 交流群</a>
+            </p>
+        </footer>
+    </div>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-body"></div>
         </div>
     </div>
-    <div id="toast" style="display:none;">
-        链接已复制到剪贴板
-    </div>
 
+    <div id="versionBadge" class="version-badge"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function formatGithubLink() {
-            var githubLinkInput = document.getElementById('githubLinkInput');
-            var currentHost = window.location.host;
-            var formattedLink = "";
-
-            if (githubLinkInput.value.startsWith("https://github.com/") || githubLinkInput.value.startsWith("http://github.com/")) {
-                formattedLink = "https://" + currentHost + "/github.com" + githubLinkInput.value.substring(githubLinkInput.value.indexOf("/", 8));
-                displayButton();
-            } else if (githubLinkInput.value.startsWith("github.com/")) {
-                formattedLink = "https://" + currentHost + "/" + githubLinkInput.value;
-                displayButton();
-            } else if (githubLinkInput.value.startsWith("https://raw.githubusercontent.com/") || githubLinkInput.value.startsWith("http://raw.githubusercontent.com/")) {
-                formattedLink = "https://" + currentHost + githubLinkInput.value.substring(githubLinkInput.value.indexOf("/", 7));
-                displayButton();
-            } else if (githubLinkInput.value.startsWith("raw.githubusercontent.com/")) {
-                formattedLink = "https://" + currentHost + "/" + githubLinkInput.value;
-                displayButton();
-            } else if (githubLinkInput.value.startsWith("https://gist.githubusercontent.com/") || githubLinkInput.value.startsWith("http://gist.githubusercontent.com/")) {
-                formattedLink = "https://" + currentHost + "/gist.github.com" + githubLinkInput.value.substring(githubLinkInput.value.indexOf("/", 18));
-                displayButton();
-            } else if (githubLinkInput.value.startsWith("gist.githubusercontent.com/")) {
-                formattedLink = "https://" + currentHost + "/" + githubLinkInput.value;
-                displayButton();
-            } else {
-                showToast('请输入有效的GitHub链接');
-            }
-            var formattedLinkOutput = document.getElementById('formattedLinkOutput');
-            formattedLinkOutput.textContent = formattedLink;
-        }
-
-        function displayButton() {
-            var copyButton = document.getElementById('copyButton');
-            var redirButton = document.getElementById('redirButton');
-            copyButton.style.display = 'block';
-            redirButton.style.display = 'block';
-        }
-
-        function redirToFormattedLink() {
-            var formattedLinkOutput = document.getElementById('formattedLinkOutput');
-            console.log(formattedLinkOutput.textContent);
-            window.open(formattedLinkOutput.textContent);
-        }
-
-        document.getElementById('formatButton').addEventListener('click', formatGithubLink);
-        document.getElementById('copyButton').addEventListener('click', function () {
-            const output = document.getElementById('formattedLinkOutput');
-            const range = document.createRange();
-            range.selectNode(output);
-            window.getSelection().removeAllRanges();
-            window.getSelection().addRange(range);
-            document.execCommand('copy');
-            window.getSelection().removeAllRanges();
-            showToast('链接已复制到剪贴板');
-        });
-        document.getElementById('redirButton').addEventListener('click', redirToFormattedLink);
+        const githubForm = document.getElementById('github-form');
+        const githubLinkInput = document.getElementById('githubLinkInput');
+        const formattedLinkOutput = document.getElementById('formattedLinkOutput');
+        const output = document.getElementById('output');
+        const copyButton = document.getElementById('copyButton');
+        const openButton = document.getElementById('openButton');
+        const toast = new bootstrap.Toast(document.getElementById('toast'));
 
         function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.style.display = 'block';
-
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 3000); // 3秒后隐藏
+            const toastBody = document.querySelector('.toast-body');
+            toastBody.textContent = message;
+            toast.show();
         }
 
-        function fetchSizeLimit() {
-            fetch(window.location.origin + '/api/size_limit')
-                .then(response => response.json())
-                .then(data => {
-                    const sizeLimitDisplay = document.getElementById('sizeLimitDisplay');
-                    sizeLimitDisplay.textContent = `文件大小限制: ${data.MaxResponseBodySize} MB`;
-                })
-                .catch(error => {
-                    console.error('Error fetching API:', error);
+        function formatGithubLink(githubLink) {
+            const currentHost = window.location.host;
+            let formattedLink = "";
 
-                });
+            if (githubLink.startsWith("https://github.com/") || githubLink.startsWith("http://github.com/")) {
+                formattedLink = "https://" + currentHost + "/github.com" + githubLink.substring(githubLink.indexOf("/", 8));
+            } else if (githubLink.startsWith("github.com/")) {
+                formattedLink = "https://" + currentHost + "/" + githubLink;
+            } else if (githubLink.startsWith("https://raw.githubusercontent.com/") || githubLink.startsWith("http://raw.githubusercontent.com/")) {
+                formattedLink = "https://" + currentHost + githubLink.substring(githubLink.indexOf("/", 7));
+            } else if (githubLink.startsWith("raw.githubusercontent.com/")) {
+                formattedLink = "https://" + currentHost + "/" + githubLink;
+            } else if (githubLink.startsWith("https://gist.githubusercontent.com/") || githubLink.startsWith("http://gist.githubusercontent.com/")) {
+                formattedLink = "https://" + currentHost + "/gist.github.com" + githubLink.substring(githubLink.indexOf("/", 18));
+            } else if (githubLink.startsWith("gist.githubusercontent.com/")) {
+                formattedLink = "https://" + currentHost + "/" + githubLink;
+            } else {
+                showToast('请输入有效的GitHub链接');
+                return null;
+            }
+
+            return formattedLink;
         }
-        function fetchWhiteList() {
-            fetch(window.location.origin + '/api/whitelist/status')
-                .then(response => response.json())
-                .then(data => {
-                    const whiteListStatus = document.getElementById('whiteListStatus');
-                    if (data.Whitelist) {
-                        whiteListStatus.textContent = `白名单状态: 已开启`;
-                    } else if (!data.Whitelist) {
-                        whiteListStatus.textContent = `白名单状态: 已关闭`;
-                    } else {
-                        whiteListStatus.textContent = `白名单状态: 未知`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching API:', error);
-                });
-        }
-        function fetchBlackList() {
-            fetch(window.location.origin + '/api/blacklist/status')
-                .then(response => response.json())
-                .then(data => {
-                    const blackListStatus = document.getElementById('blackListStatus');
-                    if (data.Blacklist) {
-                        blackListStatus.textContent = `黑名单状态: 已开启`;
-                    } else if (!data.Blacklist) {
-                        blackListStatus.textContent = `黑名单状态: 已关闭`;
-                    } else {
-                        blackListStatus.textContent = `黑名单状态: 未知`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching API:', error);
-                });
-        }
-        function fetchVersion() {
-            fetch(window.location.origin + '/api/version')
-                .then(response => response.json())
-                .then(data => {
-                    const version = document.getElementById('version');
-                    version.textContent = `${data.Version}`;
-                })
-                .catch(error => {
-                    console.error('Error fetching API:', error);
-                });
-        }
+
+        githubForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formattedLink = formatGithubLink(githubLinkInput.value);
+            if (formattedLink) {
+                formattedLinkOutput.textContent = formattedLink;
+                output.style.display = 'block';
+            }
+        });
+
+        copyButton.addEventListener('click', function () {
+            navigator.clipboard.writeText(formattedLinkOutput.textContent).then(() => {
+                showToast('链接已复制到剪贴板');
+            });
+        });
+
+        openButton.addEventListener('click', function () {
+            window.open(formattedLinkOutput.textContent, '_blank');
+        });
+
         function fetchAPI() {
-            fetchSizeLimit();
-            fetchWhiteList();
-            fetchBlackList();
-            fetchVersion();
+            fetch('/api/size_limit')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('sizeLimitDisplay').textContent = `${data.MaxResponseBodySize} MB`;
+                });
+
+            fetch('/api/whitelist/status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('whiteListStatus').textContent = data.Whitelist ? '已开启' : '已关闭';
+                });
+
+            fetch('/api/blacklist/status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('blackListStatus').textContent = data.Blacklist ? '已开启' : '已关闭';
+                });
+
+            fetch('/api/version')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('versionBadge').textContent = data.Version;
+                });
         }
+
         document.addEventListener('DOMContentLoaded', fetchAPI);
     </script>
 </body>
-
-<footer>
-    <p>
-        Copyright &copy; 2024-2025 WJQSERVER-STUDIO<br>
-        GitHub仓库地址：<a href="https://github.com/WJQSERVER-STUDIO/ghproxy">WJQSERVER-STUDIO/ghproxy</a>
-        <br><a href="https://t.me/ghproxy_go">Telegram交流群</a>
-    </p>
-    <div id="visitor-info" style="text-align: center; margin-top: 15px;">
-        <p>您的IP地址: <span id="visitor-ip"></span></p>
-        <p>当前位置: <span id="visitor-country"></span> <img id="visitor-flag" src="" alt="" width="24" height="16"></p>
-    </div>
-    <script>
-        fetch('https://ip.1888866.xyz/api/ip-lookup')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('网络响应失败');
-                }
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById('visitor-ip').textContent = data.ip;
-                document.getElementById('visitor-country').textContent = data.country_name;
-                document.getElementById('visitor-flag').src = `https://flagcdn.com/w20/${data.country_code.toLowerCase()}.png`;
-            })
-            .catch(error => {
-                console.error('获取地理位置信息失败:', error);
-                const visitorInfo = document.getElementById('visitor-info');
-                visitorInfo.innerHTML = '<p>无法获取您的地理位置信息，请稍后再试。</p>';
-            });
-    </script>
-</footer>
 
 </html>

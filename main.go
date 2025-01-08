@@ -100,6 +100,7 @@ func init() {
 
 	if cfg.Server.Debug {
 		dev = "true"
+		version = "dev"
 	}
 	if dev == "true" {
 		gin.SetMode(gin.DebugMode)
