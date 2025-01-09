@@ -6,7 +6,7 @@ enableH2C = false
 debug = false
 
 [pages]
-enabled = true
+enabled = false
 staticDir = "/usr/local/ghproxy/pages" 
 
 [log]

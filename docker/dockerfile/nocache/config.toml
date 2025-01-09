@@ -6,7 +6,7 @@ enableH2C = "off" # on / off
 debug = false
 
 [pages]
-enabled = true
+enabled = false
 staticDir = "/data/www" 
 
 [log]
