@@ -92,7 +92,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		if cfg.Blacklist.Enabled {
 			blacklist := auth.CheckBlacklist(repouser, username, repo)
 			if blacklist {
-				logErrMsg := fmt.Sprintf("%s %s %s %s %s Whitelist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, repouser)
+				logErrMsg := fmt.Sprintf("%s %s %s %s %s Blacklist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, repouser)
 				errMsg := fmt.Sprintf("Blacklist Blocked repo: %s", repouser)
 				c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
 				logWarning(logErrMsg)

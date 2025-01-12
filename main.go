@@ -4,6 +4,7 @@ import (
 	"embed"
 	"flag"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"net/http"
@@ -110,7 +111,9 @@ func init() {
 		runMode = "release"
 	}
 
-	router = gin.Default()
+	gin.LoggerWithWriter(io.Discard)
+	router := gin.New()
+	router.Use(gin.Recovery())
 	//H2C默认值为true，而后遵循cfg.Server.EnableH2C的设置
 	if cfg.Server.EnableH2C == "on" {
 		router.UseH2C = true
