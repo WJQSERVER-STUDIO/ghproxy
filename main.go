@@ -112,7 +112,7 @@ func init() {
 	}
 
 	gin.LoggerWithWriter(io.Discard)
-	router := gin.New()
+	router = gin.New()
 	router.Use(gin.Recovery())
 	//H2C默认值为true，而后遵循cfg.Server.EnableH2C的设置
 	if cfg.Server.EnableH2C == "on" {
