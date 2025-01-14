@@ -27,7 +27,7 @@ RUN VERSION=$(curl -s https://raw.githubusercontent.com/${USER}/${REPO}/dev/DEV-
 RUN wget -O /usr/local/bin/init.sh https://raw.githubusercontent.com/${USER}/${REPO}/dev/docker/dockerfile/dev/init.sh
 
 # 拉取配置
-RUN wget -O /data/caddy/Caddyfile https://raw.githubusercontent.com/${USER}/${REPO}/devcaddyfile/dev/Caddyfile
+RUN wget -O /data/caddy/Caddyfile https://raw.githubusercontent.com/${USER}/${REPO}/dev/caddyfile/dev/Caddyfile
 RUN wget -O /data/${APPLICATION}/config.toml https://raw.githubusercontent.com/${USER}/${REPO}/dev/config/config.toml
 RUN wget -O /data/${APPLICATION}/blacklist.json https://raw.githubusercontent.com/${USER}/${REPO}/dev/config/blacklist.json
 RUN wget -O /data/${APPLICATION}/whitelist.json https://raw.githubusercontent.com/${USER}/${REPO}/dev/config/whitelist.json
@@ -50,4 +50,3 @@ RUN chmod +x /data/${APPLICATION}/${APPLICATION}
 RUN chmod +x /usr/local/bin/init.sh
 
 CMD ["/usr/local/bin/init.sh"]
-
