@@ -145,6 +145,8 @@ func init() {
 	router.NoRoute(func(c *gin.Context) {
 		proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
 	})
+
+	fmt.Printf("GHProxy Version: %s\n", version)
 }
 
 func main() {
