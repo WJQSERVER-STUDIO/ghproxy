@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - 'main'
+      - 'dev'
     paths:
       - 'DEV-VERSION'
 
@@ -20,7 +20,9 @@ jobs:
       GO_VERSION: 1.23.4
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
       - name: 加载版本号
         run: |
           if [ -f DEV-VERSION ]; then
