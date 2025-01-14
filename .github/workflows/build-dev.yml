@@ -78,6 +78,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: dev
       - name: Load VERSION
         run: |
           if [ -f DEV-VERSION ]; then
