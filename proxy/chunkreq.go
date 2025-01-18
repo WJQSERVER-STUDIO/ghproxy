@@ -72,14 +72,14 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 	CopyResponseHeaders(resp, c, cfg)
 
 	c.Status(resp.StatusCode)
-	if err := chunkedCopyResponseBody(c, resp.Body); err != nil {
+	if err := chunkedCopyResponseBody(c, cfg, resp.Body); err != nil {
 		logError("%s %s %s %s %s 响应复制错误: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 	}
 }
 
 // 复制响应体
-func chunkedCopyResponseBody(c *gin.Context, respBody io.Reader) error {
-	buf := make([]byte, 4096)
+func chunkedCopyResponseBody(c *gin.Context, cfg *config.Config, respBody io.Reader) error {
+	buf := make([]byte, cfg.Server.BufferSize)
 	for {
 		n, err := respBody.Read(buf)
 		if n > 0 {
