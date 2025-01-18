@@ -17,7 +17,7 @@ jobs:
         goarch: [amd64, arm64]
     env:
       OUTPUT_BINARY: ghproxy
-      GO_VERSION: 1.23.4
+      GO_VERSION: 1.23.5
 
     steps:
       - uses: actions/checkout@v4
