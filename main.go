@@ -91,11 +91,16 @@ func setupRateLimit(cfg *config.Config) {
 	}
 }
 
+func initBufferSize() {
+	proxy.InitChunkedBufferSize(cfg.Server.BufferSize)
+}
+
 func init() {
 	readFlag()
 	flag.Parse()
 	loadConfig()
 	setupLogger(cfg)
+	initBufferSize()
 	loadlist(cfg)
 	setupRateLimit(cfg)
 
@@ -145,6 +150,8 @@ func init() {
 	router.NoRoute(func(c *gin.Context) {
 		proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
 	})
+
+	fmt.Printf("GHProxy Version: %s\n", version)
 }
 
 func main() {

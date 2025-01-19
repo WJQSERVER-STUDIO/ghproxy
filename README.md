@@ -81,6 +81,7 @@ wget -O install.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/ma
 host = "127.0.0.1"  # 监听地址
 port = 8080  # 监听端口
 sizeLimit = 125 # 125MB
+bufferSize = 4096 # Bytes 缓冲区大小
 enableH2C = "on"  # 是否开启H2C传输(latest和dev版本请开启) on/off
 
 [pages]
@@ -159,7 +160,8 @@ example.com {
 
 ### 前端页面
 
-![ghproxy-demo.png](https://webp.wjqserver.com/ghproxy/ghproxy-demo-v1.7.0-mobile-night.png)
+![ghproxy-demo.png](https://webp.wjqserver.com/ghproxy/1.8.1-light.png)
+![ghproxy-demo-dark.png](https://webp.wjqserver.com/ghproxy/1.8.1-dark.png)
 
 结语
 ---
