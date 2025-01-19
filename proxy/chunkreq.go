@@ -10,6 +10,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var chunkedBufferSize int
+
+func InitChunkedBufferSize(cfgBufferSize int) {
+	if cfgBufferSize == 0 {
+		chunkedBufferSize = 4096 // 默认缓冲区大小
+	} else {
+		chunkedBufferSize = cfgBufferSize
+	}
+}
+
 func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string, runMode string) {
 	method := c.Request.Method
 	logInfo("%s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
@@ -72,14 +82,14 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 	CopyResponseHeaders(resp, c, cfg)
 
 	c.Status(resp.StatusCode)
-	if err := chunkedCopyResponseBody(c, cfg, resp.Body); err != nil {
+	if err := chunkedCopyResponseBody(c, resp.Body); err != nil {
 		logError("%s %s %s %s %s 响应复制错误: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 	}
 }
 
 // 复制响应体
-func chunkedCopyResponseBody(c *gin.Context, cfg *config.Config, respBody io.Reader) error {
-	buf := make([]byte, cfg.Server.BufferSize)
+func chunkedCopyResponseBody(c *gin.Context, respBody io.Reader) error {
+	buf := make([]byte, chunkedBufferSize)
 	for {
 		n, err := respBody.Read(buf)
 		if n > 0 {

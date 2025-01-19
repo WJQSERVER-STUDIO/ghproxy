@@ -91,11 +91,16 @@ func setupRateLimit(cfg *config.Config) {
 	}
 }
 
+func initBufferSize() {
+	proxy.InitChunkedBufferSize(cfg.Server.BufferSize)
+}
+
 func init() {
 	readFlag()
 	flag.Parse()
 	loadConfig()
 	setupLogger(cfg)
+	initBufferSize()
 	loadlist(cfg)
 	setupRateLimit(cfg)
 
