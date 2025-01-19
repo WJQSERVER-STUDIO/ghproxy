@@ -1,5 +1,13 @@
 # 更新日志
 
+2.0.0
+---
+- RELEASE: v2.0.0正式版发布; 此版本圆了几个月前画的饼, 在大文件下载的内存占用方面做出了巨大改进
+- CHANGE: 优化`proxy`核心模块, 使用Chuncked Buffer传输数据, 减少内存占用
+- REMOVE: caddy
+- REMOVE: nocache
+- CHANGE: 优化前端页面, 增加更多功能(来自1.8.1版本, 原本也是为v2所设计的)
+
 25w04c
 ---
 - PRE-RELEASE: 此版本是v2的候选版本,请勿在生产环境中使用;
