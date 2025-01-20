@@ -14,8 +14,6 @@ if [ ! -f /data/${APPLICATON}/config/config.yaml ]; then
     cp /data/${APPLICATON}/config.yaml /data/${APPLICATON}/config/config.yaml
 fi
 
-/data/caddy/caddy run --config /data/caddy/config/Caddyfile > /data/${APPLICATON}/log/caddy.log 2>&1 &
-
 /data/${APPLICATON}/${APPLICATON} > /data/${APPLICATON}/log/run.log 2>&1 &
 
 sleep 30
