@@ -2,10 +2,6 @@
 
 APPLICATON=ghproxy
 
-if [ ! -f /data/caddy/config/Caddyfile ]; then
-    cp /data/caddy/Caddyfile /data/caddy/config/Caddyfile
-fi
-
 if [ ! -f /data/${APPLICATON}/config/blacklist.json ]; then
     cp /data/${APPLICATON}/blacklist.json /data/${APPLICATON}/config/blacklist.json
 fi
