@@ -14,3 +14,8 @@ func setRequestHeaders(c *gin.Context, req *http.Request) {
 		}
 	}
 }
+
+func removeWSHeader(req *http.Request) {
+	req.Header.Del("Upgrade")
+	req.Header.Del("Connection")
+}

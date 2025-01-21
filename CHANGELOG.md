@@ -1,5 +1,20 @@
 # 更新日志
 
+2.0.2
+---
+- RELEASE: v2.0.2正式版发布; 此版本是v2.0.1改进
+- CHANGE: 由于用户使用了不符合`RFC 9113`规范的请求头, 导致`ghproxy`无法正常工作, 在此版本为用户的错误行为提供补丁; 
+
+25w06b
+---
+- PRE-RELEASE: 此版本是改进验证版本,普通用户请勿使用; 
+- CHANGE: 由于用户使用了不符合`RFC 9113`规范的请求头, 导致`ghproxy`无法正常工作, 在此版本为用户的错误行为提供补丁; 
+
+25w06a
+---
+- PRE-RELEASE: 此版本是改进验证版本,普通用户请勿使用; 
+- CHANGE: Remove `Conection: Upgrade` header, which is not currently supported by some web server configurations.
+
 v2.0.1
 ---
 - RELEASE: v2.0.1正式版发布; 此版本是v2.0.0的小修复版本, 主要修复了Docker启动脚本存在的一些问题
