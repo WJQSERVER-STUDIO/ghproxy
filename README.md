@@ -15,14 +15,12 @@
 
 ### 项目特点
 
-- 基于Go语言实现,使用[Gin框架](https://github.com/gin-gonic/gin)与[req库](https://github.com/imroc/req)]
+- 基于Go语言实现,使用[Gin框架](https://github.com/gin-gonic/gin)
 - 支持Git clone,raw,realeases等文件拉取
 - 支持Docker部署
 - 支持速率限制
 - 支持用户鉴权
 - 支持自定义黑名单/白名单
-- 符合[RFC 7234](https://httpwg.org/specs/rfc7234.html)的HTTP Cache
-- 使用Caddy作为Web Server
 - 基于[WJQSERVER-STUDIO/golang-temp](https://github.com/WJQSERVER-STUDIO/golang-temp)模板构建,具有标准化的日志记录与构建流程
 
 ### 项目开发过程
@@ -30,6 +28,7 @@
 **本项目是[WJQSERVER-STUDIO/ghproxy-go](https://github.com/WJQSERVER-STUDIO/ghproxy-go)的重构版本,实现了原项目原定功能的同时,进一步优化了性能**
 关于此项目的详细开发过程,请参看Commit记录与[CHANGELOG.md](https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/CHANGELOG.md)
 
+- V2.0.0 对`proxy`核心模块进行了重构,大幅优化内存占用
 - V1.0.0 迁移至本仓库,并再次重构内容实现
 - v0.2.0 重构项目实现
 
@@ -42,8 +41,10 @@
 ## 使用示例
 
 ```
+# 下载文件
 https://ghproxy.1888866.xyz/raw.githubusercontent.com/WJQSERVER-STUDIO/tools-stable/main/tools-stable-ghproxy.sh
 
+# 克隆仓库
 git clone https://ghproxy.1888866.xyz/github.com/WJQSERVER-STUDIO/ghproxy.git
 ```
 
@@ -54,7 +55,7 @@ git clone https://ghproxy.1888866.xyz/github.com/WJQSERVER-STUDIO/ghproxy.git
 - Docker-cli
 
 ```
-docker run -p 7210:80 -v ./ghproxy/log/run:/data/ghproxy/log -v ./ghproxy/log/caddy:/data/caddy/log -v ./ghproxy/config:/data/ghproxy/config  --restart always wjqserver/ghproxy
+docker run -p 7210:8080 -v ./ghproxy/log/run:/data/ghproxy/log -v ./ghproxy/log/caddy:/data/caddy/log -v ./ghproxy/config:/data/ghproxy/config  --restart always wjqserver/ghproxy
 ```
 
 - Docker-Compose (建议使用)
@@ -78,7 +79,7 @@ wget -O install.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/ma
 
 ```toml
 [server]
-host = "127.0.0.1"  # 监听地址
+host = "0.0.0.0"  # 监听地址
 port = 8080  # 监听端口
 sizeLimit = 125 # 125MB
 bufferSize = 4096 # Bytes 缓冲区大小
@@ -149,10 +150,6 @@ burst = 5  # 突发请求数量
 example.com {
     reverse_proxy {
         to 127.0.0.1:7210
-        header_up X-Real-IP {remote_host}	    
-        header_up X-Real-IP {http.request.header.CF-Connecting-IP}
-        header_up X-Forwarded-For {http.request.header.CF-Connecting-IP}
-        header_up X-Forwarded-Proto {http.request.header.CF-Visitor}
     }
     encode zstd gzip    
 }
@@ -162,10 +159,3 @@ example.com {
 
 ![ghproxy-demo.png](https://webp.wjqserver.com/ghproxy/1.8.1-light.png)
 ![ghproxy-demo-dark.png](https://webp.wjqserver.com/ghproxy/1.8.1-dark.png)
-
-结语
----
-
-本项目基于Go语言实现,使用Gin框架与req库
-Docker镜像基于[WJQSERVER-STUDIO/caddy](https://github.com/WJQSERVER-STUDIO/caddy)
-本项目使用WSL LICENSE Version1.2 (WJQSERVER STUDIO LICENSE Version1.2) 授权协议,请遵守相关条例。
