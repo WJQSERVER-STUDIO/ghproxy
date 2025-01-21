@@ -1,5 +1,10 @@
 # 更新日志
 
+25w06b
+---
+- PRE-RELEASE: 此版本是改进验证版本,普通用户请勿使用; 
+- CHANGE: Remove `Conection: Upgrade` header, which is not currently supported by some web server configurations.
+
 25w06a
 ---
 - PRE-RELEASE: 此版本是改进验证版本,普通用户请勿使用; 

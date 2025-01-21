@@ -35,10 +35,14 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 	}
 	setRequestHeaders(c, headReq)
 	// 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
-	if headReq.Header.Get("Connection") == "Upgrade" {
-		headReq.Header.Del("Connection")
-	}
+	removeWSHeader(headReq)
 	AuthPassThrough(c, cfg, headReq)
+	// 打印请求Header(for debug)
+	for key, values := range headReq.Header {
+		for _, value := range values {
+			fmt.Printf("%s: %s\n", key, value)
+		}
+	}
 
 	headResp, err := client.Do(headReq)
 	if err != nil {
@@ -70,10 +74,14 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 	req.Header.Set("Transfer-Encoding", "chunked") // 确保设置分块传输编码
 	setRequestHeaders(c, req)
 	// 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
-	if req.Header.Get("Connection") == "Upgrade" {
-		req.Header.Del("Connection")
-	}
+	removeWSHeader(req)
 	AuthPassThrough(c, cfg, req)
+	// 打印请求Header(for debug)
+	for key, values := range req.Header {
+		for _, value := range values {
+			fmt.Printf("%s: %s\n", key, value)
+		}
+	}
 
 	resp, err := client.Do(req)
 	if err != nil {
