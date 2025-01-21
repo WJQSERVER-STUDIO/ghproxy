@@ -34,6 +34,10 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 		return
 	}
 	setRequestHeaders(c, headReq)
+	// 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
+	if headReq.Header.Get("Connection") == "Upgrade" {
+		headReq.Header.Del("Connection")
+	}
 	AuthPassThrough(c, cfg, headReq)
 
 	headResp, err := client.Do(headReq)
