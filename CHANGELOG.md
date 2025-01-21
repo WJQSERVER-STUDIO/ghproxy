@@ -1,5 +1,10 @@
 # 更新日志
 
+25w06a
+---
+- PRE-RELEASE: 此版本是改进验证版本,普通用户请勿使用; 
+- CHANGE: Remove `Conection: Upgrade` header, which is not currently supported by some web server configurations.
+
 v2.0.1
 ---
 - RELEASE: v2.0.1正式版发布; 此版本是v2.0.0的小修复版本, 主要修复了Docker启动脚本存在的一些问题
