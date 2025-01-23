@@ -34,9 +34,13 @@ func initChunkedBufferSize(cfgBufferSize int) {
 func initChunkedHTTPClient() {
 	tr = &http.Transport{
 		MaxIdleConns:    100,
-		IdleConnTimeout: 30 * time.Second,
+		MaxConnsPerHost: 60,
+		IdleConnTimeout: 15 * time.Second,
 	}
-	client = &http.Client{Transport: tr}
+	client = &http.Client{
+		Transport: tr,
+		Timeout:   5 * time.Second,
+	}
 }
 
 func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string, runMode string) {
