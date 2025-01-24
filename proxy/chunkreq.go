@@ -6,17 +6,39 @@ import (
 	"ghproxy/config"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 var chunkedBufferSize int
 
-func InitChunkedBufferSize(cfgBufferSize int) {
+var (
+	client *http.Client
+	tr     *http.Transport
+)
+
+func InitChunkedReq(cfgBufferSize int) {
+	initChunkedBufferSize(cfgBufferSize)
+	initChunkedHTTPClient()
+}
+
+func initChunkedBufferSize(cfgBufferSize int) {
 	if cfgBufferSize == 0 {
 		chunkedBufferSize = 4096 // 默认缓冲区大小
 	} else {
 		chunkedBufferSize = cfgBufferSize
+	}
+}
+
+func initChunkedHTTPClient() {
+	tr = &http.Transport{
+		MaxIdleConns:    100,
+		MaxConnsPerHost: 60,
+		IdleConnTimeout: 20 * time.Second,
+	}
+	client = &http.Client{
+		Transport: tr,
 	}
 }
 
@@ -25,7 +47,7 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 	logInfo("%s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 
 	// 创建HTTP客户端
-	client := &http.Client{}
+	//client := &http.Client{}
 
 	// 发送HEAD请求, 预获取Content-Length
 	headReq, err := http.NewRequest("HEAD", u, nil)
@@ -84,6 +106,7 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 	CopyResponseHeaders(resp, c, cfg)
 
 	c.Status(resp.StatusCode)
+
 	if err := chunkedCopyResponseBody(c, resp.Body); err != nil {
 		logError("%s %s %s %s %s 响应复制错误: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 	}
