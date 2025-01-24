@@ -35,11 +35,10 @@ func initChunkedHTTPClient() {
 	tr = &http.Transport{
 		MaxIdleConns:    100,
 		MaxConnsPerHost: 60,
-		IdleConnTimeout: 15 * time.Second,
+		IdleConnTimeout: 20 * time.Second,
 	}
 	client = &http.Client{
 		Transport: tr,
-		Timeout:   5 * time.Second,
 	}
 }
 
