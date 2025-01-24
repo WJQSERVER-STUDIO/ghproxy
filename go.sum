@@ -1,7 +1,7 @@
 github.com/BurntSushi/toml v1.4.0 h1:kuoIxZQy2WRRk1pttg9asf+WVv6tWQuBNVmK8+nqPr0=
 github.com/BurntSushi/toml v1.4.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
-github.com/WJQSERVER-STUDIO/go-utils/logger v1.1.0 h1:OUrAOWb8xK0kxpWextJYUasmol+5KKqG2az52X2ae64=
-github.com/WJQSERVER-STUDIO/go-utils/logger v1.1.0/go.mod h1:sAqHVYSucoUnycyHMAZc1fMH5dS2bQwgwo8NUiAIcyk=
+github.com/WJQSERVER-STUDIO/go-utils/logger v1.1.1 h1:YS3q54SroxQpEM7c12ZKjLNAaSq++bNpxTujs9cTZ9c=
+github.com/WJQSERVER-STUDIO/go-utils/logger v1.1.1/go.mod h1:oW884JCCPDU6c906LI0uKXndWLiRvjb9LkGYC2cqRO8=
 github.com/bytedance/sonic v1.12.7 h1:CQU8pxOy9HToxhndH0Kx/S1qU/CuS9GnKYrGioDcU1Q=
 github.com/bytedance/sonic v1.12.7/go.mod h1:tnbal4mxOMju17EGfknm2XyYcpyCnIROYOEYuemj13I=
 github.com/bytedance/sonic/loader v0.1.1/go.mod h1:ncP89zfokxS5LZrJxl5z0UJcsk4M4yY2JpfqGeCtNLU=
