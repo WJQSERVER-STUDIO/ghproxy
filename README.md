@@ -111,7 +111,7 @@ whitelistFile = "/data/ghproxy/config/whitelist.json"  # 白名单文件路径
 
 [rateLimit]
 enabled = false  # 是否开启速率限制
-rateMrthod = "total" # "ip" or "total" 速率限制方式
+rateMethod = "total" # "ip" or "total" 速率限制方式
 ratePerMinute = 180  # 每分钟限制请求数量
 burst = 5  # 突发请求数量
 ```
