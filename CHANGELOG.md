@@ -1,5 +1,12 @@
 # 更新日志
 
+25w08a
+---
+- PRE-RELEASE: 此版本是v2.0.4的预发布版本,请勿在生产环境中使用;
+- CHANGE: 优化GitReq的`HTTP Client`参数, 使其更符合本项目使用场景
+- CHANGE: 优化Matches
+- REMOVE: 移除Caddyfile残留
+
 2.0.3
 ---
 - RELEASE: v2.0.3正式版发布;
