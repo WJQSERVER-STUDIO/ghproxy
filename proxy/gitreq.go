@@ -6,16 +6,33 @@ import (
 	"ghproxy/config"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
+
+var (
+	gclient *http.Client
+	gtr     *http.Transport
+)
+
+func initGitHTTPClient() {
+	gtr = &http.Transport{
+		MaxIdleConns:    30,
+		MaxConnsPerHost: 30,
+		IdleConnTimeout: 30 * time.Second,
+	}
+	gclient = &http.Client{
+		Transport: gtr,
+	}
+}
 
 func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode string) {
 	method := c.Request.Method
 	logInfo("%s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 
 	// 创建HTTP客户端
-	client := &http.Client{}
+	//client := &http.Client{}
 
 	// 发送HEAD请求, 预获取Content-Length
 	headReq, err := http.NewRequest("HEAD", u, nil)
@@ -26,7 +43,7 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 	setRequestHeaders(c, headReq)
 	AuthPassThrough(c, cfg, headReq)
 
-	headResp, err := client.Do(headReq)
+	headResp, err := gclient.Do(headReq)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
@@ -55,7 +72,7 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 	setRequestHeaders(c, req)
 	AuthPassThrough(c, cfg, req)
 
-	resp, err := client.Do(req)
+	resp, err := gclient.Do(req)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
