@@ -9,17 +9,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 预定义regex
+var (
+	pathRegex = regexp.MustCompile(`^([^/]+)/([^/]+)/([^/]+)/.*`)                                         // 匹配路径
+	gistRegex = regexp.MustCompile(`^(?:https?://)?gist\.github(?:usercontent|)\.com/([^/]+)/([^/]+)/.*`) // 匹配gist路径
+)
+
 // 提取用户名和仓库名
 func MatchUserRepo(rawPath string, cfg *config.Config, c *gin.Context, matches []string) (string, string) {
-	var gistregex = regexp.MustCompile(`^(?:https?://)?gist\.github(?:usercontent|)\.com/([^/]+)/([^/]+)/.*`)
-	var gistmatches []string
-	if gistregex.MatchString(rawPath) {
-		gistmatches = gistregex.FindStringSubmatch(rawPath)
-		logInfo("%s %s %s %s %s Matched-Username: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, gistmatches[1])
-		return gistmatches[1], ""
+	if gistMatches := gistRegex.FindStringSubmatch(rawPath); len(gistMatches) == 3 {
+		logInfo("%s %s %s %s %s Matched-Username: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, gistMatches[1])
+		return gistMatches[1], ""
 	}
 	// 定义路径
-	pathRegex := regexp.MustCompile(`^([^/]+)/([^/]+)/([^/]+)/.*`)
 	if pathMatches := pathRegex.FindStringSubmatch(matches[2]); len(pathMatches) >= 4 {
 		return pathMatches[2], pathMatches[3]
 	}

@@ -14,13 +14,14 @@ import (
 var chunkedBufferSize int
 
 var (
-	client *http.Client
-	tr     *http.Transport
+	cclient *http.Client
+	ctr     *http.Transport
 )
 
-func InitChunkedReq(cfgBufferSize int) {
+func InitReq(cfgBufferSize int) {
 	initChunkedBufferSize(cfgBufferSize)
 	initChunkedHTTPClient()
+	initGitHTTPClient()
 }
 
 func initChunkedBufferSize(cfgBufferSize int) {
@@ -32,13 +33,13 @@ func initChunkedBufferSize(cfgBufferSize int) {
 }
 
 func initChunkedHTTPClient() {
-	tr = &http.Transport{
+	ctr = &http.Transport{
 		MaxIdleConns:    100,
 		MaxConnsPerHost: 60,
 		IdleConnTimeout: 20 * time.Second,
 	}
-	client = &http.Client{
-		Transport: tr,
+	cclient = &http.Client{
+		Transport: ctr,
 	}
 }
 
@@ -59,7 +60,7 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 	removeWSHeader(headReq) // 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
 	AuthPassThrough(c, cfg, headReq)
 
-	headResp, err := client.Do(headReq)
+	headResp, err := cclient.Do(headReq)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
@@ -91,7 +92,7 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 	removeWSHeader(req) // 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
 	AuthPassThrough(c, cfg, req)
 
-	resp, err := client.Do(req)
+	resp, err := cclient.Do(req)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("发送请求失败: %v", err))
 		return

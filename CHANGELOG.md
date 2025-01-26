@@ -1,5 +1,25 @@
 # 更新日志
 
+2.0.4
+---
+- RELEASE: v2.0.4正式版发布;
+- CHANGE: 优化GitReq的`HTTP Client`参数, 使其更符合本项目使用场景
+- CHANGE: 优化Matches
+- REMOVE: 移除Caddyfile残留
+- REMOVE: 由于v2改进后稳定性增强, 故移除健康检测
+
+25w08b
+---
+- PRE-RELEASE: 此版本是v2.0.4的预发布版本,请勿在生产环境中使用;
+- REMOVE: 由于v2改进后稳定性增强, 故移除健康检测
+
+25w08a
+---
+- PRE-RELEASE: 此版本是v2.0.4的预发布版本,请勿在生产环境中使用;
+- CHANGE: 优化GitReq的`HTTP Client`参数, 使其更符合本项目使用场景
+- CHANGE: 优化Matches
+- REMOVE: 移除Caddyfile残留
+
 2.0.3
 ---
 - RELEASE: v2.0.3正式版发布;
