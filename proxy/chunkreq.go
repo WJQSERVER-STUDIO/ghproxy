@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var BufferSize int
+var BufferSize int = 32 * 1024 // 32KB
 
 var (
 	cclient    *http.Client
