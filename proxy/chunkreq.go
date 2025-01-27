@@ -6,29 +6,29 @@ import (
 	"ghproxy/config"
 	"io"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-var chunkedBufferSize int
+var BufferSize int
 
 var (
-	cclient *http.Client
-	ctr     *http.Transport
+	cclient    *http.Client
+	ctr        *http.Transport
+	BufferPool *sync.Pool
 )
 
 func InitReq(cfgBufferSize int) {
-	initChunkedBufferSize(cfgBufferSize)
 	initChunkedHTTPClient()
 	initGitHTTPClient()
-}
 
-func initChunkedBufferSize(cfgBufferSize int) {
-	if cfgBufferSize == 0 {
-		chunkedBufferSize = 4096 // 默认缓冲区大小
-	} else {
-		chunkedBufferSize = cfgBufferSize
+	// 初始化固定大小的缓存池
+	BufferPool = &sync.Pool{
+		New: func() interface{} {
+			return make([]byte, BufferSize)
+		},
 	}
 }
 
@@ -108,10 +108,23 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 
 	c.Status(resp.StatusCode)
 
-	if err := chunkedCopyResponseBody(c, resp.Body); err != nil {
+	/*
+		if err := chunkedCopyResponseBody(c, resp.Body); err != nil {
+			logError("%s %s %s %s %s 响应复制错误: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+		}
+	*/
+
+	// 使用固定32KB缓冲池
+	buffer := BufferPool.Get().([]byte)
+	defer BufferPool.Put(buffer)
+
+	if _, err := io.CopyBuffer(c.Writer, resp.Body, buffer); err != nil {
 		logError("%s %s %s %s %s 响应复制错误: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+		return
 	}
 }
+
+/*
 
 // 复制响应体
 func chunkedCopyResponseBody(c *gin.Context, respBody io.Reader) error {
@@ -133,3 +146,4 @@ func chunkedCopyResponseBody(c *gin.Context, respBody io.Reader) error {
 	}
 	return nil
 }
+*/

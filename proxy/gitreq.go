@@ -86,13 +86,8 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 
 	CopyResponseHeaders(resp, c, cfg)
 	c.Status(resp.StatusCode)
-	if err := gitCopyResponseBody(c, resp.Body); err != nil {
+
+	if _, err := io.Copy(c.Writer, resp.Body); err != nil {
 		logError("%s %s %s %s %s Response-Copy-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 	}
-}
-
-// 复制响应体
-func gitCopyResponseBody(c *gin.Context, respBody io.Reader) error {
-	_, err := io.Copy(c.Writer, respBody)
-	return err
 }
