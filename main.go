@@ -92,7 +92,7 @@ func setupRateLimit(cfg *config.Config) {
 }
 
 func InitReq() {
-	proxy.InitReq(cfg.Server.BufferSize)
+	proxy.InitReq()
 }
 
 func init() {

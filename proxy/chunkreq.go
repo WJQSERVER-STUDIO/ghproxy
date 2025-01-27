@@ -6,29 +6,29 @@ import (
 	"ghproxy/config"
 	"io"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-var chunkedBufferSize int
+var BufferSize int = 32 * 1024 // 32KB
 
 var (
-	cclient *http.Client
-	ctr     *http.Transport
+	cclient    *http.Client
+	ctr        *http.Transport
+	BufferPool *sync.Pool
 )
 
-func InitReq(cfgBufferSize int) {
-	initChunkedBufferSize(cfgBufferSize)
+func InitReq() {
 	initChunkedHTTPClient()
 	initGitHTTPClient()
-}
 
-func initChunkedBufferSize(cfgBufferSize int) {
-	if cfgBufferSize == 0 {
-		chunkedBufferSize = 4096 // 默认缓冲区大小
-	} else {
-		chunkedBufferSize = cfgBufferSize
+	// 初始化固定大小的缓存池
+	BufferPool = &sync.Pool{
+		New: func() interface{} {
+			return make([]byte, BufferSize)
+		},
 	}
 }
 
@@ -46,9 +46,6 @@ func initChunkedHTTPClient() {
 func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string, runMode string) {
 	method := c.Request.Method
 	logInfo("%s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
-
-	// 创建HTTP客户端
-	//client := &http.Client{}
 
 	// 发送HEAD请求, 预获取Content-Length
 	headReq, err := http.NewRequest("HEAD", u, nil)
@@ -108,28 +105,15 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 
 	c.Status(resp.StatusCode)
 
-	if err := chunkedCopyResponseBody(c, resp.Body); err != nil {
-		logError("%s %s %s %s %s 响应复制错误: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
-	}
-}
+	// 使用固定32KB缓冲池
+	buffer := BufferPool.Get().([]byte)
+	defer BufferPool.Put(buffer)
 
-// 复制响应体
-func chunkedCopyResponseBody(c *gin.Context, respBody io.Reader) error {
-	buf := make([]byte, chunkedBufferSize)
-	for {
-		n, err := respBody.Read(buf)
-		if n > 0 {
-			if _, err := c.Writer.Write(buf[:n]); err != nil {
-				return err
-			}
-			c.Writer.Flush() // 确保每次写入后刷新
-		}
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return err
-		}
+	_, err = io.CopyBuffer(c.Writer, resp.Body, buffer)
+	if err != nil {
+		logError("%s %s %s %s %s 响应复制错误: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+		return
+	} else {
+		c.Writer.Flush() // 确保刷入
 	}
-	return nil
 }

@@ -3,7 +3,6 @@ host = "0.0.0.0"
 port = 8080 
 sizeLimit = 125 # MB
 enableH2C = "on" # "on" or "off"
-bufferSize = 4096 # Bytes
 debug = false
 
 [pages]

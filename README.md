@@ -83,7 +83,6 @@ wget -O install.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/ma
 host = "0.0.0.0"  # 监听地址
 port = 8080  # 监听端口
 sizeLimit = 125 # 125MB
-bufferSize = 4096 # Bytes 缓冲区大小
 enableH2C = "on"  # 是否开启H2C传输(latest和dev版本请开启) on/off
 
 [pages]
