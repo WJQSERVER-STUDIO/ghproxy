@@ -16,12 +16,11 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port       int    `toml:"port"`
-	Host       string `toml:"host"`
-	SizeLimit  int    `toml:"sizeLimit"`
-	EnableH2C  string `toml:"enableH2C"`
-	BufferSize int    `toml:"bufferSize"`
-	Debug      bool   `toml:"debug"`
+	Port      int    `toml:"port"`
+	Host      string `toml:"host"`
+	SizeLimit int    `toml:"sizeLimit"`
+	EnableH2C string `toml:"enableH2C"`
+	Debug     bool   `toml:"debug"`
 }
 
 type PagesConfig struct {

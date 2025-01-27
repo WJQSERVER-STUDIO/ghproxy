@@ -20,7 +20,7 @@ var (
 	BufferPool *sync.Pool
 )
 
-func InitReq(cfgBufferSize int) {
+func InitReq() {
 	initChunkedHTTPClient()
 	initGitHTTPClient()
 
