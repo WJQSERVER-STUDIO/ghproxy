@@ -5,9 +5,6 @@ import (
 	"io"
 	"net/http"
 	"regexp"
-	"strconv"
-
-	"ghproxy/config"
 
 	"github.com/WJQSERVER-STUDIO/go-utils/logger"
 	"github.com/gin-gonic/gin"
@@ -60,22 +57,6 @@ func SendRequest(c *gin.Context, req *req.Request, method, url string) (*req.Res
 }
 */
 
-// 处理响应大小
-func HandleResponseSize(resp *http.Response, cfg *config.Config, c *gin.Context) error {
-	contentLength := resp.Header.Get("Content-Length")
-	sizelimit := cfg.Server.SizeLimit * 1024 * 1024
-	if contentLength != "" {
-		size, err := strconv.Atoi(contentLength)
-		if err == nil && size > sizelimit {
-			finalURL := resp.Request.URL.String()
-			c.Redirect(http.StatusMovedPermanently, finalURL)
-			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto, finalURL, size)
-			return fmt.Errorf("Path: %s size limit exceeded: %d", finalURL, size)
-		}
-	}
-	return nil
-}
-
 func HandleError(c *gin.Context, message string) {
 	c.String(http.StatusInternalServerError, fmt.Sprintf("server error %v", message))
 	logWarning(message)
@@ -91,3 +72,21 @@ func CheckURL(u string, c *gin.Context) []string {
 	logWarning(errMsg)
 	return nil
 }
+
+/*
+// 处理响应大小
+func HandleResponseSize(resp *http.Response, cfg *config.Config, c *gin.Context) error {
+	contentLength := resp.Header.Get("Content-Length")
+	sizelimit := cfg.Server.SizeLimit * 1024 * 1024
+	if contentLength != "" {
+		size, err := strconv.Atoi(contentLength)
+		if err == nil && size > sizelimit {
+			finalURL := resp.Request.URL.String()
+			c.Redirect(http.StatusMovedPermanently, finalURL)
+			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto, finalURL, size)
+			return fmt.Errorf("Path: %s size limit exceeded: %d", finalURL, size)
+		}
+	}
+	return nil
+}
+*/
