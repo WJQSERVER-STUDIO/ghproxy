@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"ghproxy/config"
 	"io"
+	"net"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
@@ -34,9 +36,16 @@ func InitReq() {
 
 func initChunkedHTTPClient() {
 	ctr = &http.Transport{
-		MaxIdleConns:    100,
-		MaxConnsPerHost: 60,
-		IdleConnTimeout: 20 * time.Second,
+		MaxIdleConns:          100,
+		MaxConnsPerHost:       60,
+		IdleConnTimeout:       20 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		ResponseHeaderTimeout: 10 * time.Second,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
 	}
 	cclient = &http.Client{
 		Transport: ctr,
@@ -62,12 +71,31 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
 	}
-	defer headResp.Body.Close()
+	//defer headResp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			logError("Failed to close response body: %v", err)
+		}
+	}(headResp.Body)
 
-	if err := HandleResponseSize(headResp, cfg, c); err != nil {
-		logWarning("%s %s %s %s %s Response-Size-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
-		return
+	contentLength := headResp.Header.Get("Content-Length")
+	sizelimit := cfg.Server.SizeLimit * 1024 * 1024
+	if contentLength != "" {
+		size, err := strconv.Atoi(contentLength)
+		if err == nil && size > sizelimit {
+			finalURL := headResp.Request.URL.String()
+			c.Redirect(http.StatusMovedPermanently, finalURL)
+			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto, finalURL, size)
+			return
+		}
 	}
+
+	/*
+		if err := HandleResponseSize(headResp, cfg, c); err != nil {
+			logWarning("%s %s %s %s %s Response-Size-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+			return
+		}
+	*/
 
 	body, err := readRequestBody(c)
 	if err != nil {
@@ -84,7 +112,6 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 		return
 	}
 
-	req.Header.Set("Transfer-Encoding", "chunked") // 确保设置分块传输编码
 	setRequestHeaders(c, req)
 	removeWSHeader(req) // 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
 	AuthPassThrough(c, cfg, req)
@@ -96,12 +123,45 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 	}
 	defer resp.Body.Close()
 
-	if err := HandleResponseSize(resp, cfg, c); err != nil {
-		logWarning("%s %s %s %s %s Response-Size-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
-		return
+	/*
+		if err := HandleResponseSize(resp, cfg, c); err != nil {
+			logWarning("%s %s %s %s %s Response-Size-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+			return
+		}
+	*/
+
+	contentLength = resp.Header.Get("Content-Length")
+	if contentLength != "" {
+		size, err := strconv.Atoi(contentLength)
+		if err == nil && size > sizelimit {
+			finalURL := resp.Request.URL.String()
+			c.Redirect(http.StatusMovedPermanently, finalURL)
+			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto, finalURL, size)
+			return
+		}
 	}
 
-	CopyResponseHeaders(resp, c, cfg)
+	for key, values := range resp.Header {
+		for _, value := range values {
+			c.Header(key, value)
+		}
+	}
+
+	headersToRemove := map[string]struct{}{
+		"Content-Security-Policy":   {},
+		"Referrer-Policy":           {},
+		"Strict-Transport-Security": {},
+	}
+
+	for header := range headersToRemove {
+		resp.Header.Del(header)
+	}
+
+	if cfg.CORS.Enabled {
+		c.Header("Access-Control-Allow-Origin", "*")
+	} else {
+		c.Header("Access-Control-Allow-Origin", "")
+	}
 
 	c.Status(resp.StatusCode)
 
