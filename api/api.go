@@ -20,8 +20,18 @@ var (
 	logError   = logger.LogError
 )
 
+func NoCacheMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// 设置禁止缓存的响应头
+		c.Header("Cache-Control", "no-store, no-cache, must-revalidate")
+		c.Header("Pragma", "no-cache")
+		c.Header("Expires", "0")
+		c.Next() // 继续处理请求
+	}
+}
+
 func InitHandleRouter(cfg *config.Config, router *gin.Engine, version string) {
-	apiRouter := router.Group("api")
+	apiRouter := router.Group("api", NoCacheMiddleware())
 	{
 		apiRouter.GET("/size_limit", func(c *gin.Context) {
 			SizeLimitHandler(cfg, c)
