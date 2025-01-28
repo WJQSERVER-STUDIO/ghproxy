@@ -6,6 +6,7 @@ import (
 	"ghproxy/config"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -48,11 +49,24 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
 	}
-	defer headResp.Body.Close()
 
-	if err := HandleResponseSize(headResp, cfg, c); err != nil {
-		logWarning("%s %s %s %s %s Response-Size-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
-		return
+	// defer headResp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			logError("Failed to close response body: %v", err)
+		}
+	}(headResp.Body)
+
+	contentLength := headResp.Header.Get("Content-Length")
+	sizelimit := cfg.Server.SizeLimit * 1024 * 1024
+	if contentLength != "" {
+		size, err := strconv.Atoi(contentLength)
+		if err == nil && size > sizelimit {
+			finalURL := headResp.Request.URL.String()
+			c.Redirect(http.StatusMovedPermanently, finalURL)
+			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto, finalURL, size)
+			return
+		}
 	}
 
 	body, err := readRequestBody(c)
@@ -77,14 +91,52 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
 	}
-	defer resp.Body.Close()
+	//defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			logError("Failed to close response body: %v", err)
+		}
+	}(resp.Body)
 
-	if err := HandleResponseSize(resp, cfg, c); err != nil {
-		logWarning("%s %s %s %s %s Response-Size-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
-		return
+	/*
+		if err := HandleResponseSize(resp, cfg, c); err != nil {
+			logWarning("%s %s %s %s %s Response-Size-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+			return
+		}
+	*/
+	contentLength = resp.Header.Get("Content-Length")
+	if contentLength != "" {
+		size, err := strconv.Atoi(contentLength)
+		if err == nil && size > sizelimit {
+			finalURL := resp.Request.URL.String()
+			c.Redirect(http.StatusMovedPermanently, finalURL)
+			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto, finalURL, size)
+			return
+		}
 	}
 
-	CopyResponseHeaders(resp, c, cfg)
+	for key, values := range resp.Header {
+		for _, value := range values {
+			c.Header(key, value)
+		}
+	}
+
+	headersToRemove := map[string]struct{}{
+		"Content-Security-Policy":   {},
+		"Referrer-Policy":           {},
+		"Strict-Transport-Security": {},
+	}
+
+	for header := range headersToRemove {
+		resp.Header.Del(header)
+	}
+
+	if cfg.CORS.Enabled {
+		c.Header("Access-Control-Allow-Origin", "*")
+	} else {
+		c.Header("Access-Control-Allow-Origin", "")
+	}
+
 	c.Status(resp.StatusCode)
 
 	if _, err := io.Copy(c.Writer, resp.Body); err != nil {
