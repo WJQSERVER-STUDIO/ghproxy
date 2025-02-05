@@ -17,7 +17,7 @@ jobs:
         goarch: [amd64, arm64]
     env:
       OUTPUT_BINARY: ghproxy
-      GO_VERSION: 1.23.5
+      GO_VERSION: 1.23.6
 
     steps:
       - uses: actions/checkout@v3
@@ -45,12 +45,6 @@ jobs:
           mv ./ghproxyd/${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}} ./ghproxyd/${{ env.OUTPUT_BINARY }}
           cp LICENSE ./ghproxyd/
           tar -czf ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}}.tar.gz -C ghproxyd .
-      - name: Upload to GitHub Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.OUTPUT_BINARY }}
-          path: |
-            ./${{ env.OUTPUT_BINARY }}*
       - name: 上传至Release
         id: create_release
         uses: ncipollo/release-action@v1
