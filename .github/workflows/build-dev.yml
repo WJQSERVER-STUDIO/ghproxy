@@ -48,6 +48,12 @@ jobs:
           cp LICENSE ./ghproxyd/
           tar -czf ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}}.tar.gz -C ghproxyd .
           ls
+      - name: 上传Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.OUTPUT_BINARY }}-${{matrix.goos}}-${{matrix.goarch}}
+          path: |
+            ./${{ env.OUTPUT_BINARY }}*
       - name: 上传至Release
         id: create_release
         uses: ncipollo/release-action@v1
