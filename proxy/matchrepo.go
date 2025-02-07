@@ -18,7 +18,7 @@ var (
 // 提取用户名和仓库名
 func MatchUserRepo(rawPath string, cfg *config.Config, c *gin.Context, matches []string) (string, string) {
 	if gistMatches := gistRegex.FindStringSubmatch(rawPath); len(gistMatches) == 3 {
-		logInfo("%s %s %s %s %s Matched-Username: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, gistMatches[1])
+		LogDump("%s %s %s %s %s Matched-Username: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, gistMatches[1])
 		return gistMatches[1], ""
 	}
 	// 定义路径

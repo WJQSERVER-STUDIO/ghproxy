@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"log"
 	"net/http"
 	"time"
 
@@ -40,6 +39,8 @@ var (
 
 var (
 	logw       = logger.Logw
+	LogDump    = logger.LogDump
+	logDebug   = logger.LogDebug
 	logInfo    = logger.LogInfo
 	logWarning = logger.LogWarning
 	logError   = logger.LogError
@@ -53,20 +54,24 @@ func loadConfig() {
 	var err error
 	cfg, err = config.LoadConfig(cfgfile)
 	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
+		fmt.Printf("Failed to load config: %v\n", err)
 	}
-	fmt.Println("Config File Path: ", cfgfile)
-	fmt.Printf("Loaded config: %v\n", cfg)
+	if cfg.Server.Debug {
+		fmt.Println("Config File Path: ", cfgfile)
+		fmt.Printf("Loaded config: %v\n", cfg)
+	}
 }
 
 func setupLogger(cfg *config.Config) {
 	var err error
 	err = logger.Init(cfg.Log.LogFilePath, cfg.Log.MaxLogSize)
 	if err != nil {
-		log.Fatalf("Failed to initialize logger: %v", err)
+		fmt.Printf("Failed to initialize logger: %v\n", err)
 	}
-	logInfo("Config File Path: ", cfgfile)
-	logInfo("Loaded config: %v\n", cfg)
+	logger.SetLogLevel(cfg.Log.Level)
+	fmt.Printf("Log Level: %s\n", cfg.Log.Level)
+	logDebug("Config File Path: ", cfgfile)
+	logDebug("Loaded config: %v\n", cfg)
 	logInfo("Init Completed")
 }
 
@@ -87,7 +92,6 @@ func setupRateLimit(cfg *config.Config) {
 		} else {
 			logError("Invalid RateLimit Method: %s", cfg.RateLimit.RateMethod)
 		}
-		logInfo("Rate Limit Loaded")
 	}
 }
 
@@ -116,6 +120,8 @@ func init() {
 		runMode = "release"
 	}
 
+	logDebug("Run Mode: %s", runMode)
+
 	gin.LoggerWithWriter(io.Discard)
 	router = gin.New()
 	router.Use(gin.Recovery())
@@ -141,7 +147,7 @@ func init() {
 	} else if !cfg.Pages.Enabled {
 		pages, err := fs.Sub(pagesFS, "pages")
 		if err != nil {
-			log.Fatalf("Failed when processing pages: %s", err)
+			logError("Failed when processing pages: %s", err)
 		}
 		router.GET("/", gin.WrapH(http.FileServer(http.FS(pages))))
 		router.GET("/favicon.ico", gin.WrapH(http.FileServer(http.FS(pages))))
@@ -152,6 +158,8 @@ func init() {
 	})
 
 	fmt.Printf("GHProxy Version: %s\n", version)
+	fmt.Printf("A Go Based High-Performance Github Proxy \n")
+	fmt.Printf("Made by WJQSERVER-STUDIO\n")
 }
 
 func main() {

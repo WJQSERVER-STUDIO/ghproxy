@@ -13,6 +13,8 @@ import (
 // 日志模块
 var (
 	logw       = logger.Logw
+	LogDump    = logger.LogDump
+	logDebug   = logger.LogDebug
 	logInfo    = logger.LogInfo
 	logWarning = logger.LogWarning
 	logError   = logger.LogError
@@ -31,6 +33,7 @@ var exps = []*regexp.Regexp{
 func readRequestBody(c *gin.Context) ([]byte, error) {
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
+		logError("failed to read request body: %v", err)
 		return nil, fmt.Errorf("failed to read request body: %v", err)
 	}
 	defer c.Request.Body.Close()
@@ -59,7 +62,7 @@ func SendRequest(c *gin.Context, req *req.Request, method, url string) (*req.Res
 
 func HandleError(c *gin.Context, message string) {
 	c.String(http.StatusInternalServerError, fmt.Sprintf("server error %v", message))
-	logWarning(message)
+	logError(message)
 }
 
 func CheckURL(u string, c *gin.Context) []string {
@@ -69,7 +72,7 @@ func CheckURL(u string, c *gin.Context) []string {
 		}
 	}
 	errMsg := fmt.Sprintf("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Request.Method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
-	logWarning(errMsg)
+	logError(errMsg)
 	return nil
 }
 

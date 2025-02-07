@@ -13,7 +13,7 @@ func AuthHeaderHandler(c *gin.Context, cfg *config.Config) (isValid bool, err st
 	}
 	// 获取"GH-Auth"的值
 	authToken := c.GetHeader("GH-Auth")
-	logInfo("%s %s %s %s %s AUTH_TOKEN: %s", c.Request.Method, c.Request.Host, c.Request.URL.Path, c.Request.Proto, c.Request.RemoteAddr, authToken)
+	logDebug("%s %s %s %s %s AUTH_TOKEN: %s", c.Request.Method, c.Request.Host, c.Request.URL.Path, c.Request.Proto, c.Request.RemoteAddr, authToken)
 	if authToken == "" {
 		err := "Auth Header == nil"
 		return false, err
@@ -25,6 +25,5 @@ func AuthHeaderHandler(c *gin.Context, cfg *config.Config) (isValid bool, err st
 		return false, err
 	}
 
-	logInfo("auth SUCCESS: %t", isValid)
 	return isValid, ""
 }

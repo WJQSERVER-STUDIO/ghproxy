@@ -12,6 +12,7 @@ staticDir = "/data/www"
 [log]
 logFilePath = "/data/ghproxy/log/ghproxy.log" 
 maxLogSize = 5 # MB
+level = "info" # dump, debug, info, warn, error, none
 
 [cors]
 enabled = true

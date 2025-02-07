@@ -54,12 +54,12 @@ func initChunkedHTTPClient() {
 
 func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string, runMode string) {
 	method := c.Request.Method
-	logInfo("%s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+	logInfo("%s %s %s %s %s Chunked-Proxy-Request", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 
 	// 发送HEAD请求, 预获取Content-Length
 	headReq, err := http.NewRequest("HEAD", u, nil)
 	if err != nil {
-		HandleError(c, fmt.Sprintf("创建HEAD请求失败: %v", err))
+		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
 	}
 	setRequestHeaders(c, headReq)
@@ -108,7 +108,7 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 	// 创建请求
 	req, err := http.NewRequest(method, u, bodyReader)
 	if err != nil {
-		HandleError(c, fmt.Sprintf("创建请求失败: %v", err))
+		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
 	}
 
@@ -118,7 +118,7 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 
 	resp, err := cclient.Do(req)
 	if err != nil {
-		HandleError(c, fmt.Sprintf("发送请求失败: %v", err))
+		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
 	}
 	defer resp.Body.Close()
@@ -171,7 +171,7 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 
 	_, err = io.CopyBuffer(c.Writer, resp.Body, buffer)
 	if err != nil {
-		logError("%s %s %s %s %s 响应复制错误: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+		logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 		return
 	} else {
 		c.Writer.Flush() // 确保刷入
