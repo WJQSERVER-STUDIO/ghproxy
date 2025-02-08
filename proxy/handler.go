@@ -14,6 +14,7 @@ import (
 
 func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter, runMode string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+
 		// 限制访问频率
 		if cfg.RateLimit.Enabled {
 

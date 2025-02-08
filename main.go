@@ -12,8 +12,10 @@ import (
 	"ghproxy/api"
 	"ghproxy/auth"
 	"ghproxy/config"
+	"ghproxy/loggin"
 	"ghproxy/proxy"
 	"ghproxy/rate"
+	"ghproxy/timing"
 
 	"github.com/WJQSERVER-STUDIO/go-utils/logger"
 
@@ -124,7 +126,16 @@ func init() {
 
 	gin.LoggerWithWriter(io.Discard)
 	router = gin.New()
+
+	// 添加recovery中间件
 	router.Use(gin.Recovery())
+
+	// 添加log中间件
+	router.Use(loggin.Middleware())
+
+	// 添加计时中间件
+	router.Use(timing.Middleware())
+
 	//H2C默认值为true，而后遵循cfg.Server.EnableH2C的设置
 	if cfg.Server.EnableH2C == "on" {
 		router.UseH2C = true
