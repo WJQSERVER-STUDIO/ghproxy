@@ -22,9 +22,9 @@ var (
 	BufferPool *sync.Pool
 )
 
-func InitReq() {
-	initChunkedHTTPClient()
-	initGitHTTPClient()
+func InitReq(cfg *config.Config) {
+	initChunkedHTTPClient(cfg)
+	initGitHTTPClient(cfg)
 
 	// 初始化固定大小的缓存池
 	BufferPool = &sync.Pool{
@@ -34,7 +34,7 @@ func InitReq() {
 	}
 }
 
-func initChunkedHTTPClient() {
+func initChunkedHTTPClient(cfg *config.Config) {
 	ctr = &http.Transport{
 		MaxIdleConns:          100,
 		MaxConnsPerHost:       60,
@@ -47,6 +47,7 @@ func initChunkedHTTPClient() {
 			KeepAlive: 30 * time.Second,
 		}).DialContext,
 	}
+	initTransport(cfg, ctr)
 	cclient = &http.Client{
 		Transport: ctr,
 	}

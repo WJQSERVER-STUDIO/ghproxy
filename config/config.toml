@@ -36,3 +36,7 @@ enabled = false
 rateMethod = "total" # "ip" or "total"
 ratePerMinute = 180
 burst = 5
+
+[proxy]
+enabled = false
+url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
