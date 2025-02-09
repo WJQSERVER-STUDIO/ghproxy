@@ -70,7 +70,10 @@ func setupLogger(cfg *config.Config) {
 	if err != nil {
 		fmt.Printf("Failed to initialize logger: %v\n", err)
 	}
-	logger.SetLogLevel(cfg.Log.Level)
+	err = logger.SetLogLevel(cfg.Log.Level)
+	if err != nil {
+		fmt.Printf("Logger Level Error: %v\n", err)
+	}
 	fmt.Printf("Log Level: %s\n", cfg.Log.Level)
 	logDebug("Config File Path: ", cfgfile)
 	logDebug("Loaded config: %v\n", cfg)
