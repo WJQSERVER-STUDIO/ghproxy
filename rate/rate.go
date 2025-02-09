@@ -10,6 +10,8 @@ import (
 // 日志输出
 var (
 	logw       = logger.Logw
+	LogDump    = logger.LogDump
+	logDebug   = logger.LogDebug
 	logInfo    = logger.LogInfo
 	logWarning = logger.LogWarning
 	logError   = logger.LogError
