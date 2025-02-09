@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux]
+        goos: [linux, darwin, freebsd]
         goarch: [amd64, arm64]
     env:
       OUTPUT_BINARY: ghproxy
