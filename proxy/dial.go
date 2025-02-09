@@ -9,16 +9,22 @@ import (
 	"golang.org/x/net/proxy"
 )
 
-func newProxyDial(prxoyUrls string) proxy.Dialer {
+func newProxyDial(proxyUrls string) proxy.Dialer {
 	var proxyDialer proxy.Dialer = proxy.Direct
-	for _, prxoyUrl := range strings.Split(prxoyUrls, ",") {
-		urlInfo, err := url.Parse(prxoyUrl)
+	for _, proxyUrl := range strings.Split(proxyUrls, ",") {
+		urlInfo, err := url.Parse(proxyUrl)
 		if err != nil {
-			return proxyDialer
+			continue
+		}
+		if urlInfo.Scheme != "socks5" {
+			continue
 		}
 		var auth *proxy.Auth = nil
 		if urlInfo.User != nil {
-			pwd, _ := urlInfo.User.Password()
+			pwd, ok := urlInfo.User.Password()
+			if !ok {
+				continue
+			}
 			auth = &proxy.Auth{
 				User:     urlInfo.User.Username(),
 				Password: pwd,
