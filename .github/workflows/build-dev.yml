@@ -9,8 +9,36 @@ on:
       - 'DEV-VERSION'
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: 加载版本号
+        run: |
+          if [ -f DEV-VERSION ]; then
+            echo "VERSION=$(cat DEV-VERSION)" >> $GITHUB_ENV
+          else
+            echo "DEV-VERSION file not found!" && exit 1
+          fi
+      - name: 输出版本号
+        run: | 
+          echo "Version: ${{ env.VERSION }}"
+      - name: 预先创建Pre-release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          name: ${{ env.VERSION }}
+          artifacts: ./DEV-VERSION
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.VERSION }}
+          allowUpdates: true
+          prerelease: true
+        env:
+          export PATH: $PATH:/usr/local/go/bin
+
   build:
     runs-on: ubuntu-latest
+    needs: prepare
     strategy:
       matrix:
         goos: [linux, darwin, freebsd]

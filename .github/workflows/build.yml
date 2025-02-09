@@ -9,8 +9,35 @@ on:
       - 'VERSION'
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: 加载版本号
+        run: |
+          if [ -f VERSION ]; then
+            echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV
+          else
+            echo "VERSION file not found!" && exit 1
+          fi
+      - name: 输出版本号
+        run: | 
+          echo "Version: ${{ env.VERSION }}"
+      - name: 预先创建release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          name: ${{ env.VERSION }}
+          artifacts: ./VERSION
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.VERSION }}
+          allowUpdates: true
+        env:
+          export PATH: $PATH:/usr/local/go/bin
+
   build:
     runs-on: ubuntu-latest
+    needs: prepare  # 确保这个作业在 prepare 作业完成后运行
     strategy:
       matrix:
         goos: [linux, darwin, freebsd]
