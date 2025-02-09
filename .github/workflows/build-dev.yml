@@ -33,6 +33,7 @@ jobs:
           tag: ${{ env.VERSION }}
           allowUpdates: true
           prerelease: true
+          body: ${{ env.VERSION }}
         env:
           export PATH: $PATH:/usr/local/go/bin
 

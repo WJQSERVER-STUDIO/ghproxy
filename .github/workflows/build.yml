@@ -32,6 +32,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ env.VERSION }}
           allowUpdates: true
+          body: ${{ env.VERSION }}
         env:
           export PATH: $PATH:/usr/local/go/bin
 
