@@ -47,7 +47,11 @@ func Middleware() gin.HandlerFunc {
 // 记录阶段耗时
 func Record(c *gin.Context, name string) {
 	if val, exists := c.Get("timing"); exists {
-		td := val.(*timingData)
+		//td := val.(*timingData)
+		td, ok := val.(*timingData)
+		if !ok {
+			return
+		}
 		if td.count < len(td.phases) {
 			td.phases[td.count].name = name
 			td.phases[td.count].dur = time.Since(td.start) // 直接记录当前时间
@@ -62,7 +66,11 @@ func Get(c *gin.Context) (total time.Duration, phases []struct {
 	Dur  time.Duration
 }) {
 	if val, exists := c.Get("timing"); exists {
-		td := val.(*timingData)
+		//td := val.(*timingData)
+		td, ok := val.(*timingData)
+		if !ok {
+			return
+		}
 		for i := 0; i < td.count; i++ {
 			phases = append(phases, struct {
 				Name string
