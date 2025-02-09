@@ -92,6 +92,7 @@ staticPath = "/data/www"  # 静态页面文件路径
 [log]
 logFilePath = "/data/ghproxy/log/ghproxy.log" # 日志文件路径
 maxLogSize = 5 # MB 日志文件最大大小
+level = "info"  # 日志级别 dump, debug, info, warn, error, none
 
 [cors]
 enabled = true  # 是否开启跨域

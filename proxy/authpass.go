@@ -11,6 +11,7 @@ func AuthPassThrough(c *gin.Context, cfg *config.Config, req *http.Request) {
 	if cfg.Auth.PassThrough {
 		token := c.Query("token")
 		if token != "" {
+			logDebug("%s %s %s %s %s Auth-PassThrough: token %s", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto, token)
 			switch cfg.Auth.AuthMethod {
 			case "parameters":
 				if !cfg.Auth.Enabled {

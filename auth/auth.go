@@ -9,6 +9,8 @@ import (
 
 var (
 	logw       = logger.Logw
+	LogDump    = logger.LogDump
+	logDebug   = logger.LogDebug
 	logInfo    = logger.LogInfo
 	logWarning = logger.LogWarning
 	logError   = logger.LogError
@@ -21,7 +23,7 @@ func Init(cfg *config.Config) {
 	if cfg.Whitelist.Enabled {
 		LoadWhitelist(cfg)
 	}
-	logInfo("Auth Init")
+	logDebug("Auth Init")
 }
 
 func AuthHandler(c *gin.Context, cfg *config.Config) (isValid bool, err string) {
@@ -32,10 +34,10 @@ func AuthHandler(c *gin.Context, cfg *config.Config) (isValid bool, err string) 
 		isValid, err = AuthHeaderHandler(c, cfg)
 		return isValid, err
 	} else if cfg.Auth.AuthMethod == "" {
-		logWarning("Auth method not set")
+		logError("Auth method not set")
 		return true, ""
 	} else {
-		logWarning("Auth method not supported")
+		logError("Auth method not supported")
 		return false, "Auth method not supported"
 	}
 }

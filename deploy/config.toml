@@ -8,6 +8,7 @@ debug = false
 [pages]
 enabled = false
 staticDir = "/usr/local/ghproxy/pages" 
+level = "info"
 
 [log]
 logFilePath = "/usr/local/ghproxy/log/ghproxy.log" 

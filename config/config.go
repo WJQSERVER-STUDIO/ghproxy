@@ -32,6 +32,7 @@ type PagesConfig struct {
 type LogConfig struct {
 	LogFilePath string `toml:"logFilePath"`
 	MaxLogSize  int    `toml:"maxLogSize"`
+	Level       string `toml:"level"`
 }
 
 type CORSConfig struct {

@@ -6,15 +6,16 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"log"
 	"net/http"
 	"time"
 
 	"ghproxy/api"
 	"ghproxy/auth"
 	"ghproxy/config"
+	"ghproxy/loggin"
 	"ghproxy/proxy"
 	"ghproxy/rate"
+	"ghproxy/timing"
 
 	"github.com/WJQSERVER-STUDIO/go-utils/logger"
 
@@ -40,6 +41,8 @@ var (
 
 var (
 	logw       = logger.Logw
+	LogDump    = logger.LogDump
+	logDebug   = logger.LogDebug
 	logInfo    = logger.LogInfo
 	logWarning = logger.LogWarning
 	logError   = logger.LogError
@@ -53,20 +56,27 @@ func loadConfig() {
 	var err error
 	cfg, err = config.LoadConfig(cfgfile)
 	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
+		fmt.Printf("Failed to load config: %v\n", err)
 	}
-	fmt.Println("Config File Path: ", cfgfile)
-	fmt.Printf("Loaded config: %v\n", cfg)
+	if cfg.Server.Debug {
+		fmt.Println("Config File Path: ", cfgfile)
+		fmt.Printf("Loaded config: %v\n", cfg)
+	}
 }
 
 func setupLogger(cfg *config.Config) {
 	var err error
 	err = logger.Init(cfg.Log.LogFilePath, cfg.Log.MaxLogSize)
 	if err != nil {
-		log.Fatalf("Failed to initialize logger: %v", err)
+		fmt.Printf("Failed to initialize logger: %v\n", err)
 	}
-	logInfo("Config File Path: ", cfgfile)
-	logInfo("Loaded config: %v\n", cfg)
+	err = logger.SetLogLevel(cfg.Log.Level)
+	if err != nil {
+		fmt.Printf("Logger Level Error: %v\n", err)
+	}
+	fmt.Printf("Log Level: %s\n", cfg.Log.Level)
+	logDebug("Config File Path: ", cfgfile)
+	logDebug("Loaded config: %v\n", cfg)
 	logInfo("Init Completed")
 }
 
@@ -87,7 +97,6 @@ func setupRateLimit(cfg *config.Config) {
 		} else {
 			logError("Invalid RateLimit Method: %s", cfg.RateLimit.RateMethod)
 		}
-		logInfo("Rate Limit Loaded")
 	}
 }
 
@@ -116,9 +125,20 @@ func init() {
 		runMode = "release"
 	}
 
+	logDebug("Run Mode: %s", runMode)
+
 	gin.LoggerWithWriter(io.Discard)
 	router = gin.New()
+
+	// 添加recovery中间件
 	router.Use(gin.Recovery())
+
+	// 添加log中间件
+	router.Use(loggin.Middleware())
+
+	// 添加计时中间件
+	router.Use(timing.Middleware())
+
 	//H2C默认值为true，而后遵循cfg.Server.EnableH2C的设置
 	if cfg.Server.EnableH2C == "on" {
 		router.UseH2C = true
@@ -141,7 +161,7 @@ func init() {
 	} else if !cfg.Pages.Enabled {
 		pages, err := fs.Sub(pagesFS, "pages")
 		if err != nil {
-			log.Fatalf("Failed when processing pages: %s", err)
+			logError("Failed when processing pages: %s", err)
 		}
 		router.GET("/", gin.WrapH(http.FileServer(http.FS(pages))))
 		router.GET("/favicon.ico", gin.WrapH(http.FileServer(http.FS(pages))))
@@ -152,6 +172,8 @@ func init() {
 	})
 
 	fmt.Printf("GHProxy Version: %s\n", version)
+	fmt.Printf("A Go Based High-Performance Github Proxy \n")
+	fmt.Printf("Made by WJQSERVER-STUDIO\n")
 }
 
 func main() {

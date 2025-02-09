@@ -1,5 +1,40 @@
 # 更新日志
 
+2.1.0
+---
+- RELEASE: v2.1.0正式版发布;
+- CHANGE: 加入`FreeBSD`与`Darwin`系统支持
+- CHANGE: 更新安全政策, v1和24w版本序列生命周期正式结束
+- ADD: 加入`timing`中间件记录响应时间
+- ADD: 加入`loggin`中间件包装日志输出
+- CHANGE: 更新logger版本至v1.3.0
+- CHANGE: 改进日志相关
+- ADD: 加入日志等级配置项
+
+25w12d
+---
+- PRE-RELEASE: 此版本是v2.1.0的预发布版本,请勿在生产环境中使用;
+- CHANGE: 处理类型断言相关问题
+
+25w12c
+---
+- PRE-RELEASE: 此版本是v2.1.0的预发布版本,请勿在生产环境中使用;
+- CHANGE: 加入`FreeBSD`与`Darwin`系统支持
+
+25w12b
+---
+- PRE-RELEASE: 此版本是v2.0.8/v2.1.0的预发布版本,请勿在生产环境中使用;
+- ADD: 加入`timing`中间件记录响应时间
+- ADD: 加入`loggin`中间件包装日志输出
+- CHANGE: 更新安全政策, v1和24w版本序列生命周期正式结束
+
+25w12a
+---
+- PRE-RELEASE: 此版本是v2.0.8/v2.1.0的预发布版本,请勿在生产环境中使用;
+- CHANGE: 更新logger版本至v1.3.0
+- CHANGE: 改进日志相关
+- ADD: 加入日志等级配置项
+
 2.0.7
 ---
 - RELEASE: v2.0.7正式版发布;

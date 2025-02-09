@@ -14,6 +14,7 @@ import (
 
 func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter, runMode string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+
 		// 限制访问频率
 		if cfg.RateLimit.Enabled {
 
@@ -54,6 +55,8 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		username, repo := MatchUserRepo(rawPath, cfg, c, matches) // 匹配用户名和仓库名
 
 		logInfo("%s %s %s %s %s Matched-Username: %s, Matched-Repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, username, repo)
+		// dump log 记录详细信息 c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, full Header
+		LogDump("%s %s %s %s %s %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, c.Request.Header)
 		repouser := fmt.Sprintf("%s/%s", username, repo)
 
 		// 白名单检查
@@ -83,7 +86,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		matches = CheckURL(rawPath, c)
 		if matches == nil {
 			c.AbortWithStatus(http.StatusNotFound)
-			logError("%s %s %s %s %s 404-NOMATCH", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+			logWarning("%s %s %s %s %s 404-NOMATCH", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 			return
 		}
 
@@ -91,7 +94,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		if exps[5].MatchString(rawPath) {
 			if cfg.Auth.AuthMethod != "header" || !cfg.Auth.Enabled {
 				c.JSON(http.StatusForbidden, gin.H{"error": "HeaderAuth is not enabled."})
-				logWarning("%s %s %s %s %s HeaderAuth-Error: HeaderAuth is not enabled.", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+				logError("%s %s %s %s %s HeaderAuth-Error: HeaderAuth is not enabled.", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 				return
 			}
 		}
@@ -110,7 +113,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		}
 
 		// IP METHOD URL USERAGENT PROTO MATCHES
-		logInfo("%s %s %s %s %s Matches: %v", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, matches)
+		logDebug("%s %s %s %s %s Matches: %v", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, matches)
 
 		switch {
 		case exps[0].MatchString(rawPath), exps[1].MatchString(rawPath), exps[3].MatchString(rawPath), exps[4].MatchString(rawPath):

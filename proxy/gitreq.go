@@ -39,7 +39,7 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 	// 发送HEAD请求, 预获取Content-Length
 	headReq, err := http.NewRequest("HEAD", u, nil)
 	if err != nil {
-		HandleError(c, fmt.Sprintf("创建HEAD请求失败: %v", err))
+		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
 	}
 	setRequestHeaders(c, headReq)
@@ -81,7 +81,7 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 	// 创建请求
 	req, err := http.NewRequest(method, u, bodyReader)
 	if err != nil {
-		HandleError(c, fmt.Sprintf("创建请求失败: %v", err))
+		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
 	}
 	setRequestHeaders(c, req)
