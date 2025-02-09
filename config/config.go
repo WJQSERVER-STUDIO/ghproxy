@@ -13,6 +13,7 @@ type Config struct {
 	Blacklist BlacklistConfig
 	Whitelist WhitelistConfig
 	RateLimit RateLimitConfig
+	Proxy     ProxyConfig
 }
 
 type ServerConfig struct {
@@ -59,6 +60,11 @@ type RateLimitConfig struct {
 	RateMethod    string `toml:"rateMethod"`
 	RatePerMinute int    `toml:"ratePerMinute"`
 	Burst         int    `toml:"burst"`
+}
+
+type ProxyConfig struct {
+	Enabled bool   `toml:"enabled"`
+	Url     string `toml:"url"`
 }
 
 // LoadConfig 从 TOML 配置文件加载配置

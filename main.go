@@ -91,8 +91,8 @@ func setupRateLimit(cfg *config.Config) {
 	}
 }
 
-func InitReq() {
-	proxy.InitReq()
+func InitReq(cfg *config.Config) {
+	proxy.InitReq(cfg)
 }
 
 func init() {
@@ -100,7 +100,7 @@ func init() {
 	flag.Parse()
 	loadConfig()
 	setupLogger(cfg)
-	InitReq()
+	InitReq(cfg)
 	loadlist(cfg)
 	setupRateLimit(cfg)
 
