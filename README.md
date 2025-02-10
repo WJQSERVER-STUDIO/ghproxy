@@ -116,9 +116,9 @@ rateMethod = "total" # "ip" or "total" 速率限制方式
 ratePerMinute = 180  # 每分钟限制请求数量
 burst = 5  # 突发请求数量
 
-[proxy]
-enabled = false # 是否使用代理连接
-url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890" 支持HTTP代理和SOCKS5代理 支持多级SOCKS5代理
+[outbound]
+enabled = false # 是否使用自定义代理出站
+url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890" 支持Socks5/HTTP(S)出站传输
 ```
 
 ### 黑名单配置

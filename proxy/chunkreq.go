@@ -47,7 +47,9 @@ func initChunkedHTTPClient(cfg *config.Config) {
 			KeepAlive: 30 * time.Second,
 		}).DialContext,
 	}
-	initTransport(cfg, ctr)
+	if cfg.Outbound.Enabled {
+		initTransport(cfg, ctr)
+	}
 	cclient = &http.Client{
 		Transport: ctr,
 	}

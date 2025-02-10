@@ -23,7 +23,9 @@ func initGitHTTPClient(cfg *config.Config) {
 		MaxConnsPerHost: 30,
 		IdleConnTimeout: 30 * time.Second,
 	}
-	initTransport(cfg, gtr)
+	if cfg.Outbound.Enabled {
+		initTransport(cfg, ctr)
+	}
 	gclient = &http.Client{
 		Transport: gtr,
 	}

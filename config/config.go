@@ -13,7 +13,7 @@ type Config struct {
 	Blacklist BlacklistConfig
 	Whitelist WhitelistConfig
 	RateLimit RateLimitConfig
-	Proxy     ProxyConfig
+	Outbound  OutboundConfig
 }
 
 type ServerConfig struct {
@@ -63,7 +63,12 @@ type RateLimitConfig struct {
 	Burst         int    `toml:"burst"`
 }
 
-type ProxyConfig struct {
+/*
+[outbound]
+enabled = false
+url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
+*/
+type OutboundConfig struct {
 	Enabled bool   `toml:"enabled"`
 	Url     string `toml:"url"`
 }
