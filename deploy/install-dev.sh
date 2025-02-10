@@ -73,8 +73,51 @@ if [ -z "$ghproxy_dir" ]; then
     ghproxy_dir="/usr/local/ghproxy"
 fi
 
-make_systemd_service() {
+# 创建目录
+mkdir -p ${ghproxy_dir}
+mkdir -p ${ghproxy_dir}/config
+mkdir -p ${ghproxy_dir}/log
+mkdir -p ${ghproxy_dir}/pages
+
+# 获取最新版本号
+VERSION=$(curl -s https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/dev/DEV-VERSION)
+wget -q -O ${ghproxy_dir}/VERSION https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/dev/DEV-VERSION
+
+# 下载ghproxy
+wget -q -O ${ghproxy_dir}/ghproxy-linux-$ARCH.tar.gz https://github.com/WJQSERVER-STUDIO/ghproxy/releases/download/$VERSION/ghproxy-linux-$ARCH.tar.gz
+install tar
+tar -zxvf ${ghproxy_dir}/ghproxy-linux-$ARCH.tar.gz -C ${ghproxy_dir}
+chmod +x ${ghproxy_dir}/ghproxy
+
+# 下载pages
+wget -q -O ${ghproxy_dir}/pages/index.html https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/dev/pages/index.html
+wget -q -O ${ghproxy_dir}/pages/favicon.ico https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/dev/pages/favicon.ico
+
+
+# 下载配置文件
+if [ -f ${ghproxy_dir}/config/config.toml ]; then
+    echo "配置文件已存在, 跳过下载"
+    echo "[WARNING] 请检查配置文件是否正确，DEV版本升级时请注意配置文件兼容性"
+    sleep 2
+else
+    wget -q -O ${ghproxy_dir}/config/config.toml https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/dev/deploy/config.toml
+fi
+
+# 替换 port = 8080 
+sed -i "s/port = 8080/port = $PORT/g" ${ghproxy_dir}/config/config.toml
+sed -i 's/host = "127.0.0.1"/host = "'"$IP"'"/g' ${ghproxy_dir}/config/config.toml
+sed -i "s|staticDir = \"/usr/local/ghproxy/pages\"|staticDir = \"${ghproxy_dir}/pages\"|g" ${ghproxy_dir}/config/config.toml
+sed -i "s|logFilePath = \"/usr/local/ghproxy/log/ghproxy.log\"|logFilePath = \"${ghproxy_dir}/log/ghproxy.log\"|g" ${ghproxy_dir}/config/config.toml
+sed -i "s|blacklistFile = \"/usr/local/ghproxy/config/blacklist.json\"|blacklistFile = \"${ghproxy_dir}/config/blacklist.json\"|g" ${ghproxy_dir}/config/config.toml
+sed -i "s|whitelistFile = \"/usr/local/ghproxy/config/whitelist.json\"|whitelistFile = \"${ghproxy_dir}/config/whitelist.json\"|g" ${ghproxy_dir}/config/config.toml
+
+# 下载systemd服务文件
+if [ "$ghproxy_dir" = "/usr/local/ghproxy" ]; then
+    wget -q -O /etc/systemd/system/ghproxy.service https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/dev/deploy/ghproxy.service
+else
+
     cat <<EOF > /etc/systemd/system/ghproxy.service
+
 [Unit]
 Description=Github Proxy Service
 After=network.target
@@ -91,51 +134,6 @@ WantedBy=multi-user.target
 
 EOF
 
-}
-
-# 创建目录
-mkdir -p ${ghproxy_dir}
-mkdir -p ${ghproxy_dir}/config
-mkdir -p ${ghproxy_dir}/log
-mkdir -p ${ghproxy_dir}/pages
-
-# 获取最新版本号
-VERSION=$(curl -s https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/DEV-VERSION)
-wget -q -O ${ghproxy_dir}/VERSION https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/DEV-VERSION
-
-# 下载ghproxy
-wget -q -O ${ghproxy_dir}/ghproxy https://github.com/WJQSERVER-STUDIO/ghproxy/releases/download/$VERSION/ghproxy-linux-$ARCH.tar.gz
-install tar
-tar -zxvf ${ghproxy_dir}/ghproxy-linux-$ARCH.tar.gz -C ${ghproxy_dir}
-chmod +x ${ghproxy_dir}/ghproxy
-
-# 下载pages
-wget -q -O ${ghproxy_dir}/pages/index.html https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/pages/index.html
-wget -q -O ${ghproxy_dir}/pages/favicon.ico https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/pages/favicon.ico
-
-
-# 下载配置文件
-if [ -f ${ghproxy_dir}/config/config.toml ]; then
-    echo "配置文件已存在, 跳过下载"
-    echo "[WARNING] 请检查配置文件是否正确，DEV版本升级时请注意配置文件兼容性"
-    sleep 2
-else
-    wget -q -O ${ghproxy_dir}/config/config.toml https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/config.toml
-fi
-
-# 替换 port = 8080 
-sed -i "s/port = 8080/port = $PORT/g" ${ghproxy_dir}/config/config.toml
-sed -i 's/host = "127.0.0.1"/host = "'"$IP"'"/g' ${ghproxy_dir}/config/config.toml
-sed -i "s|staticDir = \"/usr/local/ghproxy/pages\"|staticDir = \"${ghproxy_dir}/pages\"|g" ${ghproxy_dir}/config/config.toml
-sed -i "s|logFilePath = \"/usr/local/ghproxy/log/ghproxy.log\"|logFilePath = \"${ghproxy_dir}/log/ghproxy.log\"|g" ${ghproxy_dir}/config/config.toml
-sed -i "s|blacklistFile = \"/usr/local/ghproxy/config/blacklist.json\"|blacklistFile = \"${ghproxy_dir}/config/blacklist.json\"|g" ${ghproxy_dir}/config/config.toml
-sed -i "s|whitelistFile = \"/usr/local/ghproxy/config/whitelist.json\"|whitelistFile = \"${ghproxy_dir}/config/whitelist.json\"|g" ${ghproxy_dir}/config/config.toml
-
-# 下载systemd服务文件
-if [ "$ghproxy_dir" = "/usr/local/ghproxy" ]; then
-    wget -q -O /etc/systemd/system/ghproxy.service https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/ghproxy.service
-else
-    make_systemd_service()
 fi
 
 # 启动ghproxy
