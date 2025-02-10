@@ -8,11 +8,11 @@ debug = false
 [pages]
 enabled = false
 staticDir = "/usr/local/ghproxy/pages" 
-level = "info"
 
 [log]
 logFilePath = "/usr/local/ghproxy/log/ghproxy.log" 
 maxLogSize = 5 # MB
+level = "info" # dump, debug, info, warn, error, none
 
 [cors]
 enabled = true
