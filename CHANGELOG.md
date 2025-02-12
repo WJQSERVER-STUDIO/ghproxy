@@ -1,5 +1,12 @@
 # 更新日志
 
+2.2.0
+---
+- RELEASE: v2.2.0正式版发布;
+- CHANGE: 更新Go版本至1.24.0
+- ADD: 加入`Socks5`和`HTTP(S)`出站支持
+- CHANGE: 配置新增`Outbound`配置块
+
 25w13b
 ---
 - PRE-RELEASE: 此版本是v2.2.0的预发布版本,请勿在生产环境中使用;
