@@ -170,3 +170,15 @@ example.com {
 
 ![ghproxy-demo.png](https://webp.wjqserver.com/ghproxy/1.8.1-light.png)
 ![ghproxy-demo-dark.png](https://webp.wjqserver.com/ghproxy/1.8.1-dark.png)
+
+## 赞助
+
+如果您觉得本项目对您有帮助,欢迎赞助支持,您的赞助将用于Demo服务器开支及开发者时间成本支出,感谢您的支持!
+
+为爱发电,开源不易
+
+爱发电: https://afdian.com/a/wjqserver
+
+### 捐赠列表
+
+虚位以待...
