@@ -4,26 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub 文件加速服务</title>
+    <title>GitHub加速服务</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #2563eb;
-            --secondary: #3b82f6;
-            --background: #f8fafc;
+            --primary: #007aff;
+            --secondary: #007aff;
+            --background: #f9f9f9;
             --card-bg: #ffffff;
-            --text: #1e293b;
-            --border: #e2e8f0;
+            --text: #333333;
+            --border: #d1d1d6;
             --muted: #64748b;
-            --success: #22c55e;
-            --danger: #ef4444;
+            --success: #00a83ed2;
+            --danger: #ce0000dd;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --background: #0f172a;
-                --card-bg: #1e293b;
-                --text: #f8fafc;
+                --background: #121212;
+                --card-bg: #1e1e1e;
+                --text: #ffffff;
                 --border: #334155;
                 --muted: #94a3b8;
             }
@@ -128,6 +128,21 @@
             color: var(--muted);
         }
 
+        .toast {
+            position: fixed;
+            top: 1%;
+            right: 1%;
+            background-color: var(--card-background);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .toast-body {
+            padding: 12px;
+        }
+
         #version {
             text-align: center;
             font-size: 13px;
@@ -141,7 +156,7 @@
     <div class="container py-4 py-lg-5">
         <!-- 头部 -->
         <header class="text-center mb-5">
-            <h1 class="display-5 fw-bold mb-3">GitHub 文件加速服务</h1>
+            <h1 class="display-5 fw-bold mb-3">GitHub加速服务</h1>
             <p class="lead text-muted">高速稳定的 GitHub 资源访问解决方案</p>
         </header>
 
@@ -218,11 +233,11 @@
             <div class="guide-section">
                 <h3 class="h5 fw-semibold mb-3">支持的工具</h3>
                 <ul class="list-unstyled">
-                    <li class="mb-2">✅ 终端工具：Git / Wget / Curl</li>
                     <li class="mb-2">✅ 支持域名：github.com</li>
                     <li class="mb-2">✅ 支持域名：raw.githubusercontent.com</li>
                     <li class="mb-2">✅ 支持域名：gist.githubusercontent.com</li>
-                    <li class="text-muted">❌ 不支持 SSH 协议克隆</li>
+                    <li class="mb-2">✅ 支持HTTPS Git Clone</li>
+                    <li class="text-muted">❌ 不支持 SSH Git Clone</li>
                 </ul>
             </div>
 
@@ -280,13 +295,20 @@
                                 class="d-block text-muted fs-sm">https://gist.githubusercontent.com/user/gist_id/raw/file.txt</code>
                         </div>
                     </div>
+
+                    <div class="col-md-6">
+                        <div class="main-card p-3">
+                            <h4 class="h6 fw-medium mb-2">HTTPS Git Clone</h4>
+                            <code class="d-block text-muted fs-sm">https://github.com/user/repo.git</code>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <footer class="text-center mt-5 text-muted">
-            <p class="mb-0 small" id="version">Version </p>
-            <p class="mb-0 small">Copyright © 2020 - <span id="currentYear"></span> WJQSERVER-STUDIO<br>
+            <p class="mb-0 small" id="version">v </p>
+            <p class="mb-0 small">Copyright © 2024 - <span id="currentYear"></span> WJQSERVER-STUDIO<br>
                 <a href="https://github.com/WJQSERVER-STUDIO/ghproxy" class="text-decoration-none">GitHub 仓库</a> |
                 <a href="https://t.me/ghproxy_go" class="text-decoration-none">Telegram 交流群</a>
             </p>
