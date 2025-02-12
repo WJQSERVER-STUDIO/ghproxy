@@ -17,11 +17,14 @@ var (
 	gtr     *http.Transport
 )
 
-func initGitHTTPClient() {
+func initGitHTTPClient(cfg *config.Config) {
 	gtr = &http.Transport{
 		MaxIdleConns:    30,
 		MaxConnsPerHost: 30,
 		IdleConnTimeout: 30 * time.Second,
+	}
+	if cfg.Outbound.Enabled {
+		initTransport(cfg, gtr)
 	}
 	gclient = &http.Client{
 		Transport: gtr,

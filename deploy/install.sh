@@ -73,26 +73,6 @@ if [ -z "$ghproxy_dir" ]; then
     ghproxy_dir="/usr/local/ghproxy"
 fi
 
-make_systemd_service() {
-    cat <<EOF > /etc/systemd/system/ghproxy.service
-[Unit]
-Description=Github Proxy Service
-After=network.target
-
-[Service]
-ExecStart=/bin/bash -c '$ghproxy_dir/ghproxy -cfg $ghproxy_dir/config/config.toml > $ghproxy_dir/log/run.log 2>&1'
-WorkingDirectory=$ghproxy_dir
-Restart=always
-User=root
-Group=root
-
-[Install]
-WantedBy=multi-user.target
-
-EOF
-
-}
-
 # 创建目录
 mkdir -p ${ghproxy_dir}
 mkdir -p ${ghproxy_dir}/config
@@ -104,7 +84,7 @@ VERSION=$(curl -s https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/mai
 wget -q -O ${ghproxy_dir}/VERSION https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/VERSION
 
 # 下载ghproxy
-wget -q -O ${ghproxy_dir}/ghproxy https://github.com/WJQSERVER-STUDIO/ghproxy/releases/download/${VERSION}/ghproxy-linux-${ARCH}.tar.gz
+wget -q -O ${ghproxy_dir}/ghproxy-linux-$ARCH.tar.gz https://github.com/WJQSERVER-STUDIO/ghproxy/releases/download/${VERSION}/ghproxy-linux-${ARCH}.tar.gz
 install tar
 tar -zxvf ${ghproxy_dir}/ghproxy-linux-$ARCH.tar.gz -C ${ghproxy_dir}
 chmod +x ${ghproxy_dir}/ghproxy
@@ -135,7 +115,25 @@ sed -i "s|whitelistFile = \"/usr/local/ghproxy/config/whitelist.json\"|whitelist
 if [ "$ghproxy_dir" = "/usr/local/ghproxy" ]; then
     wget -q -O /etc/systemd/system/ghproxy.service https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/ghproxy.service
 else
-    make_systemd_service()
+
+    cat <<EOF > /etc/systemd/system/ghproxy.service
+
+[Unit]
+Description=Github Proxy Service
+After=network.target
+
+[Service]
+ExecStart=/bin/bash -c '$ghproxy_dir/ghproxy -cfg $ghproxy_dir/config/config.toml > $ghproxy_dir/log/run.log 2>&1'
+WorkingDirectory=$ghproxy_dir
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+
+EOF
+
 fi
 
 # 启动ghproxy

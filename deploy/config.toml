@@ -2,17 +2,17 @@
 host = "127.0.0.1" 
 port = 8080 
 sizeLimit = 125 # MB
-enableH2C = false
+enableH2C = "on"
 debug = false
 
 [pages]
 enabled = false
 staticDir = "/usr/local/ghproxy/pages" 
-level = "info"
 
 [log]
 logFilePath = "/usr/local/ghproxy/log/ghproxy.log" 
 maxLogSize = 5 # MB
+level = "info" # dump, debug, info, warn, error, none
 
 [cors]
 enabled = true
@@ -36,3 +36,7 @@ enabled = false
 rateMethod = "total" # "ip" or "total"
 ratePerMinute = 180
 burst = 5
+
+[outbound]
+enabled = false
+url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"

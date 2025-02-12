@@ -13,6 +13,7 @@ type Config struct {
 	Blacklist BlacklistConfig
 	Whitelist WhitelistConfig
 	RateLimit RateLimitConfig
+	Outbound  OutboundConfig
 }
 
 type ServerConfig struct {
@@ -60,6 +61,16 @@ type RateLimitConfig struct {
 	RateMethod    string `toml:"rateMethod"`
 	RatePerMinute int    `toml:"ratePerMinute"`
 	Burst         int    `toml:"burst"`
+}
+
+/*
+[outbound]
+enabled = false
+url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
+*/
+type OutboundConfig struct {
+	Enabled bool   `toml:"enabled"`
+	Url     string `toml:"url"`
 }
 
 // LoadConfig 从 TOML 配置文件加载配置

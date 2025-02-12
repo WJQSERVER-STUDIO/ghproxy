@@ -71,6 +71,12 @@ docker run -p 7210:8080 -v ./ghproxy/log/run:/data/ghproxy/log -v ./ghproxy/log/
 wget -O install.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/deploy/install.sh && chmod +x install.sh &&./install.sh
 ```
 
+Dev一键部署脚本:
+
+```bash
+wget -O install-dev.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/dev/deploy/install-dev.sh && chmod +x install-dev.sh && ./install-dev.sh
+```
+
 ## 配置说明
 
 ### 外部配置文件
@@ -115,6 +121,10 @@ enabled = false  # 是否开启速率限制
 rateMethod = "total" # "ip" or "total" 速率限制方式
 ratePerMinute = 180  # 每分钟限制请求数量
 burst = 5  # 突发请求数量
+
+[outbound]
+enabled = false # 是否使用自定义代理出站
+url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890" 支持Socks5/HTTP(S)出站传输
 ```
 
 ### 黑名单配置
@@ -160,3 +170,15 @@ example.com {
 
 ![ghproxy-demo.png](https://webp.wjqserver.com/ghproxy/1.8.1-light.png)
 ![ghproxy-demo-dark.png](https://webp.wjqserver.com/ghproxy/1.8.1-dark.png)
+
+## 赞助
+
+如果您觉得本项目对您有帮助,欢迎赞助支持,您的赞助将用于Demo服务器开支及开发者时间成本支出,感谢您的支持!
+
+为爱发电,开源不易
+
+爱发电: https://afdian.com/a/wjqserver
+
+### 捐赠列表
+
+虚位以待...
