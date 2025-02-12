@@ -228,25 +228,21 @@
 
             <div class="guide-section">
                 <h3 class="h5 fw-semibold mb-3">基础用法示例</h3>
-
                 <div class="command-example">
                     <h4 class="h6 fw-medium mb-2">Git 克隆</h4>
                     <code
-                        class="d-block mb-3">git clone https://<span>example.com</span>/https://github.com/user/project.git</code>
-
+                        class="d-block mb-3">git clone <span class="protocol">https</span>://<span class="host">example.com</span>/https://github.com/user/project.git</code>
                     <h4 class="h6 fw-medium mb-2">私有仓库克隆</h4>
                     <code
-                        class="d-block">git clone https://user:your_token@<span>example.com</span>/https://github.com/user/project.git</code>
+                        class="d-block">git clone <span class="protocol">https</span>://user:your_token@<span class="host">example.com</span>/https://github.com/user/project.git</code>
                 </div>
-
                 <div class="command-example">
                     <h4 class="h6 fw-medium mb-2">文件下载</h4>
                     <code
-                        class="d-block mb-3">wget https://<span>example.com</span>/https://raw.githubusercontent.com/user/project/main/README.md</code>
-
+                        class="d-block mb-3">wget <span class="protocol">https</span>://<span class="host">example.com</span>/https://raw.githubusercontent.com/user/project/main/README.md</code>
                     <h4 class="h6 fw-medium mb-2">版本发布</h4>
                     <code
-                        class="d-block">curl -LO https://<span>example.com</span>/https://github.com/user/project/releases/download/v1.0.0./project_1.0.0.amd64.tar.gz</code>
+                        class="d-block">curl -LO <span class="protocol">https</span>://<span class="host">example.com</span>/https://github.com/user/project/releases/download/v1.0.0/project_1.0.0.amd64.tar.gz</code>
                 </div>
             </div>
 
@@ -319,13 +315,17 @@
             const input = document.getElementById('inputUrl');
             const output = document.getElementById('output');
             const outputLink = document.getElementById('outputLink');
+
             // 获取当前域名
+            const CURRENT_PROTOCOL = window.location.protocol.replace(':', '');
             const CURRENT_HOST = window.location.host;
-            document.querySelectorAll('code').forEach(code => {
-                const spanElement = code.querySelector('span');
-                if (spanElement) {
-                    spanElement.textContent = CURRENT_HOST;
-                }
+            // 替换协议部分
+            document.querySelectorAll('code .protocol').forEach(span => {
+                span.textContent = CURRENT_PROTOCOL;
+            });
+            // 替换域名部分
+            document.querySelectorAll('code .host').forEach(span => {
+                span.textContent = CURRENT_HOST;
             });
 
             // URL 转换规则
