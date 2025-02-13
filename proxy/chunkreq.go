@@ -132,6 +132,12 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 		}
 	*/
 
+	// 错误处理(404)
+	if resp.StatusCode == 404 {
+		c.String(http.StatusNotFound, "File Not Found")
+		return
+	}
+
 	contentLength = resp.Header.Get("Content-Length")
 	if contentLength != "" {
 		size, err := strconv.Atoi(contentLength)
