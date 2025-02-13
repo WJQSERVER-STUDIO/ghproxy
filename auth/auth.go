@@ -18,7 +18,7 @@ var (
 
 func Init(cfg *config.Config) {
 	if cfg.Blacklist.Enabled {
-		LoadBlacklist(cfg)
+		InitBlacklist(cfg)
 	}
 	if cfg.Whitelist.Enabled {
 		LoadWhitelist(cfg)

@@ -1,7 +1,7 @@
 {
   "blacklist": [
-    "black/list",
-    "test/test1",
-    "example/*"
+    "eviluser",
+    "spamuser/bad-repo",
+    "malwareuser/*"
   ]
 }
