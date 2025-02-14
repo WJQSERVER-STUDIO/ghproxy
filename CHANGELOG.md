@@ -1,5 +1,13 @@
 # 更新日志
 
+25w14t-1
+---
+- PRE-RELEASE: 此版本是测试验证版本,请勿在生产环境中使用;
+- CHANGE: 使用`touka-httpc`封装`HTTP Client`
+- CHANGE: 重构前端页面, 见[#49](https://github.com/WJQSERVER-STUDIO/ghproxy/pull/49)
+- CHANGE: 重构`blacklist`实现
+- CHANGE: 优化404处理
+
 2.2.0
 ---
 - RELEASE: v2.2.0正式版发布;

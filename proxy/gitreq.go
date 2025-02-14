@@ -10,10 +10,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	httpc "github.com/satomitouka/touka-httpc"
 )
 
 var (
-	gclient *http.Client
+	gclient *httpc.Client
 	gtr     *http.Transport
 )
 
@@ -26,20 +27,22 @@ func initGitHTTPClient(cfg *config.Config) {
 	if cfg.Outbound.Enabled {
 		initTransport(cfg, gtr)
 	}
-	gclient = &http.Client{
-		Transport: gtr,
-	}
+	/*
+		gclient = &http.Client{
+			Transport: gtr,
+		}
+	*/
+	gclient = httpc.New(
+		httpc.WithTransport(gtr),
+	)
 }
 
 func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode string) {
 	method := c.Request.Method
 	logInfo("%s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 
-	// 创建HTTP客户端
-	//client := &http.Client{}
-
 	// 发送HEAD请求, 预获取Content-Length
-	headReq, err := http.NewRequest("HEAD", u, nil)
+	headReq, err := gclient.NewRequest("HEAD", u, nil)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
@@ -81,7 +84,7 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 	bodyReader := bytes.NewBuffer(body)
 
 	// 创建请求
-	req, err := http.NewRequest(method, u, bodyReader)
+	req, err := gclient.NewRequest(method, u, bodyReader)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
@@ -101,12 +104,6 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 		}
 	}(resp.Body)
 
-	/*
-		if err := HandleResponseSize(resp, cfg, c); err != nil {
-			logWarning("%s %s %s %s %s Response-Size-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
-			return
-		}
-	*/
 	contentLength = resp.Header.Get("Content-Length")
 	if contentLength != "" {
 		size, err := strconv.Atoi(contentLength)

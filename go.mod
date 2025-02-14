@@ -6,6 +6,7 @@ require (
 	github.com/BurntSushi/toml v1.4.0
 	github.com/WJQSERVER-STUDIO/go-utils/logger v1.3.0
 	github.com/gin-gonic/gin v1.10.0
+	github.com/satomitouka/touka-httpc v0.0.3
 	golang.org/x/net v0.35.0
 	golang.org/x/time v0.10.0
 )
