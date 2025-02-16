@@ -27,6 +27,8 @@ github.com/go-playground/universal-translator v0.18.1 h1:Bcnm0ZwsGyWbCzImXv+pAJn
 github.com/go-playground/universal-translator v0.18.1/go.mod h1:xekY+UJKNuX9WP91TpwSH2VMlDf28Uj24BCp08ZFTUY=
 github.com/go-playground/validator/v10 v10.24.0 h1:KHQckvo8G6hlWnrPX4NJJ+aBfWNAE/HH+qdL2cBpCmg=
 github.com/go-playground/validator/v10 v10.24.0/go.mod h1:GGzBIJMuE98Ic/kJsBXbz1x/7cByt++cQ+YOuDM5wus=
+github.com/go-playground/validator/v10 v10.25.0 h1:5Dh7cjvzR7BRZadnsVOzPhWsrwUr0nmsZJxEAnFLNO8=
+github.com/go-playground/validator/v10 v10.25.0/go.mod h1:GGzBIJMuE98Ic/kJsBXbz1x/7cByt++cQ+YOuDM5wus=
 github.com/goccy/go-json v0.10.5 h1:Fq85nIqj+gXn/S5ahsiTlK3TmC85qgirsdTP/+DeaC4=
 github.com/goccy/go-json v0.10.5/go.mod h1:oq7eo15ShAhp70Anwd5lgX2pLfOS3QCiwU/PULtXL6M=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
@@ -53,6 +55,18 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/satomitouka/touka-httpc v0.0.3 h1:SLb14DWBIDeIaNQ0wMwRwJMjUDakHVR1Jbdct3Qi8fA=
 github.com/satomitouka/touka-httpc v0.0.3/go.mod h1:ULB/0Ze0Apm46YKl35Jmj1hW5YLVVeOGqCqn+ijqGPM=
+github.com/satomitouka/touka-httpc v0.0.4 h1:sZs/2kqTSyLQ/pDHs/71l7MSG46j4rZNKfqn3CFAboU=
+github.com/satomitouka/touka-httpc v0.0.4/go.mod h1:ULB/0Ze0Apm46YKl35Jmj1hW5YLVVeOGqCqn+ijqGPM=
+github.com/satomitouka/touka-httpc v0.0.5 h1:ov1v29vrjvwRNbGqFJHmrCp+3/qXLoyWubO4kTDvb28=
+github.com/satomitouka/touka-httpc v0.0.5/go.mod h1:ULB/0Ze0Apm46YKl35Jmj1hW5YLVVeOGqCqn+ijqGPM=
+github.com/satomitouka/touka-httpc v0.0.6 h1:1iSaTB9KpviXy2NHvMXuRzy5mkcvle+fktWPhpS907c=
+github.com/satomitouka/touka-httpc v0.0.6/go.mod h1:ULB/0Ze0Apm46YKl35Jmj1hW5YLVVeOGqCqn+ijqGPM=
+github.com/satomitouka/touka-httpc v0.0.7 h1:igoLqXs6R1yNIdKMcfpwRB1l6KLLus6DvWT3xL1T5FY=
+github.com/satomitouka/touka-httpc v0.0.7/go.mod h1:ULB/0Ze0Apm46YKl35Jmj1hW5YLVVeOGqCqn+ijqGPM=
+github.com/satomitouka/touka-httpc v0.0.8 h1:KW521Z2z9BarnTgCajug/W/tIbnoIH+CzA7CON19iAg=
+github.com/satomitouka/touka-httpc v0.0.8/go.mod h1:ULB/0Ze0Apm46YKl35Jmj1hW5YLVVeOGqCqn+ijqGPM=
+github.com/satomitouka/touka-httpc v0.1.0 h1:CXCsr6NhdskK/W/ezvhwK2CP8QGCxewkBhsEjrM7K8s=
+github.com/satomitouka/touka-httpc v0.1.0/go.mod h1:ULB/0Ze0Apm46YKl35Jmj1hW5YLVVeOGqCqn+ijqGPM=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=

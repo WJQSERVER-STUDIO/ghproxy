@@ -7,42 +7,16 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	httpc "github.com/satomitouka/touka-httpc"
 )
-
-var (
-	gclient *httpc.Client
-	gtr     *http.Transport
-)
-
-func initGitHTTPClient(cfg *config.Config) {
-	gtr = &http.Transport{
-		MaxIdleConns:    30,
-		MaxConnsPerHost: 30,
-		IdleConnTimeout: 30 * time.Second,
-	}
-	if cfg.Outbound.Enabled {
-		initTransport(cfg, gtr)
-	}
-	/*
-		gclient = &http.Client{
-			Transport: gtr,
-		}
-	*/
-	gclient = httpc.New(
-		httpc.WithTransport(gtr),
-	)
-}
 
 func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode string) {
 	method := c.Request.Method
 	logInfo("%s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 
 	// 发送HEAD请求, 预获取Content-Length
-	headReq, err := gclient.NewRequest("HEAD", u, nil)
+	headReq, err := client.NewRequest("HEAD", u, nil)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
@@ -50,7 +24,7 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 	setRequestHeaders(c, headReq)
 	AuthPassThrough(c, cfg, headReq)
 
-	headResp, err := gclient.Do(headReq)
+	headResp, err := client.Do(headReq)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
@@ -84,7 +58,7 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 	bodyReader := bytes.NewBuffer(body)
 
 	// 创建请求
-	req, err := gclient.NewRequest(method, u, bodyReader)
+	req, err := client.NewRequest(method, u, bodyReader)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
@@ -92,7 +66,7 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 	setRequestHeaders(c, req)
 	AuthPassThrough(c, cfg, req)
 
-	resp, err := gclient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
@@ -139,7 +113,15 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 
 	c.Status(resp.StatusCode)
 
-	if _, err := io.Copy(c.Writer, resp.Body); err != nil {
-		logError("%s %s %s %s %s Response-Copy-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+	// 使用固定32KB缓冲池
+	buffer := BufferPool.Get().([]byte)
+	defer BufferPool.Put(buffer)
+
+	_, err = io.CopyBuffer(c.Writer, resp.Body, buffer)
+	if err != nil {
+		logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+		return
+	} else {
+		c.Writer.Flush() // 确保刷入
 	}
 }

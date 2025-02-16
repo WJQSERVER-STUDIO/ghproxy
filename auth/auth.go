@@ -18,10 +18,18 @@ var (
 
 func Init(cfg *config.Config) {
 	if cfg.Blacklist.Enabled {
-		InitBlacklist(cfg)
+		err := InitBlacklist(cfg)
+		if err != nil {
+			logError(err.Error())
+			return
+		}
 	}
 	if cfg.Whitelist.Enabled {
-		LoadWhitelist(cfg)
+		err := InitWhitelist(cfg)
+		if err != nil {
+			logError(err.Error())
+			return
+		}
 	}
 	logDebug("Auth Init")
 }

@@ -91,6 +91,12 @@ port = 8080  # 监听端口
 sizeLimit = 125 # 125MB
 enableH2C = "on"  # 是否开启H2C传输(latest和dev版本请开启) on/off
 
+[httpc]
+mode = "auto" # "auto" or "advanced" HTTP客户端模式 自动/高级模式
+maxIdleConns = 100 # only for advanced mode 仅用于高级模式
+maxIdleConnsPerHost = 60 # only for advanced mode 仅用于高级模式
+maxConnsPerHost = 0 # only for advanced mode 仅用于高级模式
+
 [pages]
 enabled = false  # 是否开启内置静态页面(Docker版本请关闭此项)
 staticPath = "/data/www"  # 静态页面文件路径

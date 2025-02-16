@@ -6,6 +6,7 @@ import (
 
 type Config struct {
 	Server    ServerConfig
+	Httpc     HttpcConfig
 	Pages     PagesConfig
 	Log       LogConfig
 	CORS      CORSConfig
@@ -22,6 +23,20 @@ type ServerConfig struct {
 	SizeLimit int    `toml:"sizeLimit"`
 	EnableH2C string `toml:"enableH2C"`
 	Debug     bool   `toml:"debug"`
+}
+
+/*
+[httpc]
+mode = "auto" # "auto" or "advanced"
+maxIdleConns = 100 # only for advanced mode
+maxIdleConnsPerHost = 60 # only for advanced mode
+maxConnsPerHost = 0 # only for advanced mode
+*/
+type HttpcConfig struct {
+	Mode                string `toml:"mode"`
+	MaxIdleConns        int    `toml:"maxIdleConns"`
+	MaxIdleConnsPerHost int    `toml:"maxIdleConnsPerHost"`
+	MaxConnsPerHost     int    `toml:"maxConnsPerHost"`
 }
 
 type PagesConfig struct {

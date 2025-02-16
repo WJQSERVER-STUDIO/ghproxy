@@ -7,66 +7,15 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-	"sync"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	httpc "github.com/satomitouka/touka-httpc"
 )
-
-var BufferSize int = 32 * 1024 // 32KB
-
-var (
-	ctr        *http.Transport
-	BufferPool *sync.Pool
-	cclient    *httpc.Client
-)
-
-func InitReq(cfg *config.Config) {
-	initChunkedHTTPClient(cfg)
-	initGitHTTPClient(cfg)
-
-	// 初始化固定大小的缓存池
-	BufferPool = &sync.Pool{
-		New: func() interface{} {
-			return make([]byte, BufferSize)
-		},
-	}
-}
-
-func initChunkedHTTPClient(cfg *config.Config) {
-	/*
-		ctr = &http.Transport{
-			MaxIdleConns:          100,
-			MaxConnsPerHost:       60,
-			IdleConnTimeout:       20 * time.Second,
-			TLSHandshakeTimeout:   10 * time.Second,
-			ExpectContinueTimeout: 1 * time.Second,
-			ResponseHeaderTimeout: 10 * time.Second,
-			DialContext: (&net.Dialer{
-				Timeout:   30 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).DialContext,
-		}
-	*/
-	ctr = &http.Transport{
-		MaxIdleConns:    100,
-		MaxConnsPerHost: 60,
-		IdleConnTimeout: 20 * time.Second,
-	}
-	if cfg.Outbound.Enabled {
-		initTransport(cfg, ctr)
-	}
-	cclient = httpc.New(
-		httpc.WithTransport(ctr),
-	)
-}
 
 func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string, runMode string) {
 	method := c.Request.Method
 
 	// 发送HEAD请求, 预获取Content-Length
-	headReq, err := cclient.NewRequest("HEAD", u, nil)
+	headReq, err := client.NewRequest("HEAD", u, nil)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
@@ -75,7 +24,7 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 	removeWSHeader(headReq) // 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
 	AuthPassThrough(c, cfg, headReq)
 
-	headResp, err := cclient.Do(headReq)
+	headResp, err := client.Do(headReq)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
@@ -107,7 +56,7 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 
 	bodyReader := bytes.NewBuffer(body)
 
-	req, err := cclient.NewRequest(method, u, bodyReader)
+	req, err := client.NewRequest(method, u, bodyReader)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
@@ -116,7 +65,7 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 	removeWSHeader(req) // 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
 	AuthPassThrough(c, cfg, req)
 
-	resp, err := cclient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return

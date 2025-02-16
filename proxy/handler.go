@@ -61,7 +61,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 
 		// 白名单检查
 		if cfg.Whitelist.Enabled {
-			whitelist := auth.CheckWhitelist(repouser, username, repo)
+			whitelist := auth.CheckWhitelist(username, repo)
 			if !whitelist {
 				logErrMsg := fmt.Sprintf("%s %s %s %s %s Whitelist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, repouser)
 				errMsg := fmt.Sprintf("Whitelist Blocked repo: %s", repouser)
