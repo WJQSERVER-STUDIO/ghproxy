@@ -13,6 +13,7 @@ maxConnsPerHost = 0 # only for advanced mode
 
 [pages]
 enabled = false
+theme = "bootstrap" # "bootstrap" or "nebula"
 staticDir = "/data/www" 
 
 [log]

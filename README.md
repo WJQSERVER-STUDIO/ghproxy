@@ -99,6 +99,7 @@ maxConnsPerHost = 0 # only for advanced mode 仅用于高级模式
 
 [pages]
 enabled = false  # 是否开启内置静态页面(Docker版本请关闭此项)
+theme = "bootstrap" # "bootstrap" or "nebula" 内置主题
 staticPath = "/data/www"  # 静态页面文件路径
 
 [log]

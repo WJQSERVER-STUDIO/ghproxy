@@ -39,8 +39,15 @@ type HttpcConfig struct {
 	MaxConnsPerHost     int    `toml:"maxConnsPerHost"`
 }
 
+/*
+[pages]
+enabled = false
+theme = "bootstrap" # "bootstrap" or "nebula"
+staticDir = "/data/www"
+*/
 type PagesConfig struct {
 	Enabled   bool   `toml:"enabled"`
+	Theme     string `toml:"theme"`
 	StaticDir string `toml:"staticDir"`
 }
 
