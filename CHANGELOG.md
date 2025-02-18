@@ -1,5 +1,10 @@
 # 更新日志
 
+25w14b
+---
+- PRE-RELEASE: 此版本是v2.3.0的预发布版本,请勿在生产环境中使用;
+- CHANGE: 将许可证转为WJQserver Studio License 2.0
+
 25w14a
 ---
 - PRE-RELEASE: 此版本是v2.3.0的预发布版本,请勿在生产环境中使用;

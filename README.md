@@ -35,7 +35,9 @@
 
 ### LICENSE
 
-本项目使用WSL LICENSE Version1.2 (WJQSERVER STUDIO LICENSE Version1.2)
+本项目使用WJQserver Studio License 2.0 [WJQserver Studio License 2.0](https://wjqserver-studio.github.io/LICENSE/LICENSE.html)
+
+在v2.3.0之前, 本项目使用WJQserver Studio License 1.2
 
 在v1.0.0版本之前,本项目继承于[WJQSERVER-STUDIO/ghproxy-go](https://github.com/WJQSERVER-STUDIO/ghproxy-go)的APACHE2.0 LICENSE VERSION
 
