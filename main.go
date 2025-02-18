@@ -181,6 +181,8 @@ func init() {
 		}
 		router.GET("/", gin.WrapH(http.FileServer(http.FS(pages))))
 		router.GET("/favicon.ico", gin.WrapH(http.FileServer(http.FS(pages))))
+		router.GET("/script.js", gin.WrapH(http.FileServer(http.FS(pages))))
+		router.GET("/style.css", gin.WrapH(http.FileServer(http.FS(pages))))
 	}
 
 	router.NoRoute(func(c *gin.Context) {

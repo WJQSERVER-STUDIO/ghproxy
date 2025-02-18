@@ -1,0 +1,157 @@
+:root {
+    --primary: #007aff;
+    --secondary: #007aff;
+    --background: #f9f9f9;
+    --card-bg: #ffffff;
+    --text: #333333;
+    --border: #d1d1d6;
+    --muted: #64748b;
+    --success: #00a83ed2;
+    --danger: #ce0000dd;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #121212;
+        --card-bg: #1e1e1e;
+        --text: #ffffff;
+        --border: #334155;
+        --muted: #94a3b8;
+    }
+
+    .form-control::placeholder {
+        color: var(--muted);
+    }
+
+    .text-muted {
+        color: var(--muted) !important;
+    }
+
+    .btn-outline-secondary {
+        color: var(--muted);
+        border-color: var(--border);
+    }
+
+    .status-badge {
+        color: var(--text) !important;
+    }
+
+    .code-block {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .command-example {
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .btn-primary {
+        --bs-btn-bg: var(--primary);
+        --bs-btn-border-color: var(--primary);
+        --bs-btn-hover-bg: var(--secondary);
+        --bs-btn-hover-border-color: var(--secondary);
+    }
+
+    .form-control {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-color: var(--border);
+        color: var(--text);
+    }
+
+    a {
+        color: var(--secondary);
+    }
+}
+
+body {
+    background: var(--background);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.6;
+}
+
+.main-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.main-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.code-block {
+    background: rgba(37, 99, 235, 0.05);
+    border-left: 3px solid var(--primary);
+    border-radius: 6px;
+    padding: 1rem;
+    position: relative;
+    overflow-x: auto;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.guide-section {
+    border-left: 3px solid var(--primary);
+    padding-left: 1rem;
+    margin: 2rem 0;
+}
+
+.command-example {
+    position: relative;
+    padding: 1.25rem;
+    background: rgba(37, 99, 235, 0.03);
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.command-example::before {
+    content: "➜";
+    position: absolute;
+    left: -1.5rem;
+    color: var(--muted);
+}
+
+.toast {
+    position: fixed;
+    top: 1%;
+    right: 1%;
+    background-color: var(--card-background);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.toast-body {
+    padding: 12px;
+}
+
+#version {
+    text-align: center;
+    font-size: 13px;
+    line-height: 26px;
+    color: #747474;
+}
+
+.bg-primary {
+    --bs-bg-opacity: 1;
+    background-color: #2c82de !important;
+}
+
+.bg-success {
+    --bs-bg-opacity: 1;
+    background-color: #2c82de !important;
+}
+
+.bg-danger {
+    --bs-bg-opacity: 1;
+    background-color: #2c82de !important;
+}

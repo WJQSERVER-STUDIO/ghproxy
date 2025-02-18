@@ -6,174 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GitHub加速服务</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #007aff;
-            --secondary: #007aff;
-            --background: #f9f9f9;
-            --card-bg: #ffffff;
-            --text: #333333;
-            --border: #d1d1d6;
-            --muted: #64748b;
-            --success: #00a83ed2;
-            --danger: #ce0000dd;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --background: #121212;
-                --card-bg: #1e1e1e;
-                --text: #ffffff;
-                --border: #334155;
-                --muted: #94a3b8;
-            }
-
-            .form-control::placeholder {
-                color: var(--muted);
-            }
-
-            .text-muted {
-                color: var(--muted) !important;
-            }
-
-            .btn-outline-secondary {
-                color: var(--muted);
-                border-color: var(--border);
-            }
-
-            .status-badge {
-                color: var(--text) !important;
-            }
-
-            .code-block {
-                background: rgba(255, 255, 255, 0.05);
-            }
-
-            .command-example {
-                background: rgba(255, 255, 255, 0.03);
-            }
-
-            .btn-primary {
-                --bs-btn-bg: var(--primary);
-                --bs-btn-border-color: var(--primary);
-                --bs-btn-hover-bg: var(--secondary);
-                --bs-btn-hover-border-color: var(--secondary);
-            }
-
-            .form-control {
-                background-color: rgba(255, 255, 255, 0.05);
-                border-color: var(--border);
-                color: var(--text);
-            }
-
-            a {
-                color: var(--secondary);
-            }
-        }
-
-        body {
-            background: var(--background);
-            color: var(--text);
-            font-family: 'Inter', system-ui, sans-serif;
-            line-height: 1.6;
-        }
-
-        .main-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .main-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .code-block {
-            background: rgba(37, 99, 235, 0.05);
-            border-left: 3px solid var(--primary);
-            border-radius: 6px;
-            padding: 1rem;
-            position: relative;
-            overflow-x: auto;
-        }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .guide-section {
-            border-left: 3px solid var(--primary);
-            padding-left: 1rem;
-            margin: 2rem 0;
-        }
-
-        .command-example {
-            position: relative;
-            padding: 1.25rem;
-            background: rgba(37, 99, 235, 0.03);
-            border-radius: 8px;
-            margin: 1rem 0;
-        }
-
-        .command-example::before {
-            content: "➜";
-            position: absolute;
-            left: -1.5rem;
-            color: var(--muted);
-        }
-
-        .toast {
-            position: fixed;
-            top: 1%;
-            right: 1%;
-            background-color: var(--card-background);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .toast-body {
-            padding: 12px;
-        }
-
-        #version {
-            text-align: center;
-            font-size: 13px;
-            line-height: 26px;
-            color: #747474;
-        }
-
-        .bg-primary {
-            --bs-bg-opacity: 1;
-            background-color: #2c82de !important;
-        }
-        .bg-success {
-            --bs-bg-opacity: 1;
-            background-color: #2c82de !important;
-        }
-        .bg-danger {
-            --bs-bg-opacity: 1;
-            background-color: #2c82de !important;
-        }
-    </style>
+    <link href="style.css" rel="stylesheet">
 </head>
 
 <body>
     <div class="container py-4 py-lg-5">
-        <!-- 头部 -->
         <header class="text-center mb-5">
             <h1 class="display-5 fw-bold mb-3">GitHub加速服务</h1>
             <p class="lead text-muted">高速稳定的 GitHub 资源访问解决方案</p>
         </header>
-
-        <!-- 主功能区域 -->
         <div class="main-card p-4 mb-4">
             <form id="mainForm" class="mb-4">
                 <div class="mb-3">
@@ -201,8 +42,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- 服务状态 -->
         <div class="row g-3 mb-4">
             <div class="col-md-4">
                 <div class="main-card p-3">
@@ -238,8 +77,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- 详细使用指南 -->
         <div class="main-card p-4">
             <h2 class="h4 fw-bold mb-4">📚 详细使用指南</h2>
 
@@ -253,7 +90,6 @@
                     <li class="text-muted">❌ 不支持 SSH Git Clone</li>
                 </ul>
             </div>
-
             <div class="guide-section">
                 <h3 class="h5 fw-semibold mb-3">基础用法示例</h3>
                 <div class="command-example">
@@ -273,10 +109,8 @@
                         class="d-block">curl -LO <span class="protocol">https</span>://<span class="host">example.com</span>/https://github.com/user/project/releases/download/v1.0.0/project_1.0.0.amd64.tar.gz</code>
                 </div>
             </div>
-
             <div class="guide-section">
                 <h3 class="h5 fw-semibold mb-3">支持的文件类型</h3>
-
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="main-card p-3">
@@ -285,14 +119,12 @@
                                 class="d-block text-muted fs-sm">https://raw.githubusercontent.com/user/repo/main/file.txt</code>
                         </div>
                     </div>
-
                     <div class="col-md-6">
                         <div class="main-card p-3">
                             <h4 class="h6 fw-medium mb-2">分支源码</h4>
                             <code class="d-block text-muted fs-sm">https://github.com/user/repo/archive/main.zip</code>
                         </div>
                     </div>
-
                     <div class="col-md-6">
                         <div class="main-card p-3">
                             <h4 class="h6 fw-medium mb-2">版本发布</h4>
@@ -300,7 +132,6 @@
                                 class="d-block text-muted fs-sm">https://github.com/user/repo/releases/download/v1.0.0/app.zip</code>
                         </div>
                     </div>
-
                     <div class="col-md-6">
                         <div class="main-card p-3">
                             <h4 class="h6 fw-medium mb-2">Gist 文件</h4>
@@ -308,7 +139,6 @@
                                 class="d-block text-muted fs-sm">https://gist.githubusercontent.com/user/gist_id/raw/file.txt</code>
                         </div>
                     </div>
-
                     <div class="col-md-6">
                         <div class="main-card p-3">
                             <h4 class="h6 fw-medium mb-2">HTTPS Git Clone</h4>
@@ -318,7 +148,6 @@
                 </div>
             </div>
         </div>
-
         <footer class="text-center mt-5 text-muted">
             <p class="mb-0 small" id="version">v </p>
             <p class="mb-0 small">Copyright © 2024 - <span id="currentYear"></span> WJQSERVER-STUDIO<br>
@@ -327,148 +156,13 @@
             </p>
         </footer>
     </div>
-
-    <!-- Toast 通知 -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
         <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-body"></div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        (() => {
-            'use strict';
-
-            // 初始化基础配置
-            const currentYear = new Date().getFullYear();
-            document.getElementById('currentYear').textContent = currentYear;
-            const toast = new bootstrap.Toast('#liveToast');
-
-            // DOM 元素
-            const form = document.getElementById('mainForm');
-            const input = document.getElementById('inputUrl');
-            const output = document.getElementById('output');
-            const outputLink = document.getElementById('outputLink');
-
-            // 获取当前域名
-            const CURRENT_PROTOCOL = window.location.protocol.replace(':', '');
-            const CURRENT_HOST = window.location.host;
-            // 替换协议部分
-            document.querySelectorAll('code .protocol').forEach(span => {
-                span.textContent = CURRENT_PROTOCOL;
-            });
-            // 替换域名部分
-            document.querySelectorAll('code .host').forEach(span => {
-                span.textContent = CURRENT_HOST;
-            });
-
-            // URL 转换规则
-            const URL_RULES = [
-                {
-                    regex: /^(?:https?:\/\/)?(?:www\.)?(github\.com\/.*)/i,
-                    build: path => `${location.protocol}//${location.host}/${path}`
-                },
-                {
-                    regex: /^(?:https?:\/\/)?(raw\.githubusercontent\.com\/.*)/i,
-                    build: path => `${location.protocol}//${location.host}/${path}`
-                },
-                {
-                    regex: /^(?:https?:\/\/)?(gist\.(?:githubusercontent|github)\.com\/.*)/i,
-                    build: path => `${location.protocol}//${location.host}/${path}`
-                }
-            ];
-
-            // 核心功能：链接转换
-            function transformGitHubURL(url) {
-                const cleanURL = url.trim().replace(/^https?:\/\//i, '');
-                for (const rule of URL_RULES) {
-                    const match = cleanURL.match(rule.regex);
-                    if (match) return rule.build(match[1]);
-                }
-                return null;
-            }
-
-            // 事件处理
-            form.addEventListener('submit', e => {
-                e.preventDefault();
-
-                if (!input.checkValidity()) {
-                    input.classList.add('is-invalid');
-                    showToast('⚠️ 请输入有效的 GitHub 链接');
-                    return;
-                }
-
-                const result = transformGitHubURL(input.value);
-                if (!result) {
-                    showToast('❌ 不支持的链接格式');
-                    return;
-                }
-
-                outputLink.textContent = result;
-                output.hidden = false;
-                window.scrollTo({ top: output.offsetTop - 100, behavior: 'smooth' });
-            });
-
-            document.getElementById('copyBtn').addEventListener('click', async () => {
-                try {
-                    await navigator.clipboard.writeText(outputLink.textContent);
-                    showToast('✅ 链接已复制');
-                } catch {
-                    showToast('❌ 复制失败');
-                }
-            });
-
-            document.getElementById('openBtn').addEventListener('click', () => {
-                window.open(outputLink.textContent, '_blank', 'noopener,noreferrer');
-            });
-
-            // 服务状态监控
-            async function loadServiceStatus() {
-                try {
-                    const [size, whitelist, blacklist, version] = await Promise.all([
-                        fetchJSON('/api/size_limit'),
-                        fetchJSON('/api/whitelist/status'),
-                        fetchJSON('/api/blacklist/status'),
-                        fetchJSON('/api/version')
-                    ]);
-
-                    updateStatus('sizeLimit', `${size.MaxResponseBodySize}MB`);
-                    updateStatus('whitelistStatus', whitelist.Whitelist ? '已开启' : '已关闭');
-                    updateStatus('blacklistStatus', blacklist.Blacklist ? '已开启' : '已关闭');
-                    updateStatus('version', `Version ${version.Version}`);
-                } catch {
-                    showToast('⚠️ 服务状态获取失败');
-                }
-            }
-
-            async function fetchJSON(url) {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('API Error');
-                return response.json();
-            }
-
-            function updateStatus(elementId, text) {
-                const element = document.getElementById(elementId);
-                if (element) element.textContent = text;
-            }
-
-            // 工具函数
-            function showToast(message) {
-                const toastBody = document.querySelector('.toast-body');
-                toastBody.textContent = message;
-                toast.show();
-            }
-
-            // 初始化
-            input.addEventListener('input', () => {
-                input.classList.remove('is-invalid');
-                if (output.hidden === false) output.hidden = true;
-            });
-
-            loadServiceStatus();
-        })();
-    </script>
+    <script src="script.js"></script>
 </body>
 
 </html>

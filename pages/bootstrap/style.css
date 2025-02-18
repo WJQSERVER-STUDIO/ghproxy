@@ -1,0 +1,259 @@
+        /* 通用样式 */
+        :root {
+            --primary-color: #007aff;
+            /* 主要按钮颜色 */
+            --secondary-color: #34c759;
+            /* 次要按钮颜色 */
+            --background-color: #f9f9f9;
+            /* 亮色模式背景 */
+            --card-background: #ffffff;
+            /* 卡片背景 */
+            --text-color: #333333;
+            /* 亮色模式文本颜色 */
+            --border-color: #e0e0e0;
+            /* 边框颜色 */
+            --input-background: #ffffff;
+            /* 输入框背景 */
+            --input-border: #d1d1d6;
+            /* 输入框边框 */
+            --pre-background: #f1f3f4;
+            /* 代码块背景 */
+            --pre-text-color: #333333;
+            /* 代码块文本颜色 */
+            --version-badge-hover: #39c5bb;
+            /* 说明文字颜色 */
+            --muted-text-color: #6c757d;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: sans-serif;
+            line-height: 1.8;
+            font-size: 15px;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            color: var(--text-color);
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            margin: 1rem 0;
+        }
+
+        p,
+        span,
+        a,
+        li {
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--primary-color);
+        }
+
+        a:hover {
+            color: #0056b3;
+        }
+
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .btn-outline-secondary {
+            border-radius: 50%;
+            padding: 6px;
+            transition: #e9e9e9 0.3s ease-in-out, color 0.3s ease-in-out;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .form-control {
+            background-color: var(--input-background);
+            border: 1px solid var(--input-border);
+            color: var(--text-color);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.3);
+        }
+
+        .text-muted {
+            color: var(--muted-text-color) !important;
+        }
+
+        .bg-light {
+            background-color: var(--card-background) !important;
+        }
+
+        pre {
+            background-color: var(--pre-background);
+            color: var(--pre-text-color);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .version-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .version-badge:hover {
+            background-color: var(--version-badge-hover);
+        }
+
+        footer {
+            padding: 16px;
+            text-align: center;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            background-color: var(--card-background);
+        }
+
+        footer a {
+            color: var(--primary-color);
+        }
+
+        footer a:hover {
+            color: #0056b3;
+        }
+
+        /* 暗色模式 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: #121212;
+                /* 深灰色背景 */
+                --card-background: #1e1e1e;
+                /* 卡片背景稍浅 */
+                --text-color: #ffffff;
+                /* 纯白文本 */
+                --primary-color: #0a84ff;
+                /* 按钮蓝色 */
+                --secondary-color: #30d158;
+                /* 次要按钮绿色 */
+                --border-color: #3a3a3a;
+                /* 边框颜色 */
+                --input-background: #2c2c2c;
+                /* 输入框背景 */
+                --input-border: #4a4a4a;
+                /* 输入框边框 */
+                --pre-background: #3b3636;
+                /* 代码块背景 */
+                --pre-text-color: #ffffff;
+                /* 代码块文本颜色 */
+                --version-badge-hover: #39c5bc9a;
+                /* 说明文字颜色 */
+                --muted-text-color: #a0a0a0;
+            }
+
+            body {
+                background-color: var(--background-color);
+                color: var(--text-color);
+            }
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6,
+            p,
+            span,
+            a,
+            li {
+                color: var(--text-color);
+            }
+
+            .card {
+                background-color: var(--card-background);
+                color: var(--text-color);
+                border: 1px solid var(--border-color);
+            }
+
+            .btn-outline-secondary {
+                border-radius: 50%;
+                padding: 6px;
+                transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+            }
+
+            .btn-outline-secondary:hover {
+                background-color: var(--primary-color);
+                color: white;
+            }
+
+            .toast {
+                background-color: var(--card-background);
+                color: var(--text-color);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .toast-body {
+                padding: 12px;
+            }
+
+
+            .form-control {
+                background-color: var(--input-background);
+                border: 1px solid var(--input-border);
+                color: var(--text-color);
+            }
+
+            .bg-light {
+                background-color: var(--card-background) !important;
+            }
+
+            pre {
+                background-color: var(--pre-background);
+                color: var(--pre-text-color);
+            }
+
+            footer {
+                background-color: var(--card-background);
+                color: var(--text-color);
+            }
+
+            footer a {
+                color: var(--primary-color);
+            }
+        }
