@@ -16,7 +16,9 @@
 
 ### 项目特点
 
-- 基于Go语言实现,使用[Gin框架](https://github.com/gin-gonic/gin)
+- 基于Go语言实现,支持多平台
+- 使用[Gin](https://github.com/gin-gonic/gin)作为Web框架
+- 使用[Touka-HTTPC](https://github.com/satomitouka/touka-httpc)作为HTTP客户端
 - 支持Git clone,raw,realeases等文件拉取
 - 支持Docker部署
 - 支持速率限制
@@ -146,6 +148,7 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890" 支持Socks5/HTTP(S)�
       "test/test1",
       "example/repo2",
       "another/*"
+      "another"
     ]
   }
 ```
@@ -160,6 +163,7 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890" 支持Socks5/HTTP(S)�
       "test/test1",
       "example/repo2",
       "another/*"
+      "another"
     ]
   }
 ```
@@ -168,10 +172,7 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890" 支持Socks5/HTTP(S)�
 
 ```Caddyfile
 example.com {
-    reverse_proxy {
-        to 127.0.0.1:7210
-    }
-    encode zstd gzip    
+    reverse_proxy * 127.0.0.1:7210
 }
 ```
 
