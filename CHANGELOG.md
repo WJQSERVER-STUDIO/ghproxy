@@ -1,5 +1,53 @@
 # 更新日志
 
+2.3.0
+---
+- CHANGE: 使用`touka-httpc`封装`HTTP Client`, 更新到`v0.2.0`版本, 参看`touka-httpc`
+- CHANGE: 重构前端页面, 见[#49](https://github.com/WJQSERVER-STUDIO/ghproxy/pull/49)
+- CHANGE: 重构`blacklist`实现
+- CHANGE: 优化404处理
+- CHANGE: 重构`whitelist`实现
+- CHANGE: 对`proxy`进行结构性调整
+- CHANGE: `chunckedreq`与`gitreq`共用`BufferPool`和`HTTP Client`
+- CHANGE: 新增`HTTP Client`配置块
+- CHANGE: 加入内置主题配置, 支持通过配置切换主题
+- CHANGE: 将许可证转为WJQserver Studio License 2.0
+
+25w14b
+---
+- PRE-RELEASE: 此版本是v2.3.0的预发布版本,请勿在生产环境中使用;
+- CHANGE: 将许可证转为WJQserver Studio License 2.0
+
+25w14a
+---
+- PRE-RELEASE: 此版本是v2.3.0的预发布版本,请勿在生产环境中使用;
+- CHANGE: 使用`touka-httpc`封装`HTTP Client`, 更新到`v0.2.0`版本, 参看`touka-httpc`
+- CHANGE: 重构前端页面, 见[#49](https://github.com/WJQSERVER-STUDIO/ghproxy/pull/49)
+- CHANGE: 重构`blacklist`实现
+- CHANGE: 优化404处理
+- CHANGE: 重构`whitelist`实现
+- CHANGE: 对`proxy`进行结构性调整
+- CHANGE: `chunckedreq`与`gitreq`共用`BufferPool`和`HTTP Client`
+- CHANGE: 新增`HTTP Client`配置块
+- CHANGE: 加入内置主题配置, 支持通过配置切换主题
+
+25w14t-2
+---
+- PRE-RELEASE: 此版本是测试验证版本,请勿在生产环境中使用;
+- CHANGE: 使用`touka-httpc`封装`HTTP Client`，更新到`v0.1.0`版本, 参看`touka-httpc`
+- CHANGE: 重构`whitelist`实现
+- CHANGE: 对`proxy`进行结构性调整
+- CHANGE: `chunckedreq`与`gitreq`共用`BufferPool`和`HTTP Client`
+- CHANGE: 新增`HTTP Client`配置块
+
+25w14t-1
+---
+- PRE-RELEASE: 此版本是测试验证版本,请勿在生产环境中使用;
+- CHANGE: 使用`touka-httpc`封装`HTTP Client`
+- CHANGE: 重构前端页面, 见[#49](https://github.com/WJQSERVER-STUDIO/ghproxy/pull/49)
+- CHANGE: 重构`blacklist`实现
+- CHANGE: 优化404处理
+
 2.2.0
 ---
 - RELEASE: v2.2.0正式版发布;

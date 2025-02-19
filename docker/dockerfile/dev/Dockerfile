@@ -15,10 +15,6 @@ RUN mkdir -p /data/${APPLICATION}/log
 # 安装依赖
 RUN apk add --no-cache curl wget tar
 
-# 前端
-RUN wget -O /data/www/index.html https://raw.githubusercontent.com/${USER}/${REPO}/dev/pages/index.html
-RUN wget -O /data/www/favicon.ico https://raw.githubusercontent.com/${USER}/${REPO}/dev/pages/favicon.ico
-
 # 后端
 RUN VERSION=$(curl -s https://raw.githubusercontent.com/${USER}/${REPO}/dev/DEV-VERSION) && \
     wget -O /data/${APPLICATION}/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz https://github.com/${USER}/${REPO}/releases/download/$VERSION/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz && \

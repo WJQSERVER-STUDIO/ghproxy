@@ -90,8 +90,8 @@ tar -zxvf ${ghproxy_dir}/ghproxy-linux-$ARCH.tar.gz -C ${ghproxy_dir}
 chmod +x ${ghproxy_dir}/ghproxy
 
 # 下载pages
-wget -q -O ${ghproxy_dir}/pages/index.html https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/pages/index.html
-wget -q -O ${ghproxy_dir}/pages/favicon.ico https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/pages/favicon.ico
+wget -q -O ${ghproxy_dir}/pages/index.html https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/pages/bootstrap/index.html
+wget -q -O ${ghproxy_dir}/pages/favicon.ico https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghproxy/main/pages/bootstrap/favicon.ico
 
 
 # 下载配置文件

@@ -7,39 +7,16 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
-
-var (
-	gclient *http.Client
-	gtr     *http.Transport
-)
-
-func initGitHTTPClient(cfg *config.Config) {
-	gtr = &http.Transport{
-		MaxIdleConns:    30,
-		MaxConnsPerHost: 30,
-		IdleConnTimeout: 30 * time.Second,
-	}
-	if cfg.Outbound.Enabled {
-		initTransport(cfg, gtr)
-	}
-	gclient = &http.Client{
-		Transport: gtr,
-	}
-}
 
 func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode string) {
 	method := c.Request.Method
 	logInfo("%s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 
-	// 创建HTTP客户端
-	//client := &http.Client{}
-
 	// 发送HEAD请求, 预获取Content-Length
-	headReq, err := http.NewRequest("HEAD", u, nil)
+	headReq, err := client.NewRequest("HEAD", u, nil)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
@@ -47,7 +24,7 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 	setRequestHeaders(c, headReq)
 	AuthPassThrough(c, cfg, headReq)
 
-	headResp, err := gclient.Do(headReq)
+	headResp, err := client.Do(headReq)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
@@ -81,7 +58,7 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 	bodyReader := bytes.NewBuffer(body)
 
 	// 创建请求
-	req, err := http.NewRequest(method, u, bodyReader)
+	req, err := client.NewRequest(method, u, bodyReader)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
@@ -89,7 +66,7 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 	setRequestHeaders(c, req)
 	AuthPassThrough(c, cfg, req)
 
-	resp, err := gclient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
@@ -101,12 +78,6 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 		}
 	}(resp.Body)
 
-	/*
-		if err := HandleResponseSize(resp, cfg, c); err != nil {
-			logWarning("%s %s %s %s %s Response-Size-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
-			return
-		}
-	*/
 	contentLength = resp.Header.Get("Content-Length")
 	if contentLength != "" {
 		size, err := strconv.Atoi(contentLength)
@@ -142,7 +113,15 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 
 	c.Status(resp.StatusCode)
 
-	if _, err := io.Copy(c.Writer, resp.Body); err != nil {
-		logError("%s %s %s %s %s Response-Copy-Error: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+	// 使用固定32KB缓冲池
+	buffer := BufferPool.Get().([]byte)
+	defer BufferPool.Put(buffer)
+
+	_, err = io.CopyBuffer(c.Writer, resp.Body, buffer)
+	if err != nil {
+		logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+		return
+	} else {
+		c.Writer.Flush() // 确保刷入
 	}
 }

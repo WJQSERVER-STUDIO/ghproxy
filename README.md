@@ -16,7 +16,9 @@
 
 ### 项目特点
 
-- 基于Go语言实现,使用[Gin框架](https://github.com/gin-gonic/gin)
+- 基于Go语言实现,支持多平台
+- 使用[Gin](https://github.com/gin-gonic/gin)作为Web框架
+- 使用[Touka-HTTPC](https://github.com/satomitouka/touka-httpc)作为HTTP客户端
 - 支持Git clone,raw,realeases等文件拉取
 - 支持Docker部署
 - 支持速率限制
@@ -35,7 +37,9 @@
 
 ### LICENSE
 
-本项目使用WSL LICENSE Version1.2 (WJQSERVER STUDIO LICENSE Version1.2)
+本项目使用WJQserver Studio License 2.0 [WJQserver Studio License 2.0](https://wjqserver-studio.github.io/LICENSE/LICENSE.html)
+
+在v2.3.0之前, 本项目使用WJQserver Studio License 1.2
 
 在v1.0.0版本之前,本项目继承于[WJQSERVER-STUDIO/ghproxy-go](https://github.com/WJQSERVER-STUDIO/ghproxy-go)的APACHE2.0 LICENSE VERSION
 
@@ -91,8 +95,15 @@ port = 8080  # 监听端口
 sizeLimit = 125 # 125MB
 enableH2C = "on"  # 是否开启H2C传输(latest和dev版本请开启) on/off
 
+[httpc]
+mode = "auto" # "auto" or "advanced" HTTP客户端模式 自动/高级模式
+maxIdleConns = 100 # only for advanced mode 仅用于高级模式
+maxIdleConnsPerHost = 60 # only for advanced mode 仅用于高级模式
+maxConnsPerHost = 0 # only for advanced mode 仅用于高级模式
+
 [pages]
-enabled = false  # 是否开启内置静态页面(Docker版本请关闭此项)
+enabled = false  # 是否开启外置静态页面(Docker版本请关闭此项)
+theme = "bootstrap" # "bootstrap" or "nebula" 内置主题
 staticPath = "/data/www"  # 静态页面文件路径
 
 [log]
@@ -137,6 +148,7 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890" 支持Socks5/HTTP(S)�
       "test/test1",
       "example/repo2",
       "another/*"
+      "another"
     ]
   }
 ```
@@ -151,6 +163,7 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890" 支持Socks5/HTTP(S)�
       "test/test1",
       "example/repo2",
       "another/*"
+      "another"
     ]
   }
 ```
@@ -159,10 +172,7 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890" 支持Socks5/HTTP(S)�
 
 ```Caddyfile
 example.com {
-    reverse_proxy {
-        to 127.0.0.1:7210
-    }
-    encode zstd gzip    
+    reverse_proxy * 127.0.0.1:7210
 }
 ```
 

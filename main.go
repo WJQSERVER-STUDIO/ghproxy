@@ -35,8 +35,10 @@ var (
 )
 
 var (
-	//go:embed pages/*
+	//go:embed pages/bootstrap/*
 	pagesFS embed.FS
+	//go:embed pages/nebula/*
+	NebulaPagesFS embed.FS
 )
 
 var (
@@ -159,12 +161,28 @@ func init() {
 		})
 		router.StaticFile("/favicon.ico", faviconPath)
 	} else if !cfg.Pages.Enabled {
-		pages, err := fs.Sub(pagesFS, "pages")
-		if err != nil {
-			logError("Failed when processing pages: %s", err)
+		var pages fs.FS
+		var err error
+		if cfg.Pages.Theme == "bootstrap" {
+			pages, err = fs.Sub(pagesFS, "pages/bootstrap")
+			if err != nil {
+				logError("Failed when processing pages: %s", err)
+			}
+		} else if cfg.Pages.Theme == "nebula" {
+			pages, err = fs.Sub(NebulaPagesFS, "pages/nebula")
+			if err != nil {
+				logError("Failed when processing pages: %s", err)
+			}
+		} else {
+			pages, err = fs.Sub(pagesFS, "pages/bootstrap")
+			if err != nil {
+				logError("Failed when processing pages: %s", err)
+			}
 		}
 		router.GET("/", gin.WrapH(http.FileServer(http.FS(pages))))
 		router.GET("/favicon.ico", gin.WrapH(http.FileServer(http.FS(pages))))
+		router.GET("/script.js", gin.WrapH(http.FileServer(http.FS(pages))))
+		router.GET("/style.css", gin.WrapH(http.FileServer(http.FS(pages))))
 	}
 
 	router.NoRoute(func(c *gin.Context) {

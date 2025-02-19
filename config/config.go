@@ -6,6 +6,7 @@ import (
 
 type Config struct {
 	Server    ServerConfig
+	Httpc     HttpcConfig
 	Pages     PagesConfig
 	Log       LogConfig
 	CORS      CORSConfig
@@ -24,8 +25,29 @@ type ServerConfig struct {
 	Debug     bool   `toml:"debug"`
 }
 
+/*
+[httpc]
+mode = "auto" # "auto" or "advanced"
+maxIdleConns = 100 # only for advanced mode
+maxIdleConnsPerHost = 60 # only for advanced mode
+maxConnsPerHost = 0 # only for advanced mode
+*/
+type HttpcConfig struct {
+	Mode                string `toml:"mode"`
+	MaxIdleConns        int    `toml:"maxIdleConns"`
+	MaxIdleConnsPerHost int    `toml:"maxIdleConnsPerHost"`
+	MaxConnsPerHost     int    `toml:"maxConnsPerHost"`
+}
+
+/*
+[pages]
+enabled = false
+theme = "bootstrap" # "bootstrap" or "nebula"
+staticDir = "/data/www"
+*/
 type PagesConfig struct {
 	Enabled   bool   `toml:"enabled"`
+	Theme     string `toml:"theme"`
 	StaticDir string `toml:"staticDir"`
 }
 

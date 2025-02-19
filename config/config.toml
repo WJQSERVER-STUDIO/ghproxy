@@ -5,8 +5,15 @@ sizeLimit = 125 # MB
 enableH2C = "on" # "on" or "off"
 debug = false
 
+[httpc]
+mode = "auto" # "auto" or "advanced"
+maxIdleConns = 100 # only for advanced mode
+maxIdleConnsPerHost = 60 # only for advanced mode
+maxConnsPerHost = 0 # only for advanced mode
+
 [pages]
 enabled = false
+theme = "bootstrap" # "bootstrap" or "nebula"
 staticDir = "/data/www" 
 
 [log]

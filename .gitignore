@@ -2,3 +2,4 @@ demo
 demo.toml
 *.log
 *.bak
+list.json
