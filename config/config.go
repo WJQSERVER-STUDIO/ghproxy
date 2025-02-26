@@ -17,10 +17,20 @@ type Config struct {
 	Outbound  OutboundConfig
 }
 
+/*
+[server]
+host = "0.0.0.0"  # 监听地址
+port = 8080  # 监听端口
+sizeLimit = 125 # 125MB
+H2C = true # 是否开启H2C传输
+enableH2C = "on"  # 是否开启H2C传输(latest和dev版本请开启) on/off (2.4.0弃用)
+*/
+
 type ServerConfig struct {
 	Port      int    `toml:"port"`
 	Host      string `toml:"host"`
 	SizeLimit int    `toml:"sizeLimit"`
+	H2C       bool   `toml:"H2C"`
 	EnableH2C string `toml:"enableH2C"`
 	Debug     bool   `toml:"debug"`
 }
@@ -41,11 +51,13 @@ type HttpcConfig struct {
 
 /*
 [pages]
+mode = "internal" # "internal" or "external"
 enabled = false
 theme = "bootstrap" # "bootstrap" or "nebula"
 staticDir = "/data/www"
 */
 type PagesConfig struct {
+	Mode      string `toml:"mode"`
 	Enabled   bool   `toml:"enabled"`
 	Theme     string `toml:"theme"`
 	StaticDir string `toml:"staticDir"`
