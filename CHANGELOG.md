@@ -1,5 +1,11 @@
 # 更新日志
 
+2.3.1
+---
+- CHANGE: 改进`Pages`在`External`模式下的路由
+- CHANGE: 使用`H2C` bool 代替 `enableH2C` string (2.4.0 弃用 `enableH2C`)
+- CHANGE: 使用`Mode` string 代替`Pages`内的 `enable` bool (2.4.0 弃用 `enable`)
+
 25w15a
 ---
 - PRE-RELEASE: 此版本是v2.3.1的预发布版本,请勿在生产环境中使用;
