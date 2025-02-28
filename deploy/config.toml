@@ -2,6 +2,7 @@
 host = "127.0.0.1" 
 port = 8080 
 sizeLimit = 125 # MB
+H2C = true
 enableH2C = "on"
 debug = false
 
@@ -12,6 +13,7 @@ maxIdleConnsPerHost = 60 # only for advanced mode
 maxConnsPerHost = 0 # only for advanced mode
 
 [pages]
+mode = "internal" # "internal" or "external"
 enabled = false
 theme = "bootstrap" # "bootstrap" or "nebula"
 staticDir = "/usr/local/ghproxy/pages" 

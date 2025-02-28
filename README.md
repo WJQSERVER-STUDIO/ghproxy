@@ -93,7 +93,8 @@ wget -O install-dev.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghprox
 host = "0.0.0.0"  # 监听地址
 port = 8080  # 监听端口
 sizeLimit = 125 # 125MB
-enableH2C = "on"  # 是否开启H2C传输(latest和dev版本请开启) on/off
+H2C = true # 是否开启H2C传输 
+enableH2C = "on"  # 是否开启H2C传输(latest和dev版本请开启) on/off (2.4.0弃用)
 
 [httpc]
 mode = "auto" # "auto" or "advanced" HTTP客户端模式 自动/高级模式
@@ -102,7 +103,8 @@ maxIdleConnsPerHost = 60 # only for advanced mode 仅用于高级模式
 maxConnsPerHost = 0 # only for advanced mode 仅用于高级模式
 
 [pages]
-enabled = false  # 是否开启外置静态页面(Docker版本请关闭此项)
+mode = "internal" # "internal" or "external" 内部/外部 前端 默认内部
+enabled = false  # 是否开启外置静态页面(Docker版本请关闭此项) (2.4.0弃用)
 theme = "bootstrap" # "bootstrap" or "nebula" 内置主题
 staticPath = "/data/www"  # 静态页面文件路径
 
