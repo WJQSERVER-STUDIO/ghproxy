@@ -51,8 +51,8 @@ github.com/pelletier/go-toml/v2 v2.2.3 h1:YmeHyLY8mFWbdkNWwpr+qIL2bEqT0o95WSdkNH
 github.com/pelletier/go-toml/v2 v2.2.3/go.mod h1:MfCQTFTvCcUyyvvwm1+G6H/jORL20Xlb6rzQu9GuUkc=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/satomitouka/touka-httpc v0.2.0 h1:JohnKH0T5KuVcouycqSI70oJIhMxY1nlNDhgZRxI73s=
-github.com/satomitouka/touka-httpc v0.2.0/go.mod h1:ULB/0Ze0Apm46YKl35Jmj1hW5YLVVeOGqCqn+ijqGPM=
+github.com/satomitouka/touka-httpc v0.3.0 h1:9W1JqL4XMsphLxxjSXXQYU3pO1D/CQsSXA1UNV3BDz8=
+github.com/satomitouka/touka-httpc v0.3.0/go.mod h1:XB0GE7UK6cinkCb6mkgYryyLyLE27HrgunK2oWnbxis=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=
