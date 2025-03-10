@@ -7,9 +7,9 @@ import (
 type Config struct {
 	Server    ServerConfig
 	Httpc     HttpcConfig
+	GitClone  GitCloneConfig
 	Pages     PagesConfig
 	Log       LogConfig
-	CORS      CORSConfig
 	Auth      AuthConfig
 	Blacklist BlacklistConfig
 	Whitelist WhitelistConfig
@@ -31,6 +31,7 @@ type ServerConfig struct {
 	Host      string `toml:"host"`
 	SizeLimit int    `toml:"sizeLimit"`
 	H2C       bool   `toml:"H2C"`
+	Cors      string `toml:"cors"`
 	EnableH2C string `toml:"enableH2C"`
 	Debug     bool   `toml:"debug"`
 }
@@ -47,6 +48,16 @@ type HttpcConfig struct {
 	MaxIdleConns        int    `toml:"maxIdleConns"`
 	MaxIdleConnsPerHost int    `toml:"maxIdleConnsPerHost"`
 	MaxConnsPerHost     int    `toml:"maxConnsPerHost"`
+}
+
+/*
+[gitclone]
+mode = "bypass" # bypass / cache
+dir = "./repos"
+*/
+type GitCloneConfig struct {
+	Mode string `toml:"mode"`
+	Dir  string `toml:"dir"`
 }
 
 /*
@@ -67,10 +78,6 @@ type LogConfig struct {
 	LogFilePath string `toml:"logFilePath"`
 	MaxLogSize  int    `toml:"maxLogSize"`
 	Level       string `toml:"level"`
-}
-
-type CORSConfig struct {
-	Enabled bool `toml:"enabled"`
 }
 
 type AuthConfig struct {

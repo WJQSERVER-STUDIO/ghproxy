@@ -56,7 +56,6 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 	}
 
 	bodyReader := bytes.NewBuffer(body)
-
 	// 创建请求
 	req, err := client.NewRequest(method, u, bodyReader)
 	if err != nil {
@@ -105,10 +104,23 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 		resp.Header.Del(header)
 	}
 
-	if cfg.CORS.Enabled {
+	/*
+		if cfg.CORS.Enabled {
+			c.Header("Access-Control-Allow-Origin", "*")
+		} else {
+			c.Header("Access-Control-Allow-Origin", "")
+		}
+	*/
+
+	switch cfg.Server.Cors {
+	case "*":
 		c.Header("Access-Control-Allow-Origin", "*")
-	} else {
+	case "":
+		c.Header("Access-Control-Allow-Origin", "*")
+	case "nil":
 		c.Header("Access-Control-Allow-Origin", "")
+	default:
+		c.Header("Access-Control-Allow-Origin", cfg.Server.Cors)
 	}
 
 	c.Status(resp.StatusCode)

@@ -105,10 +105,23 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 		resp.Header.Del(header)
 	}
 
-	if cfg.CORS.Enabled {
+	/*
+		if cfg.CORS.Enabled {
+			c.Header("Access-Control-Allow-Origin", "*")
+		} else {
+			c.Header("Access-Control-Allow-Origin", "")
+		}
+	*/
+
+	switch cfg.Server.Cors {
+	case "*":
 		c.Header("Access-Control-Allow-Origin", "*")
-	} else {
+	case "":
+		c.Header("Access-Control-Allow-Origin", "*")
+	case "nil":
 		c.Header("Access-Control-Allow-Origin", "")
+	default:
+		c.Header("Access-Control-Allow-Origin", cfg.Server.Cors)
 	}
 
 	c.Status(resp.StatusCode)

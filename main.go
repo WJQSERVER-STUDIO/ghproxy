@@ -12,10 +12,11 @@ import (
 	"ghproxy/api"
 	"ghproxy/auth"
 	"ghproxy/config"
-	"ghproxy/loggin"
+	"ghproxy/gitclone"
+	"ghproxy/middleware/loggin"
+	"ghproxy/middleware/timing"
 	"ghproxy/proxy"
 	"ghproxy/rate"
-	"ghproxy/timing"
 
 	"github.com/WJQSERVER-STUDIO/go-utils/logger"
 
@@ -43,7 +44,7 @@ var (
 
 var (
 	logw       = logger.Logw
-	LogDump    = logger.LogDump
+	logDump    = logger.LogDump
 	logDebug   = logger.LogDebug
 	logInfo    = logger.LogInfo
 	logWarning = logger.LogWarning
@@ -213,108 +214,69 @@ func init() {
 	// 添加计时中间件
 	router.Use(timing.Middleware())
 
-	//H2C默认值为true，而后遵循cfg.Server.EnableH2C的设置
 	if cfg.Server.H2C {
 		router.UseH2C = true
-	} else {
-		logWarning("cfg.Server.EnableH2C 将于2.4.0弃用，请使用cfg.Server.H2C")
-		if cfg.Server.EnableH2C == "on" {
-			router.UseH2C = true
-		} else if cfg.Server.EnableH2C == "" {
-			router.UseH2C = true
-		} else {
-			router.UseH2C = false
-		}
 	}
-
-	/*
-		// (2.4.0启用)
-		if cfg.Server.H2C {
-			router.UseH2C = true
-		}
-	*/
 
 	setupApi(cfg, router, version)
 
-	// setupPages(cfg, router)  // 2.4.0启用
+	setupPages(cfg, router)
 
-	logInfo("Pages Mode: %s", cfg.Pages.Mode)
-	if cfg.Pages.Mode == "internal" {
-		var pages fs.FS
-		var err error
-		if cfg.Pages.Theme == "bootstrap" {
-			pages, err = fs.Sub(pagesFS, "pages/bootstrap")
-			if err != nil {
-				logError("Failed when processing pages: %s", err)
-			}
-		} else if cfg.Pages.Theme == "nebula" {
-			pages, err = fs.Sub(NebulaPagesFS, "pages/nebula")
-			if err != nil {
-				logError("Failed when processing pages: %s", err)
-			}
-		} else {
-			pages, err = fs.Sub(pagesFS, "pages/bootstrap")
-			if err != nil {
-				logError("Failed when processing pages: %s", err)
-			}
-		}
-		router.GET("/", gin.WrapH(http.FileServer(http.FS(pages))))
-		router.GET("/favicon.ico", gin.WrapH(http.FileServer(http.FS(pages))))
-		router.GET("/script.js", gin.WrapH(http.FileServer(http.FS(pages))))
-		router.GET("/style.css", gin.WrapH(http.FileServer(http.FS(pages))))
-	} else if cfg.Pages.Mode == "external" {
-		indexPagePath := fmt.Sprintf("%s/index.html", cfg.Pages.StaticDir)
-		faviconPath := fmt.Sprintf("%s/favicon.ico", cfg.Pages.StaticDir)
-		javascriptsPath := fmt.Sprintf("%s/script.js", cfg.Pages.StaticDir)
-		stylesheetsPath := fmt.Sprintf("%s/style.css", cfg.Pages.StaticDir)
-		router.GET("/", func(c *gin.Context) {
-			c.File(indexPagePath)
-			logInfo("IP:%s UA:%s METHOD:%s HTTPv:%s", c.ClientIP(), c.Request.UserAgent(), c.Request.Method, c.Request.Proto)
-		})
-		router.StaticFile("/favicon.ico", faviconPath)
-		router.StaticFile("/script.js", javascriptsPath)
-		router.StaticFile("/style.css", stylesheetsPath)
+	if cfg.GitClone.Mode == "cache" {
+		router.GET("/github.com/:username/:repo/info/refs", gitclone.HttpInfoRefs(cfg))
+		//router.GET("/https://github.com/:username/:repo/info/refs", gitclone.HttpInfoRefs(cfg))
+
+		router.POST("/github.com/:username/:repo/git-upload-pack", gitclone.HttpGitUploadPack(cfg))
+		//router.POST("/https://github.com/:username/:repo/git-upload-pack", gitclone.HttpGitUploadPack(cfg))
 	} else {
-		logWarning("缺少 cfg.Pages.Mode 配置, cfg.Pages.Enable 将于2.4.0弃用，请使用cfg.Pages.Mode")
-		if cfg.Pages.Enabled {
-			indexPagePath := fmt.Sprintf("%s/index.html", cfg.Pages.StaticDir)
-			faviconPath := fmt.Sprintf("%s/favicon.ico", cfg.Pages.StaticDir)
-			javascriptsPath := fmt.Sprintf("%s/script.js", cfg.Pages.StaticDir)
-			stylesheetsPath := fmt.Sprintf("%s/style.css", cfg.Pages.StaticDir)
-			router.GET("/", func(c *gin.Context) {
-				c.File(indexPagePath)
-				logInfo("IP:%s UA:%s METHOD:%s HTTPv:%s", c.ClientIP(), c.Request.UserAgent(), c.Request.Method, c.Request.Proto)
+		// 3. GitHub Info/Git- - Use distinct path segments for type (or combine under a common prefix)
+		/*
+			router.GET("/github.com/:username/:repo/info/*filepath", func(c *gin.Context) { // Distinct path for info
+				proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
 			})
-			router.StaticFile("/favicon.ico", faviconPath)
-			router.StaticFile("/script.js", javascriptsPath)
-			router.StaticFile("/style.css", stylesheetsPath)
-		} else if !cfg.Pages.Enabled {
-			var pages fs.FS
-			var err error
-			if cfg.Pages.Theme == "bootstrap" {
-				pages, err = fs.Sub(pagesFS, "pages/bootstrap")
-				if err != nil {
-					logError("Failed when processing pages: %s", err)
-				}
-			} else if cfg.Pages.Theme == "nebula" {
-				pages, err = fs.Sub(NebulaPagesFS, "pages/nebula")
-				if err != nil {
-					logError("Failed when processing pages: %s", err)
-				}
-			} else {
-				pages, err = fs.Sub(pagesFS, "pages/bootstrap")
-				if err != nil {
-					logError("Failed when processing pages: %s", err)
-				}
-			}
-			router.GET("/", gin.WrapH(http.FileServer(http.FS(pages))))
-			router.GET("/favicon.ico", gin.WrapH(http.FileServer(http.FS(pages))))
-			router.GET("/script.js", gin.WrapH(http.FileServer(http.FS(pages))))
-			router.GET("/style.css", gin.WrapH(http.FileServer(http.FS(pages))))
-		}
+			router.GET("/github.com/:username/:repo/git-*filepath", func(c *gin.Context) { // Distinct path for git-* (or a more specific prefix)
+				proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+			})
+		*/
 	}
 
+	/*
+		// 1. GitHub Releases/Archive - Use distinct path segments for type
+		router.GET("/github.com/:username/:repo/releases/*filepath", func(c *gin.Context) { // Distinct path for releases
+			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+		})
+
+		router.GET("/github.com/:username/:repo/archive/*filepath", func(c *gin.Context) { // Distinct path for archive
+			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+		})
+
+		// 2. GitHub Blob/Raw - Use distinct path segments for type
+		router.GET("/github.com/:username/:repo/blob/*filepath", func(c *gin.Context) { // Distinct path for blob
+			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+		})
+
+		router.GET("/github.com/:username/:repo/raw/*filepath", func(c *gin.Context) { // Distinct path for raw
+			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+		})
+
+		// 4. Raw GitHubusercontent - Keep as is (assuming it's distinct enough)
+		router.GET("/raw.githubusercontent.com/:username/:repo/*filepath", func(c *gin.Context) {
+			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+		})
+
+		// 5. Gist GitHubusercontent - Keep as is (assuming it's distinct enough)
+		router.GET("/gist.githubusercontent.com/:username/*filepath", func(c *gin.Context) {
+			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+		})
+
+		// 6. GitHub API Repos - Keep as is (assuming it's distinct enough)
+		router.GET("/api.github.com/repos/:username/:repo/*filepath", func(c *gin.Context) {
+			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+		})
+	*/
+
 	router.NoRoute(func(c *gin.Context) {
+		logInfo(c.Request.URL.Path)
 		proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
 	})
 

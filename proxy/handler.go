@@ -37,6 +37,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 			}
 		}
 
+		//rawPath := strings.TrimPrefix(c.Request.URL.Path, "/") // 去掉前缀/
 		rawPath := strings.TrimPrefix(c.Request.URL.RequestURI(), "/") // 去掉前缀/
 		re := regexp.MustCompile(`^(http:|https:)?/?/?(.*)`)           // 匹配http://或https://开头的路径
 		matches := re.FindStringSubmatch(rawPath)                      // 匹配路径

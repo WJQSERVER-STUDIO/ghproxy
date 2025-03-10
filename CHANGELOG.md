@@ -1,5 +1,12 @@
 # 更新日志
 
+25w16a
+---
+- PRE-RELEASE: 此版本是v2.4.0的预发布版本,请勿在生产环境中使用;
+- CHANGE: 变更CORS配置
+- ADD: 使用GO-GIT实现git smart http服务端和客户端
+- CHANGE: 更新依赖
+
 2.3.1
 ---
 - CHANGE: 改进`Pages`在`External`模式下的路由

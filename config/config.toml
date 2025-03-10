@@ -3,7 +3,7 @@ host = "0.0.0.0"
 port = 8080 
 sizeLimit = 125 # MB
 H2C = true
-enableH2C = "on" # "on" or "off"
+cors = "*" # "*"/"" -> "*" ; "nil" -> "" ;
 debug = false
 
 [httpc]
@@ -12,9 +12,12 @@ maxIdleConns = 100 # only for advanced mode
 maxIdleConnsPerHost = 60 # only for advanced mode
 maxConnsPerHost = 0 # only for advanced mode
 
+[gitclone]
+mode = "bypass" # bypass / cache
+dir = "./repos" 
+
 [pages]
 mode = "internal" # "internal" or "external"
-enabled = false
 theme = "bootstrap" # "bootstrap" or "nebula"
 staticDir = "/data/www" 
 
@@ -22,9 +25,6 @@ staticDir = "/data/www"
 logFilePath = "/data/ghproxy/log/ghproxy.log" 
 maxLogSize = 5 # MB
 level = "info" # dump, debug, info, warn, error, none
-
-[cors]
-enabled = true
 
 [auth]
 authMethod = "parameters" # "header" or "parameters"

@@ -94,6 +94,7 @@ host = "0.0.0.0"  # 监听地址
 port = 8080  # 监听端口
 sizeLimit = 125 # 125MB
 H2C = true # 是否开启H2C传输 
+cors = "*" # "*"/"" -> "*" ; "nil" -> "" ; 除以上特殊情况, 会将值直接传入
 enableH2C = "on"  # 是否开启H2C传输(latest和dev版本请开启) on/off (2.4.0弃用)
 
 [httpc]
@@ -112,9 +113,6 @@ staticPath = "/data/www"  # 静态页面文件路径
 logFilePath = "/data/ghproxy/log/ghproxy.log" # 日志文件路径
 maxLogSize = 5 # MB 日志文件最大大小
 level = "info"  # 日志级别 dump, debug, info, warn, error, none
-
-[cors]
-enabled = true  # 是否开启跨域
 
 [auth]
 authMethod = "parameters" # 鉴权方式,支持parameters,header
