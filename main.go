@@ -144,6 +144,7 @@ func setupPages(cfg *config.Config, router *gin.Engine) {
 		router.GET("/favicon.ico", gin.WrapH(http.FileServer(http.FS(pages))))
 		router.GET("/script.js", gin.WrapH(http.FileServer(http.FS(pages))))
 		router.GET("/style.css", gin.WrapH(http.FileServer(http.FS(pages))))
+		//router.GET("/bootstrap.min.css", gin.WrapH(http.FileServer(http.FS(pages))))
 
 	case "external":
 		// 设置外部资源路径
@@ -151,6 +152,7 @@ func setupPages(cfg *config.Config, router *gin.Engine) {
 		faviconPath := fmt.Sprintf("%s/favicon.ico", cfg.Pages.StaticDir)
 		javascriptsPath := fmt.Sprintf("%s/script.js", cfg.Pages.StaticDir)
 		stylesheetsPath := fmt.Sprintf("%s/style.css", cfg.Pages.StaticDir)
+		//bootstrapPath := fmt.Sprintf("%s/bootstrap.min.css", cfg.Pages.StaticDir)
 
 		// 设置外部资源路由
 		router.GET("/", func(c *gin.Context) {
@@ -160,6 +162,7 @@ func setupPages(cfg *config.Config, router *gin.Engine) {
 		router.StaticFile("/favicon.ico", faviconPath)
 		router.StaticFile("/script.js", javascriptsPath)
 		router.StaticFile("/style.css", stylesheetsPath)
+		//router.StaticFile("/bootstrap.min.css", bootstrapPath)
 
 	default:
 		// 处理无效的Pages Mode
@@ -230,50 +233,47 @@ func init() {
 		//router.POST("/https://github.com/:username/:repo/git-upload-pack", gitclone.HttpGitUploadPack(cfg))
 	} else {
 		// 3. GitHub Info/Git- - Use distinct path segments for type (or combine under a common prefix)
-		/*
-			router.GET("/github.com/:username/:repo/info/*filepath", func(c *gin.Context) { // Distinct path for info
-				proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
-			})
-			router.GET("/github.com/:username/:repo/git-*filepath", func(c *gin.Context) { // Distinct path for git-* (or a more specific prefix)
-				proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
-			})
-		*/
+
+		router.GET("/github.com/:username/:repo/info/*filepath", func(c *gin.Context) { // Distinct path for info
+			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+		})
+		router.GET("/github.com/:username/:repo/git-*filepath", func(c *gin.Context) { // Distinct path for git-* (or a more specific prefix)
+			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+		})
 	}
 
-	/*
-		// 1. GitHub Releases/Archive - Use distinct path segments for type
-		router.GET("/github.com/:username/:repo/releases/*filepath", func(c *gin.Context) { // Distinct path for releases
-			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
-		})
+	// 1. GitHub Releases/Archive - Use distinct path segments for type
+	router.GET("/github.com/:username/:repo/releases/*filepath", func(c *gin.Context) { // Distinct path for releases
+		proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+	})
 
-		router.GET("/github.com/:username/:repo/archive/*filepath", func(c *gin.Context) { // Distinct path for archive
-			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
-		})
+	router.GET("/github.com/:username/:repo/archive/*filepath", func(c *gin.Context) { // Distinct path for archive
+		proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+	})
 
-		// 2. GitHub Blob/Raw - Use distinct path segments for type
-		router.GET("/github.com/:username/:repo/blob/*filepath", func(c *gin.Context) { // Distinct path for blob
-			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
-		})
+	// 2. GitHub Blob/Raw - Use distinct path segments for type
+	router.GET("/github.com/:username/:repo/blob/*filepath", func(c *gin.Context) { // Distinct path for blob
+		proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+	})
 
-		router.GET("/github.com/:username/:repo/raw/*filepath", func(c *gin.Context) { // Distinct path for raw
-			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
-		})
+	router.GET("/github.com/:username/:repo/raw/*filepath", func(c *gin.Context) { // Distinct path for raw
+		proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+	})
 
-		// 4. Raw GitHubusercontent - Keep as is (assuming it's distinct enough)
-		router.GET("/raw.githubusercontent.com/:username/:repo/*filepath", func(c *gin.Context) {
-			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
-		})
+	// 4. Raw GitHubusercontent - Keep as is (assuming it's distinct enough)
+	router.GET("/raw.githubusercontent.com/:username/:repo/*filepath", func(c *gin.Context) {
+		proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+	})
 
-		// 5. Gist GitHubusercontent - Keep as is (assuming it's distinct enough)
-		router.GET("/gist.githubusercontent.com/:username/*filepath", func(c *gin.Context) {
-			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
-		})
+	// 5. Gist GitHubusercontent - Keep as is (assuming it's distinct enough)
+	router.GET("/gist.githubusercontent.com/:username/*filepath", func(c *gin.Context) {
+		proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+	})
 
-		// 6. GitHub API Repos - Keep as is (assuming it's distinct enough)
-		router.GET("/api.github.com/repos/:username/:repo/*filepath", func(c *gin.Context) {
-			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
-		})
-	*/
+	// 6. GitHub API Repos - Keep as is (assuming it's distinct enough)
+	router.GET("/api.github.com/repos/:username/:repo/*filepath", func(c *gin.Context) {
+		proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+	})
 
 	router.NoRoute(func(c *gin.Context) {
 		logInfo(c.Request.URL.Path)
