@@ -53,11 +53,11 @@ type HttpcConfig struct {
 /*
 [gitclone]
 mode = "bypass" # bypass / cache
-dir = "./repos"
+smartGitAddr = ":8080"
 */
 type GitCloneConfig struct {
-	Mode string `toml:"mode"`
-	Dir  string `toml:"dir"`
+	Mode         string `toml:"mode"`
+	SmartGitAddr string `toml:"smartGitAddr"`
 }
 
 /*

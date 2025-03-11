@@ -126,11 +126,7 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 
 	c.Status(resp.StatusCode)
 
-	// 使用固定32KB缓冲池
-	buffer := BufferPool.Get().([]byte)
-	defer BufferPool.Put(buffer)
-
-	_, err = io.CopyBuffer(c.Writer, resp.Body, buffer)
+	_, err = io.CopyBuffer(c.Writer, resp.Body, nil)
 	if err != nil {
 		logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 		return

@@ -10,6 +10,7 @@ require (
 	github.com/go-git/go-git/v5 v5.14.0
 	github.com/pierrec/lz4 v2.6.1+incompatible
 	github.com/satomitouka/touka-httpc v0.3.0
+	github.com/valyala/bytebufferpool v1.0.0
 	golang.org/x/net v0.37.0
 	golang.org/x/time v0.11.0
 )
@@ -18,6 +19,7 @@ require (
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
+	github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.3 // indirect
 	github.com/WJQSERVER-STUDIO/go-utils/log v0.0.1 // indirect
 	github.com/bytedance/sonic v1.13.1 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect

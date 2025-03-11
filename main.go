@@ -12,7 +12,6 @@ import (
 	"ghproxy/api"
 	"ghproxy/auth"
 	"ghproxy/config"
-	"ghproxy/gitclone"
 	"ghproxy/middleware/loggin"
 	"ghproxy/middleware/timing"
 	"ghproxy/proxy"
@@ -225,23 +224,6 @@ func init() {
 
 	setupPages(cfg, router)
 
-	if cfg.GitClone.Mode == "cache" {
-		router.GET("/github.com/:username/:repo/info/refs", gitclone.HttpInfoRefs(cfg))
-		//router.GET("/https://github.com/:username/:repo/info/refs", gitclone.HttpInfoRefs(cfg))
-
-		router.POST("/github.com/:username/:repo/git-upload-pack", gitclone.HttpGitUploadPack(cfg))
-		//router.POST("/https://github.com/:username/:repo/git-upload-pack", gitclone.HttpGitUploadPack(cfg))
-	} else {
-		// 3. GitHub Info/Git- - Use distinct path segments for type (or combine under a common prefix)
-
-		router.GET("/github.com/:username/:repo/info/*filepath", func(c *gin.Context) { // Distinct path for info
-			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
-		})
-		router.GET("/github.com/:username/:repo/git-*filepath", func(c *gin.Context) { // Distinct path for git-* (or a more specific prefix)
-			proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
-		})
-	}
-
 	// 1. GitHub Releases/Archive - Use distinct path segments for type
 	router.GET("/github.com/:username/:repo/releases/*filepath", func(c *gin.Context) { // Distinct path for releases
 		proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
@@ -257,6 +239,13 @@ func init() {
 	})
 
 	router.GET("/github.com/:username/:repo/raw/*filepath", func(c *gin.Context) { // Distinct path for raw
+		proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+	})
+
+	router.GET("/github.com/:username/:repo/info/*filepath", func(c *gin.Context) { // Distinct path for info
+		proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
+	})
+	router.GET("/github.com/:username/:repo/git-upload-pack", func(c *gin.Context) {
 		proxy.NoRouteHandler(cfg, limiter, iplimiter, runMode)(c)
 	})
 

@@ -1,5 +1,8 @@
 package gitclone
 
+/*
+package gitclone
+
 import (
 	"compress/gzip"
 	"ghproxy/config"
@@ -157,3 +160,5 @@ func HttpGitUploadPack(cfg *config.Config) gin.HandlerFunc {
 		}
 	}
 }
+
+*/
