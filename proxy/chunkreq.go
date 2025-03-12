@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/WJQSERVER-STUDIO/go-utils/copyb"
 	"github.com/gin-gonic/gin"
 )
 
@@ -126,7 +127,8 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 
 	c.Status(resp.StatusCode)
 
-	_, err = io.CopyBuffer(c.Writer, resp.Body, nil)
+	//_, err = io.CopyBuffer(c.Writer, resp.Body, nil)
+	_, err = copyb.CopyBuffer(c.Writer, resp.Body, nil)
 	if err != nil {
 		logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 		return

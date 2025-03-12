@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/WJQSERVER-STUDIO/go-utils/copyb"
 	"github.com/gin-gonic/gin"
 )
 
@@ -96,21 +97,12 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 	}
 
 	c.Status(resp.StatusCode)
-
-	// 使用固定32KB缓冲池
-	buffer := BufferPool.Get().([]byte)
-	defer BufferPool.Put(buffer)
-
-	_, err = io.CopyBuffer(c.Writer, resp.Body, buffer)
-	if err != nil {
-		logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
-		return
-	} else {
-		c.Writer.Flush() // 确保刷入
-	}
-
 	/*
-		_, err = copyb.CopyBuffer(c.Writer, resp.Body, nil)
+		// 使用固定32KB缓冲池
+		buffer := BufferPool.Get().([]byte)
+		defer BufferPool.Put(buffer)
+
+		_, err = io.CopyBuffer(c.Writer, resp.Body, buffer)
 		if err != nil {
 			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 			return
@@ -118,6 +110,17 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 			c.Writer.Flush() // 确保刷入
 		}
 	*/
+
+	_, err = copyb.CopyBuffer(c.Writer, resp.Body, nil)
+
+	if err != nil {
+		logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+		return
+	} else {
+
+		c.Writer.Flush() // 确保刷入
+	}
+
 }
 
 // extractParts 从给定的 URL 中提取所需的部分
