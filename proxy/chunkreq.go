@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/WJQSERVER-STUDIO/go-utils/copyb"
 	"github.com/gin-gonic/gin"
 )
 
@@ -105,19 +106,29 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 		resp.Header.Del(header)
 	}
 
-	if cfg.CORS.Enabled {
+	/*
+		if cfg.CORS.Enabled {
+			c.Header("Access-Control-Allow-Origin", "*")
+		} else {
+			c.Header("Access-Control-Allow-Origin", "")
+		}
+	*/
+
+	switch cfg.Server.Cors {
+	case "*":
 		c.Header("Access-Control-Allow-Origin", "*")
-	} else {
+	case "":
+		c.Header("Access-Control-Allow-Origin", "*")
+	case "nil":
 		c.Header("Access-Control-Allow-Origin", "")
+	default:
+		c.Header("Access-Control-Allow-Origin", cfg.Server.Cors)
 	}
 
 	c.Status(resp.StatusCode)
 
-	// 使用固定32KB缓冲池
-	buffer := BufferPool.Get().([]byte)
-	defer BufferPool.Put(buffer)
-
-	_, err = io.CopyBuffer(c.Writer, resp.Body, buffer)
+	//_, err = io.CopyBuffer(c.Writer, resp.Body, nil)
+	_, err = copyb.CopyBuffer(c.Writer, resp.Body, nil)
 	if err != nil {
 		logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 		return

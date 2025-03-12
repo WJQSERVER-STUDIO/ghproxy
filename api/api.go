@@ -92,7 +92,7 @@ func CorsStatusHandler(c *gin.Context, cfg *config.Config) {
 	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.Request.UserAgent(), c.Request.Proto)
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
-		"Cors": cfg.CORS.Enabled,
+		"Cors": cfg.Server.Cors,
 	})
 }
 
