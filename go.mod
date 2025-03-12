@@ -4,13 +4,12 @@ go 1.24.1
 
 require (
 	github.com/BurntSushi/toml v1.4.0
+	github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.3
 	github.com/WJQSERVER-STUDIO/go-utils/logger v1.5.0
 	github.com/gin-gonic/gin v1.10.0
-	github.com/go-git/go-billy/v5 v5.6.2
 	github.com/go-git/go-git/v5 v5.14.0
 	github.com/pierrec/lz4 v2.6.1+incompatible
-	github.com/satomitouka/touka-httpc v0.3.0
-	github.com/valyala/bytebufferpool v1.0.0
+	github.com/satomitouka/touka-httpc v0.3.1
 	golang.org/x/net v0.37.0
 	golang.org/x/time v0.11.0
 )
@@ -19,7 +18,6 @@ require (
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
-	github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.3 // indirect
 	github.com/WJQSERVER-STUDIO/go-utils/log v0.0.1 // indirect
 	github.com/bytedance/sonic v1.13.1 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
@@ -31,6 +29,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/gin-contrib/sse v1.0.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
+	github.com/go-git/go-billy/v5 v5.6.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.25.0 // indirect
@@ -50,6 +49,7 @@ require (
 	github.com/skeema/knownhosts v1.3.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	golang.org/x/arch v0.15.0 // indirect
 	golang.org/x/crypto v0.36.0 // indirect

@@ -1,5 +1,13 @@
 # 更新日志
 
+2.4.0 - 2025-03-12
+---
+- ADD: 支持通过[Smart-Git](https://github.com/WJQSERVER-STUDIO/smart-git)实现Git Clone缓存
+- CHANGE: 使用更高性能的Buffer Pool 实现, 调用 github.com/WJQSERVER-STUDIO/go-utils/copyb
+- CHANGE: 改进路由匹配
+- CHANGE: 更新依赖
+- CHANGE: 改进前端
+
 25w16d - 2025-03-12
 ---
 - PRE-RELEASE: 此版本是v2.4.0的预发布版本,请勿在生产环境中使用;

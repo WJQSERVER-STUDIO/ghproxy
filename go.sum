@@ -113,8 +113,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
 github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0tI/otEQ=
 github.com/rogpeppe/go-internal v1.14.1/go.mod h1:MaRKkUm5W0goXpeCfT7UZI6fk/L7L7so1lCWt35ZSgc=
-github.com/satomitouka/touka-httpc v0.3.0 h1:9W1JqL4XMsphLxxjSXXQYU3pO1D/CQsSXA1UNV3BDz8=
-github.com/satomitouka/touka-httpc v0.3.0/go.mod h1:XB0GE7UK6cinkCb6mkgYryyLyLE27HrgunK2oWnbxis=
+github.com/satomitouka/touka-httpc v0.3.1 h1:UnKFHgK0diEZeSxRW5Q7ibCO2EyAyK1lgXvGEbUmz6I=
+github.com/satomitouka/touka-httpc v0.3.1/go.mod h1:b5b+/0x4/uodWQSYCerbQyH8GrpNg92q+GcCBPhFjhI=
 github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 h1:n661drycOFuPLCN3Uc8sB6B/s6Z4t2xvBgU1htSHuq8=
 github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3/go.mod h1:A0bzQcvG0E7Rwjx0REVgAGH58e96+X0MeOfepqsbeW4=
 github.com/sirupsen/logrus v1.7.0/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
