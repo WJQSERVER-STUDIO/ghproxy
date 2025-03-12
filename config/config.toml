@@ -14,7 +14,7 @@ maxConnsPerHost = 0 # only for advanced mode
 
 [gitclone]
 mode = "bypass" # bypass / cache
-smartGitAddr = ":8080"
+smartGitAddr = "http://127.0.0.1:8080"
 
 [pages]
 mode = "internal" # "internal" or "external"

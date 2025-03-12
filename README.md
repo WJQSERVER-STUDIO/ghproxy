@@ -95,7 +95,6 @@ port = 8080  # 监听端口
 sizeLimit = 125 # 125MB
 H2C = true # 是否开启H2C传输 
 cors = "*" # "*"/"" -> "*" ; "nil" -> "" ; 除以上特殊情况, 会将值直接传入
-enableH2C = "on"  # 是否开启H2C传输(latest和dev版本请开启) on/off (2.4.0弃用)
 
 [httpc]
 mode = "auto" # "auto" or "advanced" HTTP客户端模式 自动/高级模式
@@ -103,9 +102,12 @@ maxIdleConns = 100 # only for advanced mode 仅用于高级模式
 maxIdleConnsPerHost = 60 # only for advanced mode 仅用于高级模式
 maxConnsPerHost = 0 # only for advanced mode 仅用于高级模式
 
+[gitclone]
+mode = "bypass" # bypass / cache 运行模式, cache模式依赖smart-git
+smartGitAddr = "http://127.0.0.1:8080" # smart-git组件地址
+
 [pages]
 mode = "internal" # "internal" or "external" 内部/外部 前端 默认内部
-enabled = false  # 是否开启外置静态页面(Docker版本请关闭此项) (2.4.0弃用)
 theme = "bootstrap" # "bootstrap" or "nebula" 内置主题
 staticPath = "/data/www"  # 静态页面文件路径
 
