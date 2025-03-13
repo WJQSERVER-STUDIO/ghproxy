@@ -44,12 +44,18 @@ func initHTTPClient(cfg *config.Config) {
 			}).DialContext,
 		}
 	*/
+	var proTolcols = new(http.Protocols)
+	proTolcols.SetHTTP1(true)
+	proTolcols.SetHTTP2(true)
+	proTolcols.SetUnencryptedHTTP2(true)
 	if cfg.Httpc.Mode == "auto" {
+
 		tr = &http.Transport{
 			//MaxIdleConns:    160,
 			IdleConnTimeout: 30 * time.Second,
 			WriteBufferSize: 32 * 1024, // 32KB
 			ReadBufferSize:  32 * 1024, // 32KB
+			Protocols:       proTolcols,
 		}
 	} else if cfg.Httpc.Mode == "advanced" {
 		tr = &http.Transport{
@@ -58,6 +64,7 @@ func initHTTPClient(cfg *config.Config) {
 			MaxIdleConnsPerHost: cfg.Httpc.MaxIdleConnsPerHost,
 			WriteBufferSize:     32 * 1024, // 32KB
 			ReadBufferSize:      32 * 1024, // 32KB
+			Protocols:           proTolcols,
 		}
 	} else {
 		// 错误的模式

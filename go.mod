@@ -4,12 +4,12 @@ go 1.24.1
 
 require (
 	github.com/BurntSushi/toml v1.4.0
-	github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.3
+	github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.4
 	github.com/WJQSERVER-STUDIO/go-utils/logger v1.5.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-git/go-git/v5 v5.14.0
 	github.com/pierrec/lz4 v2.6.1+incompatible
-	github.com/satomitouka/touka-httpc v0.3.1
+	github.com/satomitouka/touka-httpc v0.3.3
 	golang.org/x/net v0.37.0
 	golang.org/x/time v0.11.0
 )
