@@ -1,5 +1,11 @@
 # 更新日志
 
+25w17a - 2025-03-12
+---
+- PRE-RELEASE: 此版本是v2.4.1的预发布版本,请勿在生产环境中使用;
+- CHANGE: 重构路由匹配
+- CHANGE: 更新相关依赖以修复错误
+
 2.4.0 - 2025-03-12
 ---
 - ADD: 支持通过[Smart-Git](https://github.com/WJQSERVER-STUDIO/smart-git)实现Git Clone缓存
