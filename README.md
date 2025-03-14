@@ -105,6 +105,7 @@ maxConnsPerHost = 0 # only for advanced mode 仅用于高级模式
 [gitclone]
 mode = "bypass" # bypass / cache 运行模式, cache模式依赖smart-git
 smartGitAddr = "http://127.0.0.1:8080" # smart-git组件地址
+ForceH2C = true # 强制使用H2C连接
 
 [pages]
 mode = "internal" # "internal" or "external" 内部/外部 前端 默认内部
@@ -170,18 +171,15 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890" 支持Socks5/HTTP(S)�
   }
 ```
 
-### Caddy反代配置
-
-```Caddyfile
-example.com {
-    reverse_proxy * 127.0.0.1:7210
-}
-```
-
 ### 前端页面
 
+#### Bootstrap主题
 ![ghproxy-demo.png](https://webp.wjqserver.com/ghproxy/1.8.1-light.png)
 ![ghproxy-demo-dark.png](https://webp.wjqserver.com/ghproxy/1.8.1-dark.png)
+
+#### Nebula主题
+![nebula-dark-v2.3.0.png](https://webp.wjqserver.com/ghproxy/nebula-dark.png)
+![nebula-light-v2.3.0.png](https://webp.wjqserver.com/ghproxy/nebula-light.png)
 
 ## 赞助
 

@@ -54,10 +54,12 @@ type HttpcConfig struct {
 [gitclone]
 mode = "bypass" # bypass / cache
 smartGitAddr = ":8080"
+ForceH2C = true
 */
 type GitCloneConfig struct {
 	Mode         string `toml:"mode"`
 	SmartGitAddr string `toml:"smartGitAddr"`
+	ForceH2C     bool   `toml:"ForceH2C"`
 }
 
 /*
