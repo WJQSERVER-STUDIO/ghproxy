@@ -105,7 +105,7 @@ maxConnsPerHost = 0 # only for advanced mode 仅用于高级模式
 [gitclone]
 mode = "bypass" # bypass / cache 运行模式, cache模式依赖smart-git
 smartGitAddr = "http://127.0.0.1:8080" # smart-git组件地址
-ForceH2C = true # 强制使用H2C连接
+ForceH2C = false # 强制使用H2C连接
 
 [pages]
 mode = "internal" # "internal" or "external" 内部/外部 前端 默认内部
