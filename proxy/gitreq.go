@@ -18,16 +18,22 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 	method := c.Request.Method
 	logInfo("%s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
 
-	logInfo("U:%s", u)
+	logDump("Url Before FMT:%s", u)
 	if cfg.GitClone.Mode == "cache" {
-		userPath, repoPath, remainingPath, err := extractParts(u)
+		userPath, repoPath, remainingPath, queryParams, err := extractParts(u)
 		if err != nil {
 			HandleError(c, fmt.Sprintf("Failed to extract parts from URL: %v", err))
 			return
 		}
 		// 构建新url
-		u = cfg.GitClone.SmartGitAddr + userPath + repoPath + remainingPath
+		u = cfg.GitClone.SmartGitAddr + userPath + repoPath + remainingPath + "?" + queryParams.Encode()
+		logDump("New Url After FMT:%s", u)
 	}
+
+	var (
+		resp *http.Response
+		err  error
+	)
 
 	body, err := readRequestBody(c)
 	if err != nil {
@@ -37,18 +43,35 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 
 	bodyReader := bytes.NewBuffer(body)
 	// 创建请求
-	req, err := client.NewRequest(method, u, bodyReader)
-	if err != nil {
-		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
-		return
-	}
-	setRequestHeaders(c, req)
-	AuthPassThrough(c, cfg, req)
 
-	resp, err := client.Do(req)
-	if err != nil {
-		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
-		return
+	if cfg.GitClone.Mode == "cache" {
+		req, err := gitclient.NewRequest(method, u, bodyReader)
+		if err != nil {
+			HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
+			return
+		}
+		setRequestHeaders(c, req)
+		AuthPassThrough(c, cfg, req)
+
+		resp, err = gitclient.Do(req)
+		if err != nil {
+			HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
+			return
+		}
+	} else {
+		req, err := client.NewRequest(method, u, bodyReader)
+		if err != nil {
+			HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
+			return
+		}
+		setRequestHeaders(c, req)
+		AuthPassThrough(c, cfg, req)
+
+		resp, err = client.Do(req)
+		if err != nil {
+			HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
+			return
+		}
 	}
 	//defer resp.Body.Close()
 	defer func(Body io.ReadCloser) {
@@ -124,11 +147,11 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 }
 
 // extractParts 从给定的 URL 中提取所需的部分
-func extractParts(rawURL string) (string, string, string, error) {
+func extractParts(rawURL string) (string, string, string, url.Values, error) {
 	// 解析 URL
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
-		return "", "", "", err
+		return "", "", "", nil, err
 	}
 
 	// 获取路径部分并分割
@@ -136,7 +159,7 @@ func extractParts(rawURL string) (string, string, string, error) {
 
 	// 提取所需的部分
 	if len(pathParts) < 3 {
-		return "", "", "", fmt.Errorf("URL path is too short")
+		return "", "", "", nil, fmt.Errorf("URL path is too short")
 	}
 
 	// 提取 /WJQSERVER-STUDIO 和 /go-utils.git
@@ -149,5 +172,8 @@ func extractParts(rawURL string) (string, string, string, error) {
 		remainingPath = "/" + remainingPath
 	}
 
-	return repoOwner, repoName, remainingPath, nil
+	// 查询参数
+	queryParams := parsedURL.Query()
+
+	return repoOwner, repoName, remainingPath, queryParams, nil
 }

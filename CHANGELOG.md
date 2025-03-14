@@ -1,11 +1,24 @@
 # 更新日志
 
-2.4.1 - 2025-03-12
+2.4.2 - 2025-03-14
+---
+- CHANGE: 在GitClone Cache模式下, 相关请求会使用独立httpc client
+- CHANGE: 为GitClone Cache的独立httpc client增加ForceH2C选项
+- FIX: 修正GitClone Cache模式下的Url生成问题
+
+25w18a - 2025-03-14
+---
+- PRE-RELEASE: 此版本是v2.4.2的预发布版本,请勿在生产环境中使用;
+- CHANGE: 在GitClone Cache模式下, 相关请求会使用独立httpc client
+- CHANGE: 为GitClone Cache的独立httpc client增加ForceH2C选项
+- FIX: 修正GitClone Cache模式下的Url生成问题
+
+2.4.1 - 2025-03-13
 ---
 - CHANGE: 重构路由匹配
 - CHANGE: 更新相关依赖以修复错误
 
-25w17a - 2025-03-12
+25w17a - 2025-03-13
 ---
 - PRE-RELEASE: 此版本是v2.4.1的预发布版本,请勿在生产环境中使用;
 - CHANGE: 重构路由匹配
