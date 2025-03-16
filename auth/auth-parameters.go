@@ -7,24 +7,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthParametersHandler(c *gin.Context, cfg *config.Config) (isValid bool, err string) {
+func AuthParametersHandler(c *gin.Context, cfg *config.Config) (isValid bool, err error) {
 	if !cfg.Auth.Enabled {
-		return true, ""
+		return true, nil
 	}
 
 	authToken := c.Query("auth_token")
 	logDebug("%s %s %s %s %s AUTH_TOKEN: %s", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.Request.UserAgent(), c.Request.Proto, authToken)
 
 	if authToken == "" {
-		err := "Auth token == nil"
-		return false, err
+		return false, fmt.Errorf("Auth token not found")
 	}
 
 	isValid = authToken == cfg.Auth.AuthToken
 	if !isValid {
-		err := fmt.Sprintf("Auth token incorrect: %s", authToken)
-		return false, err
+		return false, fmt.Errorf("Auth token invalid")
 	}
 
-	return isValid, ""
+	return isValid, nil
 }

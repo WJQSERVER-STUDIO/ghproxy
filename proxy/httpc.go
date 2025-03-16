@@ -35,20 +35,6 @@ func InitReq(cfg *config.Config) {
 }
 
 func initHTTPClient(cfg *config.Config) {
-	/*
-		ctr = &http.Transport{
-			MaxIdleConns:          100,
-			MaxConnsPerHost:       60,
-			IdleConnTimeout:       20 * time.Second,
-			TLSHandshakeTimeout:   10 * time.Second,
-			ExpectContinueTimeout: 1 * time.Second,
-			ResponseHeaderTimeout: 10 * time.Second,
-			DialContext: (&net.Dialer{
-				Timeout:   30 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).DialContext,
-		}
-	*/
 	var proTolcols = new(http.Protocols)
 	proTolcols.SetHTTP1(true)
 	proTolcols.SetHTTP2(true)

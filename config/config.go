@@ -8,6 +8,7 @@ type Config struct {
 	Server    ServerConfig
 	Httpc     HttpcConfig
 	GitClone  GitCloneConfig
+	Shell     ShellConfig
 	Pages     PagesConfig
 	Log       LogConfig
 	Auth      AuthConfig
@@ -63,6 +64,14 @@ type GitCloneConfig struct {
 }
 
 /*
+[shell]
+editor = true
+*/
+type ShellConfig struct {
+	Editor bool `toml:"editor"`
+}
+
+/*
 [pages]
 mode = "internal" # "internal" or "external"
 enabled = false
@@ -82,11 +91,20 @@ type LogConfig struct {
 	Level       string `toml:"level"`
 }
 
+/*
+[auth]
+authMethod = "parameters" # "header" or "parameters"
+authToken = "token"
+enabled = false
+passThrough = false
+ForceAllowApi = true
+*/
 type AuthConfig struct {
-	Enabled     bool   `toml:"enabled"`
-	AuthMethod  string `toml:"authMethod"`
-	AuthToken   string `toml:"authToken"`
-	PassThrough bool   `toml:"passThrough"`
+	Enabled       bool   `toml:"enabled"`
+	AuthMethod    string `toml:"authMethod"`
+	AuthToken     string `toml:"authToken"`
+	PassThrough   bool   `toml:"passThrough"`
+	ForceAllowApi bool   `toml:"ForceAllowApi"`
 }
 
 type BlacklistConfig struct {

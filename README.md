@@ -111,6 +111,9 @@ mode = "bypass" # bypass / cache 运行模式, cache模式依赖smart-git
 smartGitAddr = "http://127.0.0.1:8080" # smart-git组件地址
 ForceH2C = false # 强制使用H2C连接
 
+[shell]
+editor = false # 脚本嵌套加速
+
 [pages]
 mode = "internal" # "internal" or "external" 内部/外部 前端 默认内部
 theme = "bootstrap" # "bootstrap" or "nebula" 内置主题
@@ -125,6 +128,7 @@ level = "info"  # 日志级别 dump, debug, info, warn, error, none
 authMethod = "parameters" # 鉴权方式,支持parameters,header
 authToken = "token"  # 用户鉴权Token
 enabled = false  # 是否开启用户鉴权
+ForceAllowApi = false # 在不开启Header鉴权的情况下允许api代理
 
 [blacklist]
 blacklistFile = "/data/ghproxy/config/blacklist.json"  # 黑名单文件路径

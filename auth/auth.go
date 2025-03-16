@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"ghproxy/config"
 
 	"github.com/WJQSERVER-STUDIO/go-utils/logger"
@@ -34,7 +35,7 @@ func Init(cfg *config.Config) {
 	logDebug("Auth Init")
 }
 
-func AuthHandler(c *gin.Context, cfg *config.Config) (isValid bool, err string) {
+func AuthHandler(c *gin.Context, cfg *config.Config) (isValid bool, err error) {
 	if cfg.Auth.AuthMethod == "parameters" {
 		isValid, err = AuthParametersHandler(c, cfg)
 		return isValid, err
@@ -43,9 +44,9 @@ func AuthHandler(c *gin.Context, cfg *config.Config) (isValid bool, err string) 
 		return isValid, err
 	} else if cfg.Auth.AuthMethod == "" {
 		logError("Auth method not set")
-		return true, ""
+		return true, nil
 	} else {
 		logError("Auth method not supported")
-		return false, "Auth method not supported"
+		return false, fmt.Errorf(fmt.Sprintf("Auth method %s not supported", cfg.Auth.AuthMethod))
 	}
 }
