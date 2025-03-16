@@ -20,6 +20,7 @@
 - 使用[Gin](https://github.com/gin-gonic/gin)作为Web框架
 - 使用[Touka-HTTPC](https://github.com/satomitouka/touka-httpc)作为HTTP客户端
 - 支持Git clone,raw,realeases等文件拉取
+- 支持Git Clone缓存(配合组件)
 - 支持Docker部署
 - 支持速率限制
 - 支持用户鉴权
@@ -31,8 +32,9 @@
 **本项目是[WJQSERVER-STUDIO/ghproxy-go](https://github.com/WJQSERVER-STUDIO/ghproxy-go)的重构版本,实现了原项目原定功能的同时,进一步优化了性能**
 关于此项目的详细开发过程,请参看Commit记录与[CHANGELOG.md](https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/CHANGELOG.md)
 
-- V2.0.0 对`proxy`核心模块进行了重构,大幅优化内存占用
-- V1.0.0 迁移至本仓库,并再次重构内容实现
+- v2.4.1 对路径匹配进行优化
+- v2.0.0 对`proxy`核心模块进行了重构,大幅优化内存占用
+- v1.0.0 迁移至本仓库,并再次重构内容实现
 - v0.2.0 重构项目实现
 
 ### LICENSE
@@ -48,9 +50,11 @@
 ```
 # 下载文件
 https://ghproxy.1888866.xyz/raw.githubusercontent.com/WJQSERVER-STUDIO/tools-stable/main/tools-stable-ghproxy.sh
+https://ghproxy.1888866.xyz/https://raw.githubusercontent.com/WJQSERVER-STUDIO/tools-stable/main/tools-stable-ghproxy.sh
 
 # 克隆仓库
 git clone https://ghproxy.1888866.xyz/github.com/WJQSERVER-STUDIO/ghproxy.git
+git clone https://ghproxy.1888866.xyz/https://github.com/WJQSERVER-STUDIO/ghproxy.git
 ```
 
 ## 部署说明
