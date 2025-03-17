@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"errors"
 	"fmt"
 	"ghproxy/auth"
 	"ghproxy/config"
@@ -65,89 +66,20 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		// 制作url
 		rawPath = "https://" + matches[2]
 
-		var (
-			user    string
-			repo    string
-			matcher string
-		)
-
-		// 匹配 "https://github.com"开头的链接
-		if strings.HasPrefix(rawPath, "https://github.com") {
-			remainingPath := strings.TrimPrefix(rawPath, "https://github.com")
-			if strings.HasPrefix(remainingPath, "/") {
-				remainingPath = strings.TrimPrefix(remainingPath, "/")
-			}
-			// 预期格式/user/repo/more...
-			// 取出user和repo和最后部分
-			parts := strings.Split(remainingPath, "/")
-			if len(parts) <= 2 {
-				logWarning("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+		user, repo, matcher, err := Matcher(rawPath, cfg)
+		if err != nil {
+			if errors.Is(err, ErrInvalidURL) {
 				c.String(http.StatusForbidden, "Invalid URL Format. Path: %s", rawPath)
+				logWarning(err.Error())
 				return
 			}
-			user = parts[0]
-			repo = parts[1]
-			// 匹配 "https://github.com"开头的链接
-			if len(parts) >= 3 {
-				switch parts[2] {
-				case "releases", "archive":
-					matcher = "releases"
-				case "blob", "raw":
-					matcher = "blob"
-				case "info", "git-upload-pack":
-					matcher = "clone"
-				default:
-					fmt.Println("Invalid URL: Unknown type")
-				}
-			}
-		}
-		// 匹配 "https://raw"开头的链接
-		if strings.HasPrefix(rawPath, "https://raw") {
-			remainingPath := strings.TrimPrefix(rawPath, "https://")
-			parts := strings.Split(remainingPath, "/")
-			if len(parts) <= 3 {
-				logWarning("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
-				c.String(http.StatusForbidden, "Invalid URL Format. Path: %s", rawPath)
-				return
-			}
-			user = parts[1]
-			repo = parts[2]
-			matcher = "raw"
-		}
-		// 匹配 "https://gist"开头的链接
-		if strings.HasPrefix(rawPath, "https://gist") {
-			remainingPath := strings.TrimPrefix(rawPath, "https://")
-			parts := strings.Split(remainingPath, "/")
-			if len(parts) <= 3 {
-				logWarning("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
-				c.String(http.StatusForbidden, "Invalid URL Format. Path: %s", rawPath)
-				return
-			}
-			user = parts[1]
-			matcher = "gist"
-		}
-		// 匹配 "https://api.github.com/"开头的链接
-		if strings.HasPrefix(rawPath, "https://api.github.com/") {
-			matcher = "api"
-			remainingPath := strings.TrimPrefix(rawPath, "https://api.github.com/")
-
-			parts := strings.Split(remainingPath, "/")
-			if parts[0] == "repos" {
-				user = parts[1]
-				repo = parts[2]
-			}
-			if parts[0] == "users" {
-				user = parts[1]
-			}
-			if cfg.Auth.AuthMethod != "header" || !cfg.Auth.Enabled {
-				c.JSON(http.StatusForbidden, gin.H{"error": "HeaderAuth is not enabled."})
-				logError("%s %s %s %s %s HeaderAuth-Error: HeaderAuth is not enabled.", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+			if errors.Is(err, ErrAuthHeaderUnavailable) {
+				c.String(http.StatusForbidden, "AuthHeader Unavailable")
+				logWarning(err.Error())
 				return
 			}
 		}
-
 		username := user
-		//username, repo := MatchUserRepo(rawPath, cfg, c, matches) // 匹配用户名和仓库名
 
 		logInfo("%s %s %s %s %s Matched-Username: %s, Matched-Repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, username, repo)
 		// dump log 记录详细信息 c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, full Header
@@ -195,7 +127,8 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		}
 
 		// 鉴权
-		authcheck, err := auth.AuthHandler(c, cfg)
+		var authcheck bool
+		authcheck, err = auth.AuthHandler(c, cfg)
 		if !authcheck {
 			c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
 			logWarning("%s %s %s %s %s Auth-Error: %v", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
@@ -207,8 +140,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 
 		switch matcher {
 		case "releases", "blob", "raw", "gist", "api":
-			//ProxyRequest(c, rawPath, cfg, "chrome", runMode)
-			ChunkedProxyRequest(c, rawPath, cfg, "chrome", runMode) // dev test chunk
+			ChunkedProxyRequest(c, rawPath, cfg, matcher)
 		case "clone":
 			//ProxyRequest(c, rawPath, cfg, "git", runMode)
 			GitReq(c, rawPath, cfg, "git", runMode)

@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode string, runMode string) {
+func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, matcher string) {
 	method := c.Request.Method
 
 	// 发送HEAD请求, 预获取Content-Length
@@ -23,6 +23,7 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 	}
 	setRequestHeaders(c, headReq)
 	removeWSHeader(headReq) // 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
+	reWriteEncodeHeader(headReq)
 	AuthPassThrough(c, cfg, headReq)
 
 	headResp, err := client.Do(headReq)
@@ -64,6 +65,7 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 	}
 	setRequestHeaders(c, req)
 	removeWSHeader(req) // 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
+	reWriteEncodeHeader(req)
 	AuthPassThrough(c, cfg, req)
 
 	resp, err := client.Do(req)
@@ -106,6 +108,9 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 		resp.Header.Del(header)
 	}
 
+	//c.Header("Accept-Encoding", "gzip")
+	//c.Header("Content-Encoding", "gzip")
+
 	/*
 		if cfg.CORS.Enabled {
 			c.Header("Access-Control-Allow-Origin", "*")
@@ -127,12 +132,30 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, mode stri
 
 	c.Status(resp.StatusCode)
 
-	//_, err = io.CopyBuffer(c.Writer, resp.Body, nil)
-	_, err = copyb.CopyBuffer(c.Writer, resp.Body, nil)
-	if err != nil {
-		logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
-		return
+	if MatcherShell(u) && matchString(matcher, matchedMatchers) && cfg.Shell.Editor {
+		// 判断body是不是gzip
+		var compress string
+		if resp.Header.Get("Content-Encoding") == "gzip" {
+			compress = "gzip"
+		}
+
+		logInfo("Is Shell: %s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+		c.Header("Content-Length", "")
+		_, err = processLinks(resp.Body, c.Writer, compress, c.Request.Host, cfg)
+		if err != nil {
+			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+			return
+		} else {
+			c.Writer.Flush() // 确保刷入
+		}
 	} else {
-		c.Writer.Flush() // 确保刷入
+		//_, err = io.CopyBuffer(c.Writer, resp.Body, nil)
+		_, err = copyb.CopyBuffer(c.Writer, resp.Body, nil)
+		if err != nil {
+			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+			return
+		} else {
+			c.Writer.Flush() // 确保刷入
+		}
 	}
 }

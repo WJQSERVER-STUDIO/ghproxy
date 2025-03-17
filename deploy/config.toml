@@ -17,6 +17,9 @@ mode = "bypass" # bypass / cache
 smartGitAddr = "http://127.0.0.1:8080"
 ForceH2C = false
 
+[shell]
+editor = false
+
 [pages]
 mode = "internal" # "internal" or "external"
 theme = "bootstrap" # "bootstrap" or "nebula"
@@ -32,6 +35,7 @@ authMethod = "parameters" # "header" or "parameters"
 authToken = "token"
 enabled = false
 passThrough = false
+ForceAllowApi = false
 
 [blacklist]
 blacklistFile = "/usr/local/ghproxy/config/blacklist.json"

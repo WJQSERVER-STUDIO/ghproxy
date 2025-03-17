@@ -20,6 +20,7 @@
 - 使用[Gin](https://github.com/gin-gonic/gin)作为Web框架
 - 使用[Touka-HTTPC](https://github.com/satomitouka/touka-httpc)作为HTTP客户端
 - 支持Git clone,raw,realeases等文件拉取
+- 支持Git Clone缓存(配合组件)
 - 支持Docker部署
 - 支持速率限制
 - 支持用户鉴权
@@ -31,8 +32,9 @@
 **本项目是[WJQSERVER-STUDIO/ghproxy-go](https://github.com/WJQSERVER-STUDIO/ghproxy-go)的重构版本,实现了原项目原定功能的同时,进一步优化了性能**
 关于此项目的详细开发过程,请参看Commit记录与[CHANGELOG.md](https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/CHANGELOG.md)
 
-- V2.0.0 对`proxy`核心模块进行了重构,大幅优化内存占用
-- V1.0.0 迁移至本仓库,并再次重构内容实现
+- v2.4.1 对路径匹配进行优化
+- v2.0.0 对`proxy`核心模块进行了重构,大幅优化内存占用
+- v1.0.0 迁移至本仓库,并再次重构内容实现
 - v0.2.0 重构项目实现
 
 ### LICENSE
@@ -48,9 +50,11 @@
 ```
 # 下载文件
 https://ghproxy.1888866.xyz/raw.githubusercontent.com/WJQSERVER-STUDIO/tools-stable/main/tools-stable-ghproxy.sh
+https://ghproxy.1888866.xyz/https://raw.githubusercontent.com/WJQSERVER-STUDIO/tools-stable/main/tools-stable-ghproxy.sh
 
 # 克隆仓库
 git clone https://ghproxy.1888866.xyz/github.com/WJQSERVER-STUDIO/ghproxy.git
+git clone https://ghproxy.1888866.xyz/https://github.com/WJQSERVER-STUDIO/ghproxy.git
 ```
 
 ## 部署说明
@@ -107,6 +111,9 @@ mode = "bypass" # bypass / cache 运行模式, cache模式依赖smart-git
 smartGitAddr = "http://127.0.0.1:8080" # smart-git组件地址
 ForceH2C = false # 强制使用H2C连接
 
+[shell]
+editor = false # 脚本嵌套加速
+
 [pages]
 mode = "internal" # "internal" or "external" 内部/外部 前端 默认内部
 theme = "bootstrap" # "bootstrap" or "nebula" 内置主题
@@ -121,6 +128,7 @@ level = "info"  # 日志级别 dump, debug, info, warn, error, none
 authMethod = "parameters" # 鉴权方式,支持parameters,header
 authToken = "token"  # 用户鉴权Token
 enabled = false  # 是否开启用户鉴权
+ForceAllowApi = false # 在不开启Header鉴权的情况下允许api代理
 
 [blacklist]
 blacklistFile = "/data/ghproxy/config/blacklist.json"  # 黑名单文件路径
@@ -188,6 +196,8 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890" 支持Socks5/HTTP(S)�
 为爱发电,开源不易
 
 爱发电: https://afdian.com/a/wjqserver
+
+USDT(TRC20): `TNfSYG6F2vkiibd6J6mhhHNWDgWgNdF5hN`
 
 ### 捐赠列表
 
