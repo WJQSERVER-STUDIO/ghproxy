@@ -197,6 +197,8 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890" 支持Socks5/HTTP(S)�
 
 爱发电: https://afdian.com/a/wjqserver
 
+USDT(TRC20): `TNfSYG6F2vkiibd6J6mhhHNWDgWgNdF5hN`
+
 ### 捐赠列表
 
 虚位以待...
