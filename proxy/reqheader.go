@@ -4,16 +4,14 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gin-gonic/gin"
+	"github.com/cloudwego/hertz/pkg/app"
 )
 
 // 设置请求头
-func setRequestHeaders(c *gin.Context, req *http.Request) {
-	for key, values := range c.Request.Header {
-		for _, value := range values {
-			req.Header.Set(key, value)
-		}
-	}
+func setRequestHeaders(c *app.RequestContext, req *http.Request) {
+	c.Request.Header.VisitAll(func(key, value []byte) {
+		req.Header.Set(string(key), string(value))
+	})
 }
 
 func removeWSHeader(req *http.Request) {

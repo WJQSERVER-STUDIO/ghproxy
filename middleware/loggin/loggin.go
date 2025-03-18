@@ -1,16 +1,16 @@
 package loggin
 
 import (
-	"ghproxy/middleware/timing"
+	"context"
 	"time"
 
 	"github.com/WJQSERVER-STUDIO/go-utils/logger"
-	"github.com/gin-gonic/gin"
+	"github.com/cloudwego/hertz/pkg/app"
 )
 
 var (
 	logw       = logger.Logw
-	LogDump    = logger.LogDump
+	logDump    = logger.LogDump
 	logDebug   = logger.LogDebug
 	logInfo    = logger.LogInfo
 	logWarning = logger.LogWarning
@@ -18,17 +18,20 @@ var (
 )
 
 // 日志中间件
-func Middleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// 处理请求
-		c.Next()
+func Middleware() app.HandlerFunc {
+	return func(ctx context.Context, c *app.RequestContext) {
+		startTime := time.Now() // 请求开始处理前记录当前时间作为开始时间
 
-		var timingResults time.Duration
+		c.Next(ctx) //  调用 Next() 执行后续的 Handler
 
-		// 获取计时结果
-		timingResults, _ = timing.Get(c)
+		endTime := time.Now()                   // 请求处理完成后记录当前时间作为结束时间
+		timingResults := endTime.Sub(startTime) // 计算时间差，得到请求处理耗时 (Duration 类型)
 
 		// 记录日志 IP METHOD URL USERAGENT PROTOCOL STATUS TIMING
-		logInfo("%s %s %s %s %d %s ", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.Request.UserAgent(), c.Writer.Status(), timingResults)
+		//  %s %s %s %s %s %d %s  分别对应:  ClientIP, Method, Protolcol, Path, UserAgent, StatusCode, timingResults (需要格式化)
+		//  %v 可以通用地格式化 time.Duration 类型
+		logInfo("%s %s %s %s %s %d %v ", c.ClientIP(), c.Method(), c.Request.Header.GetProtocol(), string(c.Path()), c.Request.Header.UserAgent(), c.Response.StatusCode(), timingResults)
+
+		//logInfo("%s %s %s %s %d %v ", c.ClientIP(), c.Method(), c.Path(), c.Request.Header.UserAgent(), c.Response.StatusCode(), timingResults)
 	}
 }

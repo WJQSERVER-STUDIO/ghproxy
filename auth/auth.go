@@ -1,11 +1,12 @@
 package auth
 
 import (
+	"context"
 	"fmt"
 	"ghproxy/config"
 
 	"github.com/WJQSERVER-STUDIO/go-utils/logger"
-	"github.com/gin-gonic/gin"
+	"github.com/cloudwego/hertz/pkg/app"
 )
 
 var (
@@ -35,7 +36,7 @@ func Init(cfg *config.Config) {
 	logDebug("Auth Init")
 }
 
-func AuthHandler(c *gin.Context, cfg *config.Config) (isValid bool, err error) {
+func AuthHandler(ctx context.Context, c *app.RequestContext, cfg *config.Config) (isValid bool, err error) {
 	if cfg.Auth.AuthMethod == "parameters" {
 		isValid, err = AuthParametersHandler(c, cfg)
 		return isValid, err
