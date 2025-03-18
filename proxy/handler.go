@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/gin-gonic/gin"
 )
 
 var re = regexp.MustCompile(`^(http:|https:)?/?/?(.*)`) // 匹配http://或https://开头的路径
@@ -36,7 +35,8 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 			}
 
 			if !allowed {
-				c.JSON(http.StatusTooManyRequests, gin.H{"error": "Too Many Requests"})
+				//c.JSON(http.StatusTooManyRequests, gin.H{"error": "Too Many Requests"})
+				c.JSON(http.StatusTooManyRequests, map[string]string{"error": "Too Many Requests"})
 				logWarning("%s %s %s %s %s 429-TooManyRequests", c.ClientIP(), c.Request.Method, c.Request.RequestURI(), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
 				return
 			}
@@ -84,7 +84,8 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 			if !whitelist {
 				logErrMsg := fmt.Sprintf("%s %s %s %s %s Whitelist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), repouser)
 				errMsg := fmt.Sprintf("Whitelist Blocked repo: %s", repouser)
-				c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
+				//c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
+				c.JSON(http.StatusForbidden, map[string]string{"error": errMsg})
 				logWarning(logErrMsg)
 				return
 			}
@@ -96,7 +97,8 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 			if blacklist {
 				logErrMsg := fmt.Sprintf("%s %s %s %s %s Blacklist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), repouser)
 				errMsg := fmt.Sprintf("Blacklist Blocked repo: %s", repouser)
-				c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
+				//c.JSON(http.StatusForbidden, gin.H{"error": errMsg})
+				c.JSON(http.StatusForbidden, map[string]string{"error": errMsg})
 				logWarning(logErrMsg)
 				return
 			}
@@ -122,7 +124,8 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		var authcheck bool
 		authcheck, err = auth.AuthHandler(ctx, c, cfg)
 		if !authcheck {
-			c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
+			//c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
+			c.AbortWithStatusJSON(401, map[string]string{"error": "Unauthorized"})
 			logWarning("%s %s %s %s %s Auth-Error: %v", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), err)
 			return
 		}

@@ -7,12 +7,6 @@ import (
 	"github.com/WJQSERVER-STUDIO/go-utils/logger"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
-	"github.com/gin-gonic/gin"
-)
-
-var (
-	router *gin.Engine
-	//cfg    *config.Config
 )
 
 var (
