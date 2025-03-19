@@ -9,10 +9,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/cloudwego/hertz/pkg/app"
-	//hclient "github.com/cloudwego/hertz/pkg/app/client"
-	//"github.com/cloudwego/hertz/pkg/protocol"
 	"github.com/WJQSERVER-STUDIO/go-utils/hwriter"
+	"github.com/cloudwego/hertz/pkg/app"
 	hresp "github.com/cloudwego/hertz/pkg/protocol/http1/resp"
 )
 
@@ -87,7 +85,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		if err == nil && size > sizelimit {
 			finalURL := resp.Request.URL.String()
 			c.Redirect(http.StatusMovedPermanently, []byte(finalURL))
-			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Path(), c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), finalURL, size)
+			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Path(), c.UserAgent(), c.Request.Header.GetProtocol(), finalURL, size)
 			return
 		}
 	}
@@ -132,18 +130,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		logInfo("Is Shell: %s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol())
 		c.Header("Content-Length", "")
 
-		ProcessLinksAndWriteChunked(resp.Body, compress, string(c.Request.Host()), cfg, c)
-
-		/*
-			presp, err := processLinks(resp.Body, compress, string(c.Request.Host()), cfg)
-			if err != nil {
-				logError("Failed to process links: %v", err)
-				WriteChunkedBody(resp.Body, c)
-				return
-			}
-			defer presp.Close()
-			WriteChunkedBody(presp, c)
-		*/
+		err := ProcessLinksAndWriteChunked(resp.Body, compress, string(c.Request.Host()), cfg, c)
 
 		if err != nil {
 			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
@@ -152,7 +139,6 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 			c.Flush() // 确保刷入
 		}
 	} else {
-		//WriteChunkedBody(resp.Body, c)
 		err = hwriter.Writer(resp.Body, c)
 		if err != nil {
 			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)

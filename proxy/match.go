@@ -2,12 +2,12 @@ package proxy
 
 import (
 	"bufio"
-	"bytes"
 	"compress/gzip"
 	"fmt"
 	"ghproxy/config"
 	"io"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -211,128 +211,8 @@ func matchString(target string, stringsToMatch []string) bool {
 	return exists
 }
 
-// processLinks 处理链接并返回一个 io.ReadCloser
-func processLinks(input io.Reader, compress string, host string, cfg *config.Config) (io.ReadCloser, error) {
-	var reader *bufio.Reader
-
-	if compress == "gzip" {
-		// 解压 gzip
-		gzipReader, err := gzip.NewReader(input)
-		if err != nil {
-			return nil, fmt.Errorf("gzip 解压错误: %w", err)
-		}
-		reader = bufio.NewReader(gzipReader)
-	} else {
-		reader = bufio.NewReader(input)
-	}
-
-	// 创建一个缓冲区用于存储输出
-	var outputBuffer io.Writer
-	var gzipWriter *gzip.Writer
-	var output io.ReadCloser
-	var buf bytes.Buffer
-
-	if compress == "gzip" {
-		// 创建一个管道来连接 gzipWriter 和 output
-		pipeReader, pipeWriter := io.Pipe() // 创建一个管道
-		output = pipeReader                 // 将管道的读取端作为输出
-		outputBuffer = pipeWriter           // 将管道的写入端作为 outputBuffer
-		gzipWriter = gzip.NewWriter(outputBuffer)
-		go func() {
-			defer pipeWriter.Close() // 确保在 goroutine 结束时关闭 pipeWriter
-			writer := bufio.NewWriter(gzipWriter)
-			defer func() {
-				if err := writer.Flush(); err != nil {
-					logError("gzip writer 刷新失败: %v", err)
-				}
-				if err := gzipWriter.Close(); err != nil {
-					logError("gzipWriter 关闭失败: %v", err)
-				}
-			}()
-
-			scanner := bufio.NewScanner(reader)
-			urlPattern := regexp.MustCompile(`https?://[^\s'"]+`)
-			for scanner.Scan() {
-				line := scanner.Text()
-				modifiedLine := urlPattern.ReplaceAllStringFunc(line, func(originalURL string) string {
-					return modifyURL(originalURL, host, cfg)
-				})
-				if _, err := writer.WriteString(modifiedLine + "\n"); err != nil {
-					logError("写入 gzipWriter 失败: %v", err)
-					return // 在发生错误时退出 goroutine
-				}
-			}
-			if err := scanner.Err(); err != nil {
-				logError("读取输入错误: %v", err)
-			}
-		}()
-	} else {
-		outputBuffer = &buf
-		writer := bufio.NewWriter(outputBuffer)
-		defer func() {
-			if err := writer.Flush(); err != nil {
-				logError("writer 刷新失败: %v", err)
-			}
-		}()
-
-		urlPattern := regexp.MustCompile(`https?://[^\s'"]+`)
-		scanner := bufio.NewScanner(reader)
-		for scanner.Scan() {
-			line := scanner.Text()
-			modifiedLine := urlPattern.ReplaceAllStringFunc(line, func(originalURL string) string {
-				return modifyURL(originalURL, host, cfg)
-			})
-			if _, err := writer.WriteString(modifiedLine + "\n"); err != nil {
-				return nil, fmt.Errorf("写入文件错误: %w", err) // 传递错误
-			}
-		}
-		if err := scanner.Err(); err != nil {
-			return nil, fmt.Errorf("读取行错误: %w", err) // 传递错误
-		}
-		output = io.NopCloser(&buf)
-	}
-
-	return output, nil
-}
-
-func WriteChunkedBody(resp io.ReadCloser, c *app.RequestContext) {
-	defer resp.Close()
-
-	c.Response.HijackWriter(hresp.NewChunkedBodyWriter(&c.Response, c.GetWriter()))
-
-	bufWrapper := bytebufferpool.Get()
-	buf := bufWrapper.B
-	size := 32768 // 32KB
-	buf = buf[:cap(buf)]
-	if len(buf) < size {
-		buf = append(buf, make([]byte, size-len(buf))...)
-	}
-	buf = buf[:size] // 将缓冲区限制为 'size'
-	defer bytebufferpool.Put(bufWrapper)
-
-	for {
-		n, err := resp.Read(buf)
-		if err != nil {
-			if err == io.EOF {
-				break // 读取到文件末尾
-			}
-			fmt.Println("读取错误:", err)
-			c.String(http.StatusInternalServerError, "读取错误")
-			return
-		}
-
-		_, err = c.Write(buf[:n]) // 写入 chunk
-		if err != nil {
-			fmt.Println("写入 chunk 错误:", err)
-			return
-		}
-
-		c.Flush() // 刷新 chunk 到客户端
-	}
-}
-
 // processLinksAndWriteChunked 处理链接并将结果以 chunked 方式写入响应
-func ProcessLinksAndWriteChunked(input io.Reader, compress string, host string, cfg *config.Config, c *app.RequestContext) {
+func ProcessLinksAndWriteChunked(input io.Reader, compress string, host string, cfg *config.Config, c *app.RequestContext) error {
 	var reader *bufio.Reader
 
 	if compress == "gzip" {
@@ -340,7 +220,7 @@ func ProcessLinksAndWriteChunked(input io.Reader, compress string, host string, 
 		gzipReader, err := gzip.NewReader(input)
 		if err != nil {
 			c.String(http.StatusInternalServerError, fmt.Sprintf("gzip 解压错误: %v", err))
-			return
+			return fmt.Errorf("gzip 解压错误: %w", err)
 		}
 		defer gzipReader.Close()
 		reader = bufio.NewReader(gzipReader)
@@ -386,13 +266,13 @@ func ProcessLinksAndWriteChunked(input io.Reader, compress string, host string, 
 		_, err := writer.Write([]byte(modifiedLineWithNewline))
 		if err != nil {
 			logError("写入 chunk 错误: %v", err)
-			return // 发生错误时退出
+			return fmt.Errorf("写入 chunk 错误: %w", err)
 		}
 
 		if compress != "gzip" {
 			if fErr := chunkedWriter.Flush(); fErr != nil {
 				logError("chunkedWriter flush failed: %v", fErr)
-				return
+				return fmt.Errorf("chunkedWriter flush failed: %w", fErr)
 			}
 		}
 	}
@@ -400,125 +280,48 @@ func ProcessLinksAndWriteChunked(input io.Reader, compress string, host string, 
 	if err := scanner.Err(); err != nil {
 		logError("读取输入错误: %v", err)
 		c.String(http.StatusInternalServerError, fmt.Sprintf("读取输入错误: %v", err))
-		return
+		return fmt.Errorf("读取输入错误: %w", err)
 	}
 
 	// 对于 gzip，chunkedWriter 的关闭会触发最后的 chunk
 	if compress != "gzip" {
 		if fErr := chunkedWriter.Flush(); fErr != nil {
 			logError("final chunkedWriter flush failed: %v", fErr)
+			return fmt.Errorf("final chunkedWriter flush failed: %w", fErr)
 		}
 	}
+
+	return nil // 成功完成处理
 }
 
-func ProcessAndWriteChunkedBody(input io.Reader, compress string, host string, cfg *config.Config, c *app.RequestContext) error {
-	var reader *bufio.Reader
-
-	if compress == "gzip" {
-		// 解压gzip
-		gzipReader, err := gzip.NewReader(input)
-		if err != nil {
-			return fmt.Errorf("gzip解压错误: %v", err)
-		}
-		defer gzipReader.Close()
-		reader = bufio.NewReader(gzipReader)
-	} else {
-		reader = bufio.NewReader(input)
+// extractParts 从给定的 URL 中提取所需的部分
+func extractParts(rawURL string) (string, string, string, url.Values, error) {
+	// 解析 URL
+	parsedURL, err := url.Parse(rawURL)
+	if err != nil {
+		return "", "", "", nil, err
 	}
 
-	// 创建一个缓冲区用于存储输出
-	var outputBuffer io.Writer
-	var gzipWriter *gzip.Writer
-	var buf bytes.Buffer
+	// 获取路径部分并分割
+	pathParts := strings.Split(parsedURL.Path, "/")
 
-	if compress == "gzip" {
-		// 创建一个缓冲区
-		outputBuffer = &buf
-		gzipWriter = gzip.NewWriter(outputBuffer)
-		defer func() {
-			if gzipWriter != nil {
-				if closeErr := gzipWriter.Close(); closeErr != nil {
-					logError("gzipWriter close failed %v", closeErr)
-				}
-			}
-		}()
-	} else {
-		outputBuffer = &buf
+	// 提取所需的部分
+	if len(pathParts) < 3 {
+		return "", "", "", nil, fmt.Errorf("URL path is too short")
 	}
 
-	writer := bufio.NewWriter(outputBuffer)
-	defer func() {
-		if flushErr := writer.Flush(); flushErr != nil {
-			logError("writer flush failed %v", flushErr)
-		}
-	}()
+	// 提取 /WJQSERVER-STUDIO 和 /go-utils.git
+	repoOwner := "/" + pathParts[1]
+	repoName := "/" + pathParts[2]
 
-	// 使用正则表达式匹配 http 和 https 链接
-	urlPattern := regexp.MustCompile(`https?://[^\s'"]+`)
-	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			if err == io.EOF {
-				break // 文件结束
-			}
-			return fmt.Errorf("读取行错误: %v", err) // 传递错误
-		}
-
-		// 替换所有匹配的 URL
-		modifiedLine := urlPattern.ReplaceAllStringFunc(line, func(originalURL string) string {
-			return modifyURL(originalURL, host, cfg)
-		})
-
-		_, werr := writer.WriteString(modifiedLine)
-		if werr != nil {
-			return fmt.Errorf("写入文件错误: %v", werr) // 传递错误
-		}
+	// 剩余部分
+	remainingPath := strings.Join(pathParts[3:], "/")
+	if remainingPath != "" {
+		remainingPath = "/" + remainingPath
 	}
 
-	// 在返回之前，再刷新一次
-	if fErr := writer.Flush(); fErr != nil {
-		return fErr
-	}
+	// 查询参数
+	queryParams := parsedURL.Query()
 
-	if compress == "gzip" {
-		if err := gzipWriter.Close(); err != nil {
-			return fmt.Errorf("gzipWriter close failed: %v", err)
-		}
-	}
-
-	// 将处理后的内容以分块的方式写入响应
-	c.Response.HijackWriter(hresp.NewChunkedBodyWriter(&c.Response, c.GetWriter()))
-
-	bufWrapper := bytebufferpool.Get()
-	bbuf := bufWrapper.B
-	size := 32768 // 32KB
-	if cap(bbuf) < size {
-		bbuf = make([]byte, size)
-	} else {
-		bbuf = bbuf[:size]
-	}
-	defer bytebufferpool.Put(bufWrapper)
-
-	// 将缓冲区内容写入响应
-	for {
-		n, err := buf.Read(bbuf)
-		if err != nil {
-			if err != io.EOF {
-				fmt.Println("读取错误:", err)
-				c.String(http.StatusInternalServerError, "读取错误")
-				return err
-			}
-			break // 读取到文件末尾
-		}
-
-		_, err = c.Write(bbuf[:n]) // 写入 chunk
-		if err != nil {
-			fmt.Println("写入 chunk 错误:", err)
-			return err
-		}
-
-		c.Flush() // 刷新 chunk 到客户端
-	}
-
-	return nil
+	return repoOwner, repoName, remainingPath, queryParams, nil
 }

@@ -7,15 +7,13 @@ import (
 	"ghproxy/config"
 	"io"
 	"net/http"
-	"net/url"
 	"strconv"
-	"strings"
 
 	"github.com/WJQSERVER-STUDIO/go-utils/hwriter"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
-func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Config, mode string, runMode string) {
+func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Config, mode string) {
 	method := string(c.Request.Method())
 
 	logDump("Url Before FMT:%s", u)
@@ -116,21 +114,6 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 	}
 
 	c.Status(resp.StatusCode)
-	/*
-		// 使用固定32KB缓冲池
-		buffer := BufferPool.Get().([]byte)
-		defer BufferPool.Put(buffer)
-
-		_, err = io.CopyBuffer(c.Writer, resp.Body, buffer)
-		if err != nil {
-			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
-			return
-		} else {
-			c.Writer.Flush() // 确保刷入
-		}
-	*/
-
-	//_, err = copyb.CopyBuffer(c, resp.Body, nil)
 	err = hwriter.Writer(resp.Body, c)
 
 	if err != nil {
@@ -141,36 +124,4 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 		c.Flush() // 确保刷入
 	}
 
-}
-
-// extractParts 从给定的 URL 中提取所需的部分
-func extractParts(rawURL string) (string, string, string, url.Values, error) {
-	// 解析 URL
-	parsedURL, err := url.Parse(rawURL)
-	if err != nil {
-		return "", "", "", nil, err
-	}
-
-	// 获取路径部分并分割
-	pathParts := strings.Split(parsedURL.Path, "/")
-
-	// 提取所需的部分
-	if len(pathParts) < 3 {
-		return "", "", "", nil, fmt.Errorf("URL path is too short")
-	}
-
-	// 提取 /WJQSERVER-STUDIO 和 /go-utils.git
-	repoOwner := "/" + pathParts[1]
-	repoName := "/" + pathParts[2]
-
-	// 剩余部分
-	remainingPath := strings.Join(pathParts[3:], "/")
-	if remainingPath != "" {
-		remainingPath = "/" + remainingPath
-	}
-
-	// 查询参数
-	queryParams := parsedURL.Query()
-
-	return repoOwner, repoName, remainingPath, queryParams, nil
 }
