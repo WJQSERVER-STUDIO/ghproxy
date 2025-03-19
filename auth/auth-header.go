@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"ghproxy/config"
 
-	"github.com/gin-gonic/gin"
+	"github.com/cloudwego/hertz/pkg/app"
 )
 
-func AuthHeaderHandler(c *gin.Context, cfg *config.Config) (isValid bool, err error) {
+func AuthHeaderHandler(c *app.RequestContext, cfg *config.Config) (isValid bool, err error) {
 	if !cfg.Auth.Enabled {
 		return true, nil
 	}
 	// 获取"GH-Auth"的值
-	authToken := c.GetHeader("GH-Auth")
-	logDebug("%s %s %s %s %s AUTH_TOKEN: %s", c.Request.Method, c.Request.Host, c.Request.URL.Path, c.Request.Proto, c.Request.RemoteAddr, authToken)
+	authToken := string(c.GetHeader("GH-Auth"))
+	logDebug("%s %s %s %s %s AUTH_TOKEN: %s", c.Request.Method, string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), authToken)
 	if authToken == "" {
 		return false, fmt.Errorf("Auth token not found")
 	}

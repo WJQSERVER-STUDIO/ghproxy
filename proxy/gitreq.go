@@ -2,21 +2,19 @@ package proxy
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"ghproxy/config"
 	"io"
 	"net/http"
-	"net/url"
 	"strconv"
-	"strings"
 
-	"github.com/WJQSERVER-STUDIO/go-utils/copyb"
-	"github.com/gin-gonic/gin"
+	"github.com/WJQSERVER-STUDIO/go-utils/hwriter"
+	"github.com/cloudwego/hertz/pkg/app"
 )
 
-func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode string) {
-	method := c.Request.Method
-	logInfo("%s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
+func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Config, mode string) {
+	method := string(c.Request.Method())
 
 	logDump("Url Before FMT:%s", u)
 	if cfg.GitClone.Mode == "cache" {
@@ -35,11 +33,7 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 		err  error
 	)
 
-	body, err := readRequestBody(c)
-	if err != nil {
-		HandleError(c, err.Error())
-		return
-	}
+	body := c.Request.Body()
 
 	bodyReader := bytes.NewBuffer(body)
 	// 创建请求
@@ -85,9 +79,9 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 		size, err := strconv.Atoi(contentLength)
 		sizelimit := cfg.Server.SizeLimit * 1024 * 1024
 		if err == nil && size > sizelimit {
-			finalURL := resp.Request.URL.String()
+			finalURL := []byte(resp.Request.URL.String())
 			c.Redirect(http.StatusMovedPermanently, finalURL)
-			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto, finalURL, size)
+			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Path(), c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), finalURL, size)
 			return
 		}
 	}
@@ -120,60 +114,14 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 	}
 
 	c.Status(resp.StatusCode)
-	/*
-		// 使用固定32KB缓冲池
-		buffer := BufferPool.Get().([]byte)
-		defer BufferPool.Put(buffer)
-
-		_, err = io.CopyBuffer(c.Writer, resp.Body, buffer)
-		if err != nil {
-			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
-			return
-		} else {
-			c.Writer.Flush() // 确保刷入
-		}
-	*/
-
-	_, err = copyb.CopyBuffer(c.Writer, resp.Body, nil)
+	err = hwriter.Writer(resp.Body, c)
 
 	if err != nil {
-		logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
+		logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
 		return
 	} else {
 
-		c.Writer.Flush() // 确保刷入
+		c.Flush() // 确保刷入
 	}
 
-}
-
-// extractParts 从给定的 URL 中提取所需的部分
-func extractParts(rawURL string) (string, string, string, url.Values, error) {
-	// 解析 URL
-	parsedURL, err := url.Parse(rawURL)
-	if err != nil {
-		return "", "", "", nil, err
-	}
-
-	// 获取路径部分并分割
-	pathParts := strings.Split(parsedURL.Path, "/")
-
-	// 提取所需的部分
-	if len(pathParts) < 3 {
-		return "", "", "", nil, fmt.Errorf("URL path is too short")
-	}
-
-	// 提取 /WJQSERVER-STUDIO 和 /go-utils.git
-	repoOwner := "/" + pathParts[1]
-	repoName := "/" + pathParts[2]
-
-	// 剩余部分
-	remainingPath := strings.Join(pathParts[3:], "/")
-	if remainingPath != "" {
-		remainingPath = "/" + remainingPath
-	}
-
-	// 查询参数
-	queryParams := parsedURL.Query()
-
-	return repoOwner, repoName, remainingPath, queryParams, nil
 }

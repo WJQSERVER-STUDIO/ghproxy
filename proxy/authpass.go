@@ -4,22 +4,22 @@ import (
 	"ghproxy/config"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/cloudwego/hertz/pkg/app"
 )
 
-func AuthPassThrough(c *gin.Context, cfg *config.Config, req *http.Request) {
+func AuthPassThrough(c *app.RequestContext, cfg *config.Config, req *http.Request) {
 	if cfg.Auth.PassThrough {
 		token := c.Query("token")
 		if token != "" {
-			logDebug("%s %s %s %s %s Auth-PassThrough: token %s", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto, token)
+			logDebug("%s %s %s %s %s Auth-PassThrough: token %s", c.ClientIP(), c.Request.Method, string(c.Path()), c.UserAgent(), c.Request.Header.GetProtocol(), token)
 			switch cfg.Auth.AuthMethod {
 			case "parameters":
 				if !cfg.Auth.Enabled {
 					req.Header.Set("Authorization", "token "+token)
 				} else {
-					logWarning("%s %s %s %s %s Auth-Error: Conflict Auth Method", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto)
+					logWarning("%s %s %s %s %s Auth-Error: Conflict Auth Method", c.ClientIP(), c.Request.Method, string(c.Path()), c.UserAgent(), c.Request.Header.GetProtocol())
 					// 500 Internal Server Error
-					c.JSON(http.StatusInternalServerError, gin.H{"error": "Conflict Auth Method"})
+					c.JSON(http.StatusInternalServerError, map[string]string{"error": "Conflict Auth Method"})
 					return
 				}
 			case "header":
@@ -27,9 +27,9 @@ func AuthPassThrough(c *gin.Context, cfg *config.Config, req *http.Request) {
 					req.Header.Set("Authorization", "token "+token)
 				}
 			default:
-				logWarning("%s %s %s %s %s Invalid Auth Method / Auth Method is not be set", c.ClientIP(), c.Request.Method, c.Request.URL.String(), c.Request.Header.Get("User-Agent"), c.Request.Proto)
+				logWarning("%s %s %s %s %s Invalid Auth Method / Auth Method is not be set", c.ClientIP(), c.Request.Method, string(c.Path()), c.UserAgent(), c.Request.Header.GetProtocol())
 				// 500 Internal Server Error
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid Auth Method / Auth Method is not be set"})
+				c.JSON(http.StatusInternalServerError, map[string]string{"error": "Invalid Auth Method / Auth Method is not be set"})
 				return
 			}
 		}

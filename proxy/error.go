@@ -2,11 +2,10 @@ package proxy
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/WJQSERVER-STUDIO/go-utils/logger"
-	"github.com/gin-gonic/gin"
+	"github.com/cloudwego/hertz/pkg/app"
 )
 
 // 日志模块
@@ -19,18 +18,7 @@ var (
 	logError   = logger.LogError
 )
 
-// 读取请求体
-func readRequestBody(c *gin.Context) ([]byte, error) {
-	body, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		logError("failed to read request body: %v", err)
-		return nil, fmt.Errorf("failed to read request body: %v", err)
-	}
-	defer c.Request.Body.Close()
-	return body, nil
-}
-
-func HandleError(c *gin.Context, message string) {
+func HandleError(c *app.RequestContext, message string) {
 	c.String(http.StatusInternalServerError, fmt.Sprintf("server error %v", message))
 	logError(message)
 }

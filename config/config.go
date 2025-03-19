@@ -24,7 +24,6 @@ host = "0.0.0.0"  # 监听地址
 port = 8080  # 监听端口
 sizeLimit = 125 # 125MB
 H2C = true # 是否开启H2C传输
-enableH2C = "on"  # 是否开启H2C传输(latest和dev版本请开启) on/off (2.4.0弃用)
 */
 
 type ServerConfig struct {
@@ -33,7 +32,6 @@ type ServerConfig struct {
 	SizeLimit int    `toml:"sizeLimit"`
 	H2C       bool   `toml:"H2C"`
 	Cors      string `toml:"cors"`
-	EnableH2C string `toml:"enableH2C"`
 	Debug     bool   `toml:"debug"`
 }
 
@@ -54,7 +52,7 @@ type HttpcConfig struct {
 /*
 [gitclone]
 mode = "bypass" # bypass / cache
-smartGitAddr = ":8080"
+smartGitAddr = "http://127.0.0.1:8080"
 ForceH2C = true
 */
 type GitCloneConfig struct {
@@ -74,13 +72,11 @@ type ShellConfig struct {
 /*
 [pages]
 mode = "internal" # "internal" or "external"
-enabled = false
-theme = "bootstrap" # "bootstrap" or "nebula"
+theme = "bootstrap" # "bootstrap" or "nebula" or "design" or "classic"
 staticDir = "/data/www"
 */
 type PagesConfig struct {
 	Mode      string `toml:"mode"`
-	Enabled   bool   `toml:"enabled"`
 	Theme     string `toml:"theme"`
 	StaticDir string `toml:"staticDir"`
 }
