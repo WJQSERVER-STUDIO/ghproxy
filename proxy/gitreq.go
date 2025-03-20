@@ -45,6 +45,8 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 			return
 		}
 		setRequestHeaders(c, req)
+		removeWSHeader(req)
+		reWriteEncodeHeader(req)
 		AuthPassThrough(c, cfg, req)
 
 		resp, err = gitclient.Do(req)
@@ -59,6 +61,8 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 			return
 		}
 		setRequestHeaders(c, req)
+		removeWSHeader(req)
+		reWriteEncodeHeader(req)
 		AuthPassThrough(c, cfg, req)
 
 		resp, err = client.Do(req)

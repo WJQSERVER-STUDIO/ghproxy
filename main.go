@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
+	"os"
 	"time"
 
 	"ghproxy/api"
@@ -27,14 +28,16 @@ import (
 )
 
 var (
-	cfg        *config.Config
-	r          *server.Hertz
-	configfile = "/data/ghproxy/config/config.toml"
-	cfgfile    string
-	version    string
-	runMode    string
-	limiter    *rate.RateLimiter
-	iplimiter  *rate.IPRateLimiter
+	cfg         *config.Config
+	r           *server.Hertz
+	configfile  = "/data/ghproxy/config/config.toml"
+	cfgfile     string
+	version     string
+	runMode     string
+	limiter     *rate.RateLimiter
+	iplimiter   *rate.IPRateLimiter
+	showVersion bool // 新增的版本号标志
+	showHelp    bool // 新增的帮助标志
 )
 
 var (
@@ -61,6 +64,38 @@ var (
 
 func readFlag() {
 	flag.StringVar(&cfgfile, "cfg", configfile, "config file path")
+	flag.BoolVar(&showVersion, "v", false, "show version and exit")   // 添加-v标志
+	flag.BoolVar(&showHelp, "h", false, "show help message and exit") // 添加-h标志
+
+	// 捕获未定义的 flag
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+		flag.PrintDefaults()
+		fmt.Fprintln(os.Stderr, "\nInvalid flags:")
+
+		// 检查未定义的flags
+		invalidFlags := []string{}
+		for _, arg := range os.Args[1:] {
+			if arg[0] == '-' && arg != "-h" && arg != "-v" { // 检查是否是flag, 排除 -h 和 -v
+				defined := false
+				flag.VisitAll(func(f *flag.Flag) {
+					if "-"+f.Name == arg {
+						defined = true
+					}
+				})
+				if !defined {
+					invalidFlags = append(invalidFlags, arg)
+				}
+			}
+		}
+		for _, flag := range invalidFlags {
+			fmt.Fprintf(os.Stderr, "  %s\n", flag)
+		}
+		if len(invalidFlags) > 0 {
+			os.Exit(2) // 使用非零状态码退出，表示有错误
+		}
+
+	}
 }
 
 func loadConfig() {
@@ -68,8 +103,11 @@ func loadConfig() {
 	cfg, err = config.LoadConfig(cfgfile)
 	if err != nil {
 		fmt.Printf("Failed to load config: %v\n", err)
+		// 如果配置文件加载失败，也显示帮助信息并退出
+		flag.Usage()
+		os.Exit(1)
 	}
-	if cfg.Server.Debug {
+	if cfg != nil && cfg.Server.Debug { // 确保 cfg 不为 nil
 		fmt.Println("Config File Path: ", cfgfile)
 		fmt.Printf("Loaded config: %v\n", cfg)
 	}
@@ -80,10 +118,12 @@ func setupLogger(cfg *config.Config) {
 	err = logger.Init(cfg.Log.LogFilePath, cfg.Log.MaxLogSize)
 	if err != nil {
 		fmt.Printf("Failed to initialize logger: %v\n", err)
+		os.Exit(1)
 	}
 	err = logger.SetLogLevel(cfg.Log.Level)
 	if err != nil {
 		fmt.Printf("Logger Level Error: %v\n", err)
+		os.Exit(1)
 	}
 	fmt.Printf("Log Level: %s\n", cfg.Log.Level)
 	logDebug("Config File Path: ", cfgfile)
@@ -260,26 +300,50 @@ func setupPages(cfg *config.Config, r *server.Hertz) {
 func init() {
 	readFlag()
 	flag.Parse()
+
+	// 如果设置了 -h，则显示帮助信息并退出
+	if showHelp {
+		flag.Usage()
+		os.Exit(0)
+	}
+
+	// 如果设置了 -v，则显示版本号并退出
+	if showVersion {
+		fmt.Printf("GHProxy Version: %s \n", version)
+		os.Exit(0)
+	}
+
 	loadConfig()
-	setupLogger(cfg)
-	InitReq(cfg)
-	loadlist(cfg)
-	setupRateLimit(cfg)
+	if cfg != nil { // 在setupLogger前添加空值检查
+		setupLogger(cfg)
+		InitReq(cfg)
+		loadlist(cfg)
+		setupRateLimit(cfg)
 
-	if cfg.Server.Debug {
-		runMode = "dev"
-	} else {
-		runMode = "release"
+		if cfg.Server.Debug {
+			runMode = "dev"
+		} else {
+			runMode = "release"
+		}
+
+		if cfg.Server.Debug {
+			version = "Dev" // 如果是Debug模式，版本设置为"Dev"
+		}
 	}
-
-	if cfg.Server.Debug {
-		version = "Dev"
-	}
-
 }
 
 func main() {
+	// 如果 showVersion 为 true，则在 init 阶段已退出，这里直接返回
+	if showVersion || showHelp {
+		return
+	}
 	logDebug("Run Mode: %s", runMode)
+
+	// 确保在程序配置加载且非版本显示模式下执行
+	if cfg == nil {
+		fmt.Println("Config not loaded, exiting.")
+		return // 如果配置未加载，则不继续执行
+	}
 
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 
