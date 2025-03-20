@@ -4,7 +4,7 @@ go 1.24.1
 
 require (
 	github.com/BurntSushi/toml v1.5.0
-	github.com/WJQSERVER-STUDIO/go-utils/hwriter v0.0.2
+	github.com/WJQSERVER-STUDIO/go-utils/hwriter v0.0.3-0.20250320145615-806f17b7273c
 	github.com/WJQSERVER-STUDIO/go-utils/logger v1.5.0
 	github.com/cloudwego/hertz v0.9.6
 	github.com/hertz-contrib/http2 v0.1.8
