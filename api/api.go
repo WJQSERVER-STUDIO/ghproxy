@@ -65,7 +65,7 @@ func InitHandleRouter(cfg *config.Config, r *server.Hertz, version string) {
 
 func SizeLimitHandler(cfg *config.Config, c *app.RequestContext, ctx context.Context) {
 	sizeLimit := cfg.Server.SizeLimit
-	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Method(), string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
 	c.Response.Header.Set("Content-Type", "application/json")
 	c.JSON(200, (map[string]interface{}{
 		"MaxResponseBodySize": sizeLimit,
@@ -73,7 +73,7 @@ func SizeLimitHandler(cfg *config.Config, c *app.RequestContext, ctx context.Con
 }
 
 func WhiteListStatusHandler(cfg *config.Config, c *app.RequestContext, ctx context.Context) {
-	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Method(), string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
 	c.Response.Header.Set("Content-Type", "application/json")
 	c.JSON(200, (map[string]interface{}{
 		"Whitelist": cfg.Whitelist.Enabled,
@@ -81,7 +81,7 @@ func WhiteListStatusHandler(cfg *config.Config, c *app.RequestContext, ctx conte
 }
 
 func BlackListStatusHandler(cfg *config.Config, c *app.RequestContext, ctx context.Context) {
-	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Method(), string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
 	c.Response.Header.Set("Content-Type", "application/json")
 	c.JSON(200, (map[string]interface{}{
 		"Blacklist": cfg.Blacklist.Enabled,
@@ -89,7 +89,7 @@ func BlackListStatusHandler(cfg *config.Config, c *app.RequestContext, ctx conte
 }
 
 func CorsStatusHandler(cfg *config.Config, c *app.RequestContext, ctx context.Context) {
-	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Method(), string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
 	c.Response.Header.Set("Content-Type", "application/json")
 	c.JSON(200, (map[string]interface{}{
 		"Cors": cfg.Server.Cors,
@@ -97,7 +97,7 @@ func CorsStatusHandler(cfg *config.Config, c *app.RequestContext, ctx context.Co
 }
 
 func HealthcheckHandler(c *app.RequestContext, ctx context.Context) {
-	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Method(), string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
 	c.Response.Header.Set("Content-Type", "application/json")
 	c.JSON(200, (map[string]interface{}{
 		"Status": "OK",
@@ -105,7 +105,7 @@ func HealthcheckHandler(c *app.RequestContext, ctx context.Context) {
 }
 
 func VersionHandler(c *app.RequestContext, ctx context.Context, version string) {
-	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Method(), string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
 	c.Response.Header.Set("Content-Type", "application/json")
 	c.JSON(200, (map[string]interface{}{
 		"Version": version,
@@ -113,7 +113,7 @@ func VersionHandler(c *app.RequestContext, ctx context.Context, version string) 
 }
 
 func RateLimitStatusHandler(cfg *config.Config, c *app.RequestContext, ctx context.Context) {
-	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Method(), string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
 	c.Response.Header.Set("Content-Type", "application/json")
 	c.JSON(200, (map[string]interface{}{
 		"RateLimit": cfg.RateLimit.Enabled,
@@ -121,7 +121,7 @@ func RateLimitStatusHandler(cfg *config.Config, c *app.RequestContext, ctx conte
 }
 
 func RateLimitLimitHandler(cfg *config.Config, c *app.RequestContext, ctx context.Context) {
-	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Method(), string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
 	c.Response.Header.Set("Content-Type", "application/json")
 	c.JSON(200, (map[string]interface{}{
 		"RatePerMinute": cfg.RateLimit.RatePerMinute,
@@ -129,7 +129,7 @@ func RateLimitLimitHandler(cfg *config.Config, c *app.RequestContext, ctx contex
 }
 
 func SmartGitStatusHandler(cfg *config.Config, c *app.RequestContext, ctx context.Context) {
-	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Method(), string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
 	c.Response.Header.Set("Content-Type", "application/json")
 	c.JSON(200, (map[string]interface{}{
 		"enabled": cfg.GitClone.Mode == "cache",
