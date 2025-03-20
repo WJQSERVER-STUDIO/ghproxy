@@ -13,7 +13,7 @@ func AuthParametersHandler(c *app.RequestContext, cfg *config.Config) (isValid b
 	}
 
 	authToken := c.Query("auth_token")
-	logDebug("%s %s %s %s %s AUTH_TOKEN: %s", c.ClientIP(), c.Request.Method, string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), authToken)
+	logDebug("%s %s %s %s %s AUTH_TOKEN: %s", c.ClientIP(), c.Method(), string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), authToken)
 
 	if authToken == "" {
 		return false, fmt.Errorf("Auth token not found")

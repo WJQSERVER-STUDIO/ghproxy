@@ -36,7 +36,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 
 			if !allowed {
 				c.JSON(http.StatusTooManyRequests, map[string]string{"error": "Too Many Requests"})
-				logWarning("%s %s %s %s %s 429-TooManyRequests", c.ClientIP(), c.Request.Method, c.Request.RequestURI(), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
+				logWarning("%s %s %s %s %s 429-TooManyRequests", c.ClientIP(), c.Method(), c.Request.RequestURI(), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
 				return
 			}
 		}
@@ -47,7 +47,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 
 		// 匹配路径错误处理
 		if len(matches) < 3 {
-			errMsg := fmt.Sprintf("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
+			errMsg := fmt.Sprintf("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
 			logWarning(errMsg)
 			c.String(http.StatusForbidden, "Invalid URL Format. Path: %s", rawPath)
 			return
@@ -71,9 +71,9 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		}
 		username := user
 
-		logInfo("%s %s %s %s %s Matched-Username: %s, Matched-Repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), username, repo)
-		// dump log 记录详细信息 c.ClientIP(), c.Request.Method, rawPath,c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), full Header
-		logDump("%s %s %s %s %s %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), c.Request.Header.Header())
+		logInfo("%s %s %s %s %s Matched-Username: %s, Matched-Repo: %s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), username, repo)
+		// dump log 记录详细信息 c.ClientIP(), c.Method(), rawPath,c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), full Header
+		logDump("%s %s %s %s %s %s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), c.Request.Header.Header())
 		repouser := fmt.Sprintf("%s/%s", username, repo)
 
 		// 白名单检查
@@ -82,7 +82,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 			if !whitelist {
 				errMsg := fmt.Sprintf("Whitelist Blocked repo: %s", repouser)
 				c.JSON(http.StatusForbidden, map[string]string{"error": errMsg})
-				logWarning("%s %s %s %s %s Whitelist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), repouser)
+				logWarning("%s %s %s %s %s Whitelist Blocked repo: %s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), repouser)
 				return
 			}
 		}
@@ -93,7 +93,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 			if blacklist {
 				errMsg := fmt.Sprintf("Blacklist Blocked repo: %s", repouser)
 				c.JSON(http.StatusForbidden, map[string]string{"error": errMsg})
-				logWarning("%s %s %s %s %s Blacklist Blocked repo: %s", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), repouser)
+				logWarning("%s %s %s %s %s Blacklist Blocked repo: %s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), repouser)
 				return
 			}
 		}
@@ -111,12 +111,12 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		if !authcheck {
 			//c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
 			c.AbortWithStatusJSON(401, map[string]string{"error": "Unauthorized"})
-			logWarning("%s %s %s %s %s Auth-Error: %v", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), err)
+			logWarning("%s %s %s %s %s Auth-Error: %v", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), err)
 			return
 		}
 
 		// IP METHOD URL USERAGENT PROTO MATCHES
-		logDebug("%s %s %s %s %s Matches: %v", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), matches)
+		logDebug("%s %s %s %s %s Matches: %v", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), matches)
 
 		switch matcher {
 		case "releases", "blob", "raw", "gist", "api":
