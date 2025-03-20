@@ -47,7 +47,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		if err == nil && size > sizelimit {
 			finalURL := headResp.Request.URL.String()
 			c.Redirect(http.StatusMovedPermanently, []byte(finalURL))
-			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Path(), c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), finalURL, size)
+			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Method(), c.Path(), c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), finalURL, size)
 			return
 		}
 	}
@@ -85,7 +85,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		if err == nil && size > sizelimit {
 			finalURL := resp.Request.URL.String()
 			c.Redirect(http.StatusMovedPermanently, []byte(finalURL))
-			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Path(), c.UserAgent(), c.Request.Header.GetProtocol(), finalURL, size)
+			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Method(), c.Path(), c.UserAgent(), c.Request.Header.GetProtocol(), finalURL, size)
 			return
 		}
 	}
