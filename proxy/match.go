@@ -10,9 +10,10 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	hresp "github.com/cloudwego/hertz/pkg/protocol/http1/resp"
+	"github.com/cloudwego/hertz/pkg/protocol/http1/resp"
 	"github.com/valyala/bytebufferpool"
 )
 
@@ -211,87 +212,134 @@ func matchString(target string, stringsToMatch []string) bool {
 	return exists
 }
 
-// processLinksAndWriteChunked 处理链接并将结果以 chunked 方式写入响应
 func ProcessLinksAndWriteChunked(input io.Reader, compress string, host string, cfg *config.Config, c *app.RequestContext) error {
-	var reader *bufio.Reader
+	pr, pw := io.Pipe() // 创建一个管道，用于进程间通信
+	var wg sync.WaitGroup
+	wg.Add(2)
 
-	if compress == "gzip" {
-		// 解压 gzip
-		gzipReader, err := gzip.NewReader(input)
-		if err != nil {
-			c.String(http.StatusInternalServerError, fmt.Sprintf("gzip 解压错误: %v", err))
-			return fmt.Errorf("gzip 解压错误: %w", err)
-		}
-		defer gzipReader.Close()
-		reader = bufio.NewReader(gzipReader)
-	} else {
-		reader = bufio.NewReader(input)
-	}
+	var processErr error // 用于存储处理过程中发生的错误
 
-	// 获取 chunked body writer
-	chunkedWriter := hresp.NewChunkedBodyWriter(&c.Response, c.GetWriter())
+	go func() {
+		defer wg.Done()  // 协程结束时通知 WaitGroup
+		defer pw.Close() // 协程结束时关闭管道的写端
 
-	var writer io.Writer = chunkedWriter
-	var gzipWriter *gzip.Writer
-
-	if compress == "gzip" {
-		gzipWriter = gzip.NewWriter(writer)
-		writer = gzipWriter
-		defer func() {
-			if err := gzipWriter.Close(); err != nil {
-				logError("gzipWriter close failed: %v", err)
+		var reader *bufio.Reader
+		if compress == "gzip" { // 如果需要解压
+			gzipReader, err := gzip.NewReader(input) // 创建 gzip 解压器
+			if err != nil {
+				c.String(http.StatusInternalServerError, fmt.Sprintf("gzip 解压错误: %v", err)) // 设置 HTTP 状态码和错误信息
+				processErr = fmt.Errorf("gzip decompression error: %w", err)                // gzip decompression error
+				return
 			}
-		}()
-	}
-
-	bufWrapper := bytebufferpool.Get()
-	buf := bufWrapper.B
-	size := 32768 // 32KB
-	buf = buf[:cap(buf)]
-	if len(buf) < size {
-		buf = append(buf, make([]byte, size-len(buf))...)
-	}
-	buf = buf[:size] // 将缓冲区限制为 'size'
-	defer bytebufferpool.Put(bufWrapper)
-
-	urlPattern := regexp.MustCompile(`https?://[^\s'"]+`)
-	scanner := bufio.NewScanner(reader)
-	for scanner.Scan() {
-		line := scanner.Text()
-		modifiedLine := urlPattern.ReplaceAllStringFunc(line, func(originalURL string) string {
-			return modifyURL(originalURL, host, cfg)
-		})
-		modifiedLineWithNewline := modifiedLine + "\n"
-
-		_, err := writer.Write([]byte(modifiedLineWithNewline))
-		if err != nil {
-			logError("写入 chunk 错误: %v", err)
-			return fmt.Errorf("写入 chunk 错误: %w", err)
+			defer gzipReader.Close()             // 延迟关闭 gzip 解压器
+			reader = bufio.NewReader(gzipReader) // 使用 bufio 读取解压后的数据
+		} else {
+			reader = bufio.NewReader(input) // 直接使用 bufio 读取原始数据
 		}
 
-		if compress != "gzip" {
-			if fErr := chunkedWriter.Flush(); fErr != nil {
-				logError("chunkedWriter flush failed: %v", fErr)
-				return fmt.Errorf("chunkedWriter flush failed: %w", fErr)
+		var writer io.Writer = pw // 默认写入管道
+		var gzipWriter *gzip.Writer
+
+		if compress == "gzip" { // 如果需要压缩
+			gzipWriter = gzip.NewWriter(writer) // 创建 gzip 压缩器
+			writer = gzipWriter                 // 将 writer 设置为 gzip 压缩器
+			defer func() {                      // 延迟关闭 gzip 压缩器
+				if err := gzipWriter.Close(); err != nil {
+					logError("gzipWriter close failed: %v", err)
+					processErr = fmt.Errorf("gzipwriter close failed: %w", err) // gzipwriter close failed
+				}
+			}()
+		}
+
+		urlPattern := regexp.MustCompile(`https?://[^\s'"]+`) // 编译正则表达式，用于匹配 URL
+		scanner := bufio.NewScanner(reader)                   // 创建 scanner 用于逐行扫描
+		for scanner.Scan() {                                  // 循环读取每一行
+			line := scanner.Text()                                                                  // 获取当前行
+			modifiedLine := urlPattern.ReplaceAllStringFunc(line, func(originalURL string) string { // 替换 URL
+				return modifyURL(originalURL, host, cfg) // 调用 modifyURL 函数修改 URL
+			})
+			modifiedLineWithNewline := modifiedLine + "\n" // 添加换行符
+
+			_, err := writer.Write([]byte(modifiedLineWithNewline)) // 将修改后的行写入管道/gzip
+			if err != nil {
+				logError("写入 pipe 错误: %v", err)                         // 记录错误
+				processErr = fmt.Errorf("write to pipe error: %w", err) // write to pipe error
+				return
 			}
 		}
-	}
 
-	if err := scanner.Err(); err != nil {
-		logError("读取输入错误: %v", err)
-		c.String(http.StatusInternalServerError, fmt.Sprintf("读取输入错误: %v", err))
-		return fmt.Errorf("读取输入错误: %w", err)
-	}
-
-	// 对于 gzip，chunkedWriter 的关闭会触发最后的 chunk
-	if compress != "gzip" {
-		if fErr := chunkedWriter.Flush(); fErr != nil {
-			logError("final chunkedWriter flush failed: %v", fErr)
-			return fmt.Errorf("final chunkedWriter flush failed: %w", fErr)
+		if err := scanner.Err(); err != nil {
+			logError("读取输入错误: %v", err)                                              // 记录错误
+			c.String(http.StatusInternalServerError, fmt.Sprintf("读取输入错误: %v", err)) // 设置 HTTP 状态码和错误信息
+			processErr = fmt.Errorf("read input error: %w", err)                     // read input error
+			return
 		}
-	}
+	}()
 
-	return nil // 成功完成处理
+	go func() {
+		defer wg.Done() // 协程结束时通知 WaitGroup
+
+		c.Response.HijackWriter(resp.NewChunkedBodyWriter(&c.Response, c.GetWriter())) // 劫持 writer，启用分块编码
+
+		bufWrapper := bytebufferpool.Get() // 从对象池获取 bytebuffer
+		buf := bufWrapper.B
+		size := 32768 // 32KB, 设置缓冲区大小
+		buf = buf[:cap(buf)]
+		if len(buf) < size {
+			buf = append(buf, make([]byte, size-len(buf))...)
+		}
+		buf = buf[:size]                     // 将缓冲区限制为 'size'
+		defer bytebufferpool.Put(bufWrapper) // 延迟将 bytebuffer 放回对象池
+
+		for { // 循环读取和写入数据
+			n, err := pr.Read(buf) // 从管道读取数据
+			if err != nil {
+				if err == io.EOF { // 如果读取到文件末尾
+					if n > 0 { // 确保写入所有剩余数据
+						_, err := c.Write(buf[:n]) // 写入最后的数据块
+						if err != nil {
+							processErr = fmt.Errorf("failed to write final chunk: %w", err) // failed to write final chunk
+							break
+						}
+					}
+					c.Flush() // 刷新缓冲区
+					break     // 读取到文件末尾, 退出循环
+				}
+				logError("hwriter.Writer read error: %v", err) // 记录错误
+				if processErr == nil {
+					processErr = fmt.Errorf("failed to read from pipe: %w", err) // failed to read from pipe
+					// 不要在这里设置 http status code. 如果 read 失败, process 协程可能还没有完成, 它可能正在尝试设置 status code. 两个地方都设置会导致 race condition.
+				}
+				break // 读取错误，退出循环
+			}
+
+			if n > 0 { // 只有在实际读取到数据时才写入
+				_, err = c.Write(buf[:n]) // 将数据写入响应
+				if err != nil {
+					// 处理写入错误 (考虑记录日志并可能中止)
+					logError("hwriter.Writer write error: %v", err)
+					if processErr == nil { // 仅当 processErr 尚未设置时才设置.
+						processErr = fmt.Errorf("failed to write chunk: %w", err) // failed to write chunk
+					}
+					break // 写入错误, 退出循环
+				}
+
+				// 在大多数情况下，考虑移除 Flush. 仅在 *真正* 需要时保留它。
+				if err := c.Flush(); err != nil {
+					// 更强大的 Flush() 错误处理
+					c.AbortWithStatus(http.StatusInternalServerError) // 中止响应
+					logError("hwriter.Writer flush error: %v", err)
+					if processErr == nil {
+						processErr = fmt.Errorf("failed to flush chunk: %w", err) // failed to flush chunk
+					}
+					break // 刷新错误, 退出循环
+				}
+			}
+		}
+	}()
+
+	wg.Wait()         // 等待两个协程结束
+	return processErr // 返回错误
 }
 
 // extractParts 从给定的 URL 中提取所需的部分
