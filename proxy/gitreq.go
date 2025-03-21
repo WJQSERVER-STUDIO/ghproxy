@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/WJQSERVER-STUDIO/go-utils/hwriter"
+	"github.com/WJQSERVER-STUDIO/go-utils/copyb"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
@@ -118,7 +118,8 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 	}
 
 	c.Status(resp.StatusCode)
-	err = hwriter.Writer(resp.Body, c)
+	//err = hwriter.Writer(resp.Body, c)
+	_, err = copyb.Copy(c.Response.BodyWriter(), resp.Body)
 
 	if err != nil {
 		logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
