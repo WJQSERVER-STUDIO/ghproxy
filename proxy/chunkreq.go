@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/WJQSERVER-STUDIO/go-utils/hwriter"
+	"github.com/WJQSERVER-STUDIO/go-utils/copyb"
 	"github.com/cloudwego/hertz/pkg/app"
 	hresp "github.com/cloudwego/hertz/pkg/protocol/http1/resp"
 )
@@ -130,7 +130,8 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		logInfo("Is Shell: %s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol())
 		c.Header("Content-Length", "")
 
-		err := ProcessLinksAndWriteChunked(resp.Body, compress, string(c.Request.Host()), cfg, c)
+		//err := ProcessLinksAndWriteChunked(resp.Body, compress, string(c.Request.Host()), cfg, c)
+		_, err := processLinks(resp.Body, c.Response.BodyWriter(), compress, string(c.Request.Host()), cfg)
 
 		if err != nil {
 			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
@@ -139,7 +140,9 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 			c.Flush() // 确保刷入
 		}
 	} else {
-		err = hwriter.Writer(resp.Body, c)
+		//err = hwriter.Writer(resp.Body, c)
+		//writer := c.Response.BodyWriter()
+		_, err := copyb.Copy(c.Response.BodyWriter(), resp.Body)
 		if err != nil {
 			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
 			return
