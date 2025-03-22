@@ -56,6 +56,12 @@ jobs:
           else
             echo "VERSION file not found!" && exit 1
           fi
+
+      - name: 拉取前端
+        run: |
+          sudo git clone https://github.com/WJQSERVER-STUDIO/GHPrxoy-Frontend.git pages
+          sudo rm -rf pages/.git/
+
       - name: 安装 Go
         uses: actions/setup-go@v3
         with:
