@@ -24,15 +24,17 @@ import (
 )
 
 var (
-	cfg        *config.Config
-	router     *gin.Engine
-	configfile = "/data/ghproxy/config/config.toml"
-	cfgfile    string
-	version    string
-	dev        string
-	runMode    string
-	limiter    *rate.RateLimiter
-	iplimiter  *rate.IPRateLimiter
+	cfg         *config.Config
+	router      *gin.Engine
+	configfile  = "/data/ghproxy/config/config.toml"
+	cfgfile     string
+	version     string
+	dev         string
+	runMode     string
+	limiter     *rate.RateLimiter
+	iplimiter   *rate.IPRateLimiter
+	showVersion bool
+	showHelp    bool
 )
 
 var (
@@ -239,10 +241,6 @@ func init() {
 	}
 
 	loadConfig()
-	if cfg = nil {
-		fmt.Println("Failed to load config")
-		return
-	}
 	setupLogger(cfg)
 	InitReq(cfg)
 	loadlist(cfg)
