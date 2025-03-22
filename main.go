@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/fs"
 	"net/http"
+	"os"
 	"time"
 
 	"ghproxy/api"
@@ -50,6 +51,38 @@ var (
 
 func readFlag() {
 	flag.StringVar(&cfgfile, "cfg", configfile, "config file path")
+	flag.BoolVar(&showVersion, "v", false, "show version and exit")   // 添加-v标志
+	flag.BoolVar(&showHelp, "h", false, "show help message and exit") // 添加-h标志
+
+	// 捕获未定义的 flag
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+		flag.PrintDefaults()
+		fmt.Fprintln(os.Stderr, "\nInvalid flags:")
+
+		// 检查未定义的flags
+		invalidFlags := []string{}
+		for _, arg := range os.Args[1:] {
+			if arg[0] == '-' && arg != "-h" && arg != "-v" { // 检查是否是flag, 排除 -h 和 -v
+				defined := false
+				flag.VisitAll(func(f *flag.Flag) {
+					if "-"+f.Name == arg {
+						defined = true
+					}
+				})
+				if !defined {
+					invalidFlags = append(invalidFlags, arg)
+				}
+			}
+		}
+		for _, flag := range invalidFlags {
+			fmt.Fprintf(os.Stderr, "  %s\n", flag)
+		}
+		if len(invalidFlags) > 0 {
+			os.Exit(2) // 使用非零状态码退出，表示有错误
+		}
+
+	}
 }
 
 func loadConfig() {
@@ -57,8 +90,11 @@ func loadConfig() {
 	cfg, err = config.LoadConfig(cfgfile)
 	if err != nil {
 		fmt.Printf("Failed to load config: %v\n", err)
+		// 如果配置文件加载失败，也显示帮助信息并退出
+		flag.Usage()
+		os.Exit(1)
 	}
-	if cfg.Server.Debug {
+	if cfg != nil && cfg.Server.Debug { // 确保 cfg 不为 nil
 		fmt.Println("Config File Path: ", cfgfile)
 		fmt.Printf("Loaded config: %v\n", cfg)
 	}
@@ -189,7 +225,24 @@ func setupPages(cfg *config.Config, router *gin.Engine) {
 func init() {
 	readFlag()
 	flag.Parse()
+
+	// 如果设置了 -h，则显示帮助信息并退出
+	if showHelp {
+		flag.Usage()
+		os.Exit(0)
+	}
+
+	// 如果设置了 -v，则显示版本号并退出
+	if showVersion {
+		fmt.Printf("GHProxy Version: %s \n", version)
+		os.Exit(0)
+	}
+
 	loadConfig()
+	if cfg = nil {
+		fmt.Println("Failed to load config")
+		return
+	}
 	setupLogger(cfg)
 	InitReq(cfg)
 	loadlist(cfg)
@@ -280,6 +333,9 @@ func init() {
 }
 
 func main() {
+	if showVersion || showHelp {
+		return
+	}
 	err := router.Run(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port))
 	if err != nil {
 		logError("Failed to start server: %v\n", err)
