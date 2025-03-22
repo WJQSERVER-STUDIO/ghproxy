@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"ghproxy/config"
 	"io"
+	"net/url"
 	"regexp"
 	"strings"
 )
@@ -283,4 +284,36 @@ func processLinks(input io.Reader, output io.Writer, compress string, host strin
 	}
 
 	return written, nil
+}
+
+// extractParts 从给定的 URL 中提取所需的部分
+func extractParts(rawURL string) (string, string, string, url.Values, error) {
+	// 解析 URL
+	parsedURL, err := url.Parse(rawURL)
+	if err != nil {
+		return "", "", "", nil, err
+	}
+
+	// 获取路径部分并分割
+	pathParts := strings.Split(parsedURL.Path, "/")
+
+	// 提取所需的部分
+	if len(pathParts) < 3 {
+		return "", "", "", nil, fmt.Errorf("URL path is too short")
+	}
+
+	// 提取 /WJQSERVER-STUDIO 和 /go-utils.git
+	repoOwner := "/" + pathParts[1]
+	repoName := "/" + pathParts[2]
+
+	// 剩余部分
+	remainingPath := strings.Join(pathParts[3:], "/")
+	if remainingPath != "" {
+		remainingPath = "/" + remainingPath
+	}
+
+	// 查询参数
+	queryParams := parsedURL.Query()
+
+	return repoOwner, repoName, remainingPath, queryParams, nil
 }

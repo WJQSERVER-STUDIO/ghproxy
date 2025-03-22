@@ -108,17 +108,6 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, matcher s
 		resp.Header.Del(header)
 	}
 
-	//c.Header("Accept-Encoding", "gzip")
-	//c.Header("Content-Encoding", "gzip")
-
-	/*
-		if cfg.CORS.Enabled {
-			c.Header("Access-Control-Allow-Origin", "*")
-		} else {
-			c.Header("Access-Control-Allow-Origin", "")
-		}
-	*/
-
 	switch cfg.Server.Cors {
 	case "*":
 		c.Header("Access-Control-Allow-Origin", "*")
@@ -150,7 +139,7 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, matcher s
 		}
 	} else {
 		//_, err = io.CopyBuffer(c.Writer, resp.Body, nil)
-		_, err = copyb.CopyBuffer(c.Writer, resp.Body, nil)
+		_, err = copyb.Copy(c.Writer, resp.Body)
 		if err != nil {
 			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto, err)
 			return

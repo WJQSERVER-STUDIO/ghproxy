@@ -14,16 +14,6 @@ import (
 )
 
 var re = regexp.MustCompile(`^(http:|https:)?/?/?(.*)`) // 匹配http://或https://开头的路径
-/*
-var exps = []*regexp.Regexp{
-	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:releases|archive)/.*`),     // 匹配 GitHub Releases 或 Archive 链接
-	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:blob|raw)/.*`),             // 匹配 GitHub Blob 或 Raw 链接
-	regexp.MustCompile(`^(?:https?://)?github\.com/([^/]+)/([^/]+)/(?:info|git-).*`),             // 匹配 GitHub Info 或 Git 相关链接 (例如 .gitattributes, .gitignore)
-	regexp.MustCompile(`^(?:https?://)?raw\.github(?:usercontent|)\.com/([^/]+)/([^/]+)/.+?/.+`), // 匹配 raw.githubusercontent.com 链接
-	regexp.MustCompile(`^(?:https?://)?gist\.github(?:usercontent|)\.com/([^/]+)/.+?/.+`),        // 匹配 gist.githubusercontent.com 链接
-	regexp.MustCompile(`^(?:https?://)?api\.github\.com/repos/([^/]+)/([^/]+)/.*`),               // 匹配 api.github.com/repos 链接 (GitHub API)
-}
-*/
 
 func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter, runMode string) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -110,15 +100,6 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 			}
 		}
 
-		/*
-			matches = CheckURL(rawPath, c)
-			if matches == nil {
-				c.AbortWithStatus(http.StatusNotFound)
-				logWarning("%s %s %s %s %s 404-NOMATCH", c.ClientIP(), c.Request.Method, rawPath, c.Request.Header.Get("User-Agent"), c.Request.Proto)
-				return
-			}
-		*/
-
 		// 若匹配api.github.com/repos/用户名/仓库名/路径, 则检查是否开启HeaderAuth
 
 		// 处理blob/raw路径
@@ -151,16 +132,3 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		}
 	}
 }
-
-/*
-func CheckURL(u string, c *gin.Context) []string {
-	for _, exp := range exps {
-		if matches := exp.FindStringSubmatch(u); matches != nil {
-			return matches[1:]
-		}
-	}
-	errMsg := fmt.Sprintf("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Request.Method, u, c.Request.Header.Get("User-Agent"), c.Request.Proto)
-	logError(errMsg)
-	return nil
-}
-*/
