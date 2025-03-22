@@ -15,7 +15,7 @@ var (
 
 var (
 	logw       = logger.Logw
-	LogDump    = logger.LogDump
+	logDump    = logger.LogDump
 	logDebug   = logger.LogDebug
 	logInfo    = logger.LogInfo
 	logWarning = logger.LogWarning
@@ -58,6 +58,9 @@ func InitHandleRouter(cfg *config.Config, router *gin.Engine, version string) {
 		})
 		apiRouter.GET("/rate_limit/limit", func(c *gin.Context) {
 			RateLimitLimitHandler(c, cfg)
+		})
+		apiRouter.GET("/smartgit/status", func(c *gin.Context) {
+			SmartGitStatusHandler(c, cfg)
 		})
 	}
 	logInfo("API router Init success")
@@ -125,5 +128,13 @@ func RateLimitLimitHandler(c *gin.Context, cfg *config.Config) {
 	c.Writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
 		"RatePerMinute": cfg.RateLimit.RatePerMinute,
+	})
+}
+
+func SmartGitStatusHandler(c *gin.Context, cfg *config.Config) {
+	logInfo("%s %s %s %s %s", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.Request.UserAgent(), c.Request.Proto)
+	c.Writer.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(c.Writer).Encode(map[string]interface{}{
+		"enabled": cfg.GitClone.Mode == "cache",
 	})
 }
