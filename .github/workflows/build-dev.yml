@@ -51,7 +51,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: dev
+          #ref: dev
+          ref: v3
       - name: 加载版本号
         run: |
           if [ -f DEV-VERSION ]; then
@@ -114,7 +115,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: dev
+          #ref: dev
+          ref: v3
       - name: Load VERSION
         run: |
           if [ -f DEV-VERSION ]; then
