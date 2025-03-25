@@ -5,11 +5,9 @@ import (
 	"context"
 	"fmt"
 	"ghproxy/config"
-	"io"
 	"net/http"
 	"strconv"
 
-	"github.com/WJQSERVER-STUDIO/go-utils/copyb"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
@@ -30,7 +28,7 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 
 	var (
 		resp *http.Response
-		err  error
+		//err  error
 	)
 
 	body := c.Request.Body()
@@ -46,7 +44,7 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 		}
 		setRequestHeaders(c, req)
 		removeWSHeader(req)
-		reWriteEncodeHeader(req)
+		//reWriteEncodeHeader(req)
 		AuthPassThrough(c, cfg, req)
 
 		resp, err = gitclient.Do(req)
@@ -62,7 +60,7 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 		}
 		setRequestHeaders(c, req)
 		removeWSHeader(req)
-		reWriteEncodeHeader(req)
+		//reWriteEncodeHeader(req)
 		AuthPassThrough(c, cfg, req)
 
 		resp, err = client.Do(req)
@@ -71,12 +69,14 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 			return
 		}
 	}
-	//defer resp.Body.Close()
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
-			logError("Failed to close response body: %v", err)
-		}
-	}(resp.Body)
+	/*
+		//defer resp.Body.Close()
+		defer func(Body io.ReadCloser) {
+			if err := Body.Close(); err != nil {
+				logError("Failed to close response body: %v", err)
+			}
+		}(resp.Body)
+	*/
 
 	contentLength := resp.Header.Get("Content-Length")
 	if contentLength != "" {
@@ -118,15 +118,18 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 	}
 
 	c.Status(resp.StatusCode)
+	c.SetBodyStream(resp.Body, -1)
 	//err = hwriter.Writer(resp.Body, c)
-	_, err = copyb.Copy(c.Response.BodyWriter(), resp.Body)
+	/*
+		_, err = copyb.Copy(c.Response.BodyWriter(), resp.Body)
 
-	if err != nil {
-		logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
-		return
-	} else {
+		if err != nil {
+			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
+			return
+		} else {
 
-		c.Flush() // 确保刷入
-	}
+			c.Flush() // 确保刷入
+		}
+	*/
 
 }

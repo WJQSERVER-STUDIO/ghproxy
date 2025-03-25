@@ -20,6 +20,7 @@ func removeWSHeader(req *http.Request) {
 }
 
 func reWriteEncodeHeader(req *http.Request) {
+
 	if isGzipAccepted(req.Header) {
 		req.Header.Set("Content-Encoding", "gzip")
 		req.Header.Set("Accept-Encoding", "gzip")

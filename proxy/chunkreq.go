@@ -9,9 +9,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/WJQSERVER-STUDIO/go-utils/copyb"
 	"github.com/cloudwego/hertz/pkg/app"
-	hresp "github.com/cloudwego/hertz/pkg/protocol/http1/resp"
+	//hresp "github.com/cloudwego/hertz/pkg/protocol/http1/resp"
 )
 
 func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, cfg *config.Config, matcher string) {
@@ -71,7 +70,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
 	}
-	defer resp.Body.Close()
+	//defer resp.Body.Close()
 
 	// 错误处理(404)
 	if resp.StatusCode == 404 {
@@ -117,8 +116,8 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		c.Header("Access-Control-Allow-Origin", cfg.Server.Cors)
 	}
 
-	c.Status(resp.StatusCode)
-	c.Response.HijackWriter(hresp.NewChunkedBodyWriter(&c.Response, c.GetWriter()))
+	//c.Status(resp.StatusCode)
+	//c.Response.HijackWriter(hresp.NewChunkedBodyWriter(&c.Response, c.GetWriter()))
 
 	if MatcherShell(u) && matchString(matcher, matchedMatchers) && cfg.Shell.Editor {
 		// 判断body是不是gzip
@@ -131,23 +130,27 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		c.Header("Content-Length", "")
 
 		//err := ProcessLinksAndWriteChunked(resp.Body, compress, string(c.Request.Host()), cfg, c)
-		_, err := processLinks(resp.Body, c.Response.BodyWriter(), compress, string(c.Request.Host()), cfg)
+		reader, _, err := processLinks(resp.Body, compress, string(c.Request.Host()), cfg)
+		c.SetBodyStream(reader, -1)
 
 		if err != nil {
 			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
 			return
-		} else {
-			c.Flush() // 确保刷入
 		}
 	} else {
 		//err = hwriter.Writer(resp.Body, c)
 		//writer := c.Response.BodyWriter()
-		_, err := copyb.Copy(c.Response.BodyWriter(), resp.Body)
-		if err != nil {
-			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
-			return
-		} else {
-			c.Flush() // 确保刷入
-		}
+
+		/*
+			_, err := copyb.Copy(c.Response.BodyWriter(), resp.Body)
+			if err != nil {
+				logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
+				return
+			} else {
+				c.Flush() // 确保刷入
+			}
+		*/
+		c.SetBodyStream(resp.Body, -1)
 	}
+
 }
