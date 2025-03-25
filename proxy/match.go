@@ -46,6 +46,19 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, error)
 		repo    string
 		matcher string
 	)
+	// 匹配 "https://raw"开头的链接
+	if strings.HasPrefix(rawPath, "https://raw") {
+		remainingPath := strings.TrimPrefix(rawPath, "https://")
+		parts := strings.Split(remainingPath, "/")
+		if len(parts) <= 3 {
+			return "", "", "", ErrInvalidURL
+		}
+		user = parts[1]
+		repo = parts[2]
+		matcher = "raw"
+
+		return user, repo, matcher, nil
+	}
 	// 匹配 "https://github.com"开头的链接
 	if strings.HasPrefix(rawPath, "https://github.com") {
 		remainingPath := strings.TrimPrefix(rawPath, "https://github.com")
@@ -75,19 +88,6 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, error)
 		}
 		return user, repo, matcher, nil
 	}
-	// 匹配 "https://raw"开头的链接
-	if strings.HasPrefix(rawPath, "https://raw") {
-		remainingPath := strings.TrimPrefix(rawPath, "https://")
-		parts := strings.Split(remainingPath, "/")
-		if len(parts) <= 3 {
-			return "", "", "", ErrInvalidURL
-		}
-		user = parts[1]
-		repo = parts[2]
-		matcher = "raw"
-
-		return user, repo, matcher, nil
-	}
 	// 匹配 "https://gist"开头的链接
 	if strings.HasPrefix(rawPath, "https://gist") {
 		remainingPath := strings.TrimPrefix(rawPath, "https://")
@@ -100,25 +100,27 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, error)
 		matcher = "gist"
 		return user, repo, matcher, nil
 	}
-	// 匹配 "https://api.github.com/"开头的链接
-	if strings.HasPrefix(rawPath, "https://api.github.com/") {
-		matcher = "api"
-		remainingPath := strings.TrimPrefix(rawPath, "https://api.github.com/")
+	if cfg.Shell.RewriteAPI {
+		// 匹配 "https://api.github.com/"开头的链接
+		if strings.HasPrefix(rawPath, "https://api.github.com/") {
+			matcher = "api"
+			remainingPath := strings.TrimPrefix(rawPath, "https://api.github.com/")
 
-		parts := strings.Split(remainingPath, "/")
-		if parts[0] == "repos" {
-			user = parts[1]
-			repo = parts[2]
-		}
-		if parts[0] == "users" {
-			user = parts[1]
-		}
-		if !cfg.Auth.ForceAllowApi {
-			if cfg.Auth.AuthMethod != "header" || !cfg.Auth.Enabled {
-				return "", "", "", ErrAuthHeaderUnavailable
+			parts := strings.Split(remainingPath, "/")
+			if parts[0] == "repos" {
+				user = parts[1]
+				repo = parts[2]
 			}
+			if parts[0] == "users" {
+				user = parts[1]
+			}
+			if !cfg.Auth.ForceAllowApi {
+				if cfg.Auth.AuthMethod != "header" || !cfg.Auth.Enabled {
+					return "", "", "", ErrAuthHeaderUnavailable
+				}
+			}
+			return user, repo, matcher, nil
 		}
-		return user, repo, matcher, nil
 	}
 	return "", "", "", ErrInvalidURL
 }
