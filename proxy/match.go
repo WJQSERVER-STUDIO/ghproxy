@@ -182,7 +182,7 @@ func modifyURL(url string, host string, cfg *config.Config) string {
 	}
 	if matched {
 		var u = url
-		u := strings.TrimPrefix(u, "https://")
+		u = strings.TrimPrefix(u, "https://")
 		u = strings.TrimPrefix(u, "http://")
 		logDump("Modified URL: %s", "https://"+host+"/"+u)
 		return "https://" + host + "/" + u
