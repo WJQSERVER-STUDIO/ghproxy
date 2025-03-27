@@ -163,10 +163,13 @@ func EditorMatcher(rawPath string, cfg *config.Config) (bool, string, error) {
 
 // 匹配文件扩展名是sh的rawPath
 func MatcherShell(rawPath string) bool {
-	if strings.HasSuffix(rawPath, ".sh") {
-		return true
-	}
-	return false
+	/*
+		if strings.HasSuffix(rawPath, ".sh") {
+			return true
+		}
+		return false
+	*/
+	return strings.HasSuffix(rawPath, ".sh")
 }
 
 // LinkProcessor 是一个函数类型，用于处理提取到的链接。
