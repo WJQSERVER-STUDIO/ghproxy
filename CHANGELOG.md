@@ -1,7 +1,29 @@
 # 更新日志
 
-3.0.2 - 2025-03-21
+e3.0.3rc2 - 2025-03-27
 ---
+- ATTENTION: 此版本是实验性的, 请确保了解这一点
+- PRE-RELEASE: 此版本是v3.0.3的候选版本,请勿在生产环境中使用;
+- PORT: 从v2移植`matcher`相关改进
+
+e3.0.3rc1 - 2025-03-26
+---
+- ATTENTION: 此版本是实验性的, 请确保了解这一点
+- PRE-RELEASE: 此版本是v3.0.3的候选版本,请勿在生产环境中使用;
+- CHANGE&FIX: 使用`c.SetBodyStream`方式, 修正此前`chunked`传输中存在的诸多问题, 参看[HertZ Issues #1309](https://github.com/cloudwego/hertz/issues/1309)
+
+2.6.0 - 2025-03-22
+---
+- BACKPORT: 将v3的功能性改进反向移植
+
+25w23a - 2025-03-22
+---
+- PRE-RELEASE: 此版本是v2.6.0的预发布版本,请勿在生产环境中使用;
+- BACKPORT: 将v3的功能性改进反向移植
+
+e3.0.2 - 2025-03-21
+---
+- ATTENTION: 此版本是实验性的, 请确保了解这一点
 - RELEASE: 在此表达对各位的歉意, v3迁移到HertZ带来了许多问题; 此版本完善v3的同时, 修正已知问题; v3会与v2.4.0及以上版本保证兼容关系, 可平顺升级;
 - FIX: 使用等效`c.Writer()`, 回归v2.5.0 func以修正问题
 - CHANGE: 更新相关依赖
@@ -11,8 +33,9 @@
 - PRE-RELEASE: 此版本是v3.0.1的预发布版本,请勿在生产环境中使用;
 - FIX: 使用等效`c.Writer()`, 回归v2.5.0 func以修正问题
 
-3.0.1 - 2025-03-21
+e3.0.1 - 2025-03-21
 ---
+- ATTENTION: 此版本是实验性的, 请确保了解这一点
 - RELEASE: Next Step; 下一步; 完善v3的同时, 修正已知问题; v3会与v2.4.0及以上版本保证兼容关系, 可平顺升级;
 - CHANGE: 改进cli
 - CHANGE: 重写`ProcessLinksAndWriteChunked`(脚本嵌套加速处理器), 修正已知问题的同时提高性能与效率
@@ -46,8 +69,9 @@
 - CHANGE: 改进cli
 - CHANGE: 完善`gitreq`部分
 
-3.0.0 - 2025-03-19
+e3.0.0 - 2025-03-19
 ---
+- ATTENTION: 此版本是实验性的, 请确保了解这一点
 - RELEASE: Next Gen; 下一个起点; v3会与v2.4.0及以上版本保证兼容关系, 可平顺升级;
 - CHANGE: 使用HertZ框架重构, 提升性能
 - CHANGE: 前端在构建时加入, 新增`Design`,`Metro`,`Classic`主题
