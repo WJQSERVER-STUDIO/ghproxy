@@ -1,5 +1,23 @@
 # 更新日志
 
+25w23b - 2025-03-27
+---
+- PRE-RELEASE: 此版本是v2.6.1的预发布版本,请勿在生产环境中使用;
+- CHANGE: 改进`matcher`组件
+- CHANGE: 加入优雅关闭
+
+e3.0.3rc2 - 2025-03-27
+---
+- ATTENTION: 此版本是实验性的, 请确保了解这一点
+- PRE-RELEASE: 此版本是v3.0.3的候选版本,请勿在生产环境中使用;
+- PORT: 从v2移植`matcher`相关改进
+
+e3.0.3rc1 - 2025-03-26
+---
+- ATTENTION: 此版本是实验性的, 请确保了解这一点
+- PRE-RELEASE: 此版本是v3.0.3的候选版本,请勿在生产环境中使用;
+- CHANGE&FIX: 使用`c.SetBodyStream`方式, 修正此前`chunked`传输中存在的诸多问题, 参看[HertZ Issues #1309](https://github.com/cloudwego/hertz/issues/1309)
+
 2.6.0 - 2025-03-22
 ---
 - BACKPORT: 将v3的功能性改进反向移植
