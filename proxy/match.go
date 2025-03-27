@@ -151,10 +151,12 @@ func EditorMatcher(rawPath string, cfg *config.Config) (bool, string, error) {
 	if strings.HasPrefix(rawPath, "https://gist.github.com") {
 		return true, matcher, nil
 	}
-	// 匹配 "https://api.github.com/"开头的链接
-	if strings.HasPrefix(rawPath, "https://api.github.com") {
-		matcher = "api"
-		return true, matcher, nil
+	if cfg.Shell.RewriteAPI {
+		// 匹配 "https://api.github.com/"开头的链接
+		if strings.HasPrefix(rawPath, "https://api.github.com") {
+			matcher = "api"
+			return true, matcher, nil
+		}
 	}
 	return false, "", ErrInvalidURL
 }
