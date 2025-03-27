@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+
 	"github.com/BurntSushi/toml"
 )
 
@@ -74,7 +76,7 @@ type ShellConfig struct {
 /*
 [pages]
 mode = "internal" # "internal" or "external"
-theme = "bootstrap" # "bootstrap" or "nebula" or "design" or "classic"
+theme = "bootstrap" # "bootstrap" or "nebula"
 staticDir = "/data/www"
 */
 type PagesConfig struct {
@@ -134,9 +136,100 @@ type OutboundConfig struct {
 
 // LoadConfig 从 TOML 配置文件加载配置
 func LoadConfig(filePath string) (*Config, error) {
+	if !FileExists(filePath) {
+		// 楔入配置文件
+		err := DefaultConfig().WriteConfig(filePath)
+		if err != nil {
+			return nil, err
+		}
+		return DefaultConfig(), nil
+	}
+
 	var config Config
 	if _, err := toml.DecodeFile(filePath, &config); err != nil {
 		return nil, err
 	}
 	return &config, nil
+}
+
+// 写入配置文件
+func (c *Config) WriteConfig(filePath string) error {
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	encoder := toml.NewEncoder(file)
+	return encoder.Encode(c)
+}
+
+// 检测文件是否存在
+func FileExists(filename string) bool {
+	_, err := os.Stat(filename)
+	return !os.IsNotExist(err)
+}
+
+// 默认配置结构体
+func DefaultConfig() *Config {
+	return &Config{
+		Server: ServerConfig{
+			Port:      8080,
+			Host:      "0.0.0.0",
+			SizeLimit: 125,
+			H2C:       true,
+			Cors:      "*",
+			Debug:     false,
+		},
+		Httpc: HttpcConfig{
+			Mode:                "auto",
+			MaxIdleConns:        100,
+			MaxIdleConnsPerHost: 60,
+			MaxConnsPerHost:     0,
+		},
+		GitClone: GitCloneConfig{
+			Mode:         "bypass",
+			SmartGitAddr: "http://127.0.0.1:8080",
+			ForceH2C:     true,
+		},
+		Shell: ShellConfig{
+			Editor:     true,
+			RewriteAPI: false,
+		},
+		Pages: PagesConfig{
+			Mode:      "internal",
+			Theme:     "bootstrap",
+			StaticDir: "/data/www",
+		},
+		Log: LogConfig{
+			LogFilePath: "/data/ghproxy/log/ghproxy.log",
+			MaxLogSize:  100,
+			Level:       "info",
+		},
+		Auth: AuthConfig{
+			Enabled:       false,
+			AuthMethod:    "parameters",
+			AuthToken:     "token",
+			PassThrough:   false,
+			ForceAllowApi: true,
+		},
+		Blacklist: BlacklistConfig{
+			Enabled:       false,
+			BlacklistFile: "/data/ghproxy/config/blacklist.txt",
+		},
+		Whitelist: WhitelistConfig{
+			Enabled:       false,
+			WhitelistFile: "/data/ghproxy/config/whitelist.txt",
+		},
+		RateLimit: RateLimitConfig{
+			Enabled:       false,
+			RateMethod:    "total",
+			RatePerMinute: 1000,
+			Burst:         100,
+		},
+		Outbound: OutboundConfig{
+			Enabled: false,
+			Url:     "socks5://127.0.0.1:1080",
+		},
+	}
 }
