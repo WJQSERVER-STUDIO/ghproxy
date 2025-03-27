@@ -19,6 +19,7 @@ ForceH2C = false
 
 [shell]
 editor = false
+rewriteAPI = false
 
 [pages]
 mode = "internal" # "internal" or "external"

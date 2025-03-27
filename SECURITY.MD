@@ -6,7 +6,8 @@
 
 | 版本 | 是否支持 |
 | --- | --- |
-| v2.x.x | :white_check_mark: 当前最新版本序列, 受支持 |
+| v3.x.x | :white_check_mark: 接受issue, 实验性 |
+| v2.x.x | :white_check_mark: 受支持, 正在维护 |
 | v1.x.x | :x: 这些版本已结束生命周期,不再受支持 |
 | 25w*a/b/c... | :warning: 此为PRE-RELEASE版本,用于开发与测试,可能存在未知的问题 |
 | 24w*a/b/c... | :warning: 此为PRE-RELEASE版本,用于开发与测试,可能存在未知的问题 生命周期已完全结束 |

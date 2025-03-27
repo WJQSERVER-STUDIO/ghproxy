@@ -20,11 +20,13 @@
 - 使用[Gin](https://github.com/gin-gonic/gin)作为Web框架
 - 使用[Touka-HTTPC](https://github.com/satomitouka/touka-httpc)作为HTTP客户端
 - 支持Git clone,raw,realeases等文件拉取
+- 支持多个前端主题
+- 支持自定义黑名单/白名单
 - 支持Git Clone缓存(配合组件)
 - 支持Docker部署
 - 支持速率限制
 - 支持用户鉴权
-- 支持自定义黑名单/白名单
+- 支持shell脚本嵌套加速
 - 基于[WJQSERVER-STUDIO/golang-temp](https://github.com/WJQSERVER-STUDIO/golang-temp)模板构建,具有标准化的日志记录与构建流程
 
 ### 项目开发过程
@@ -201,4 +203,6 @@ USDT(TRC20): `TNfSYG6F2vkiibd6J6mhhHNWDgWgNdF5hN`
 
 ### 捐赠列表
 
-虚位以待...
+| 赞助人    |金额|
+|--------|------|
+| starry | 8 USDT (TRC20)   |

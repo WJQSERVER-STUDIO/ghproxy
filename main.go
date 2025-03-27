@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"flag"
 	"fmt"
 	"io"
 	"io/fs"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"ghproxy/api"
@@ -23,22 +27,22 @@ import (
 )
 
 var (
-	cfg        *config.Config
-	router     *gin.Engine
-	configfile = "/data/ghproxy/config/config.toml"
-	cfgfile    string
-	version    string
-	dev        string
-	runMode    string
-	limiter    *rate.RateLimiter
-	iplimiter  *rate.IPRateLimiter
+	cfg         *config.Config
+	router      *gin.Engine
+	configfile  = "/data/ghproxy/config/config.toml"
+	cfgfile     string
+	version     string
+	dev         string
+	runMode     string
+	limiter     *rate.RateLimiter
+	iplimiter   *rate.IPRateLimiter
+	showVersion bool
+	showHelp    bool
 )
 
 var (
-	//go:embed pages/bootstrap/*
+	//go:embed pages/*
 	pagesFS embed.FS
-	//go:embed pages/nebula/*
-	NebulaPagesFS embed.FS
 )
 
 var (
@@ -52,6 +56,38 @@ var (
 
 func readFlag() {
 	flag.StringVar(&cfgfile, "cfg", configfile, "config file path")
+	flag.BoolVar(&showVersion, "v", false, "show version and exit")   // 添加-v标志
+	flag.BoolVar(&showHelp, "h", false, "show help message and exit") // 添加-h标志
+
+	// 捕获未定义的 flag
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+		flag.PrintDefaults()
+		fmt.Fprintln(os.Stderr, "\nInvalid flags:")
+
+		// 检查未定义的flags
+		invalidFlags := []string{}
+		for _, arg := range os.Args[1:] {
+			if arg[0] == '-' && arg != "-h" && arg != "-v" { // 检查是否是flag, 排除 -h 和 -v
+				defined := false
+				flag.VisitAll(func(f *flag.Flag) {
+					if "-"+f.Name == arg {
+						defined = true
+					}
+				})
+				if !defined {
+					invalidFlags = append(invalidFlags, arg)
+				}
+			}
+		}
+		for _, flag := range invalidFlags {
+			fmt.Fprintf(os.Stderr, "  %s\n", flag)
+		}
+		if len(invalidFlags) > 0 {
+			os.Exit(2) // 使用非零状态码退出，表示有错误
+		}
+
+	}
 }
 
 func loadConfig() {
@@ -59,8 +95,11 @@ func loadConfig() {
 	cfg, err = config.LoadConfig(cfgfile)
 	if err != nil {
 		fmt.Printf("Failed to load config: %v\n", err)
+		// 如果配置文件加载失败，也显示帮助信息并退出
+		flag.Usage()
+		os.Exit(1)
 	}
-	if cfg.Server.Debug {
+	if cfg != nil && cfg.Server.Debug { // 确保 cfg 不为 nil
 		fmt.Println("Config File Path: ", cfgfile)
 		fmt.Printf("Loaded config: %v\n", cfg)
 	}
@@ -110,12 +149,19 @@ func InitReq(cfg *config.Config) {
 func loadEmbeddedPages(cfg *config.Config) (fs.FS, error) {
 	var pages fs.FS
 	var err error
-
 	switch cfg.Pages.Theme {
 	case "bootstrap":
 		pages, err = fs.Sub(pagesFS, "pages/bootstrap")
 	case "nebula":
-		pages, err = fs.Sub(NebulaPagesFS, "pages/nebula")
+		pages, err = fs.Sub(pagesFS, "pages/nebula")
+	case "design":
+		pages, err = fs.Sub(pagesFS, "pages/design")
+	case "metro":
+		pages, err = fs.Sub(pagesFS, "pages/metro")
+	case "classic":
+		pages, err = fs.Sub(pagesFS, "pages/classic")
+	case "mino":
+		pages, err = fs.Sub(pagesFS, "pages/mino")
 	default:
 		pages, err = fs.Sub(pagesFS, "pages/bootstrap") // 默认主题
 		logWarning("Invalid Pages Theme: %s, using default theme 'bootstrap'", cfg.Pages.Theme)
@@ -184,6 +230,19 @@ func setupPages(cfg *config.Config, router *gin.Engine) {
 func init() {
 	readFlag()
 	flag.Parse()
+
+	// 如果设置了 -h，则显示帮助信息并退出
+	if showHelp {
+		flag.Usage()
+		os.Exit(0)
+	}
+
+	// 如果设置了 -v，则显示版本号并退出
+	if showVersion {
+		fmt.Printf("GHProxy Version: %s \n", version)
+		os.Exit(0)
+	}
+
 	loadConfig()
 	setupLogger(cfg)
 	InitReq(cfg)
@@ -275,10 +334,40 @@ func init() {
 }
 
 func main() {
-	err := router.Run(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port))
-	if err != nil {
-		logError("Failed to start server: %v\n", err)
+	if showVersion || showHelp {
+		return
 	}
-	defer logger.Close()
+
+	server := &http.Server{
+		Addr:    fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
+		Handler: router,
+	}
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	/*
+		go func() {
+			err := router.Run(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port))
+			if err != nil {
+				logError("Failed to start server: %v\n", err)
+			}
+		}()
+	*/
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logError("Failed to start server: %v\n", err)
+			os.Exit(1)
+		}
+	}()
+
+	<-quit
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	if err := server.Shutdown(ctx); err != nil {
+		logError("Server forced to shutdown: %v\n", err)
+	}
+	defer cancel()
+	logger.Close()
 	fmt.Println("Program Exit")
 }
