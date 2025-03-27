@@ -100,27 +100,25 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, error)
 		matcher = "gist"
 		return user, repo, matcher, nil
 	}
-	if cfg.Shell.RewriteAPI {
-		// 匹配 "https://api.github.com/"开头的链接
-		if strings.HasPrefix(rawPath, "https://api.github.com/") {
-			matcher = "api"
-			remainingPath := strings.TrimPrefix(rawPath, "https://api.github.com/")
+	// 匹配 "https://api.github.com/"开头的链接
+	if strings.HasPrefix(rawPath, "https://api.github.com/") {
+		matcher = "api"
+		remainingPath := strings.TrimPrefix(rawPath, "https://api.github.com/")
 
-			parts := strings.Split(remainingPath, "/")
-			if parts[0] == "repos" {
-				user = parts[1]
-				repo = parts[2]
-			}
-			if parts[0] == "users" {
-				user = parts[1]
-			}
-			if !cfg.Auth.ForceAllowApi {
-				if cfg.Auth.AuthMethod != "header" || !cfg.Auth.Enabled {
-					return "", "", "", ErrAuthHeaderUnavailable
-				}
-			}
-			return user, repo, matcher, nil
+		parts := strings.Split(remainingPath, "/")
+		if parts[0] == "repos" {
+			user = parts[1]
+			repo = parts[2]
 		}
+		if parts[0] == "users" {
+			user = parts[1]
+		}
+		if !cfg.Auth.ForceAllowApi {
+			if cfg.Auth.AuthMethod != "header" || !cfg.Auth.Enabled {
+				return "", "", "", ErrAuthHeaderUnavailable
+			}
+		}
+		return user, repo, matcher, nil
 	}
 	return "", "", "", ErrInvalidURL
 }
@@ -131,10 +129,12 @@ func EditorMatcher(rawPath string, cfg *config.Config) (bool, string, error) {
 	)
 	// 匹配 "https://github.com"开头的链接
 	if strings.HasPrefix(rawPath, "https://github.com") {
-		remainingPath := strings.TrimPrefix(rawPath, "https://github.com")
-		if strings.HasPrefix(remainingPath, "/") {
-			remainingPath = strings.TrimPrefix(remainingPath, "/")
-		}
+		/*
+			remainingPath := strings.TrimPrefix(rawPath, "https://github.com")
+			if strings.HasPrefix(remainingPath, "/") {
+				remainingPath = strings.TrimPrefix(remainingPath, "/")
+			}
+		*/
 		return true, "", nil
 	}
 	// 匹配 "https://raw.githubusercontent.com"开头的链接
@@ -154,19 +154,24 @@ func EditorMatcher(rawPath string, cfg *config.Config) (bool, string, error) {
 		return true, matcher, nil
 	}
 	// 匹配 "https://api.github.com/"开头的链接
-	if strings.HasPrefix(rawPath, "https://api.github.com") {
-		matcher = "api"
-		return true, matcher, nil
+	if cfg.Shell.RewriteAPI {
+		if strings.HasPrefix(rawPath, "https://api.github.com") {
+			matcher = "api"
+			return true, matcher, nil
+		}
 	}
 	return false, "", ErrInvalidURL
 }
 
 // 匹配文件扩展名是sh的rawPath
 func MatcherShell(rawPath string) bool {
-	if strings.HasSuffix(rawPath, ".sh") {
-		return true
-	}
-	return false
+	/*
+		if strings.HasSuffix(rawPath, ".sh") {
+			return true
+		}
+		return false
+	*/
+	return strings.HasSuffix(rawPath, ".sh")
 }
 
 // LinkProcessor 是一个函数类型，用于处理提取到的链接。
