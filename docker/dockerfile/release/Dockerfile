@@ -2,6 +2,7 @@ FROM alpine:latest AS builder
 
 ARG USER=WJQSERVER-STUDIO
 ARG REPO=ghproxy
+ARG BRANCH=v3
 ARG APPLICATION=ghproxy
 ARG TARGETOS
 ARG TARGETARCH
@@ -16,17 +17,16 @@ RUN mkdir -p /data/${APPLICATION}/log
 RUN apk add --no-cache curl wget tar
 
 # 后端
-RUN VERSION=$(curl -s https://raw.githubusercontent.com/${USER}/${REPO}/main/VERSION) && \
+RUN VERSION=$(curl -s https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/VERSION) && \
     wget -O /data/${APPLICATION}/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz https://github.com/${USER}/${REPO}/releases/download/$VERSION/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz && \
     tar -zxvf /data/${APPLICATION}/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz -C /data/${APPLICATION} && \
     rm -rf /data/${APPLICATION}/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz
-RUN wget -O /usr/local/bin/init.sh https://raw.githubusercontent.com/${USER}/${REPO}/main/docker/dockerfile/release/init.sh
+RUN wget -O /usr/local/bin/init.sh https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/docker/dockerfile/release/init.sh
 
 # 拉取配置
-#RUN wget -O /data/caddy/Caddyfile https://raw.githubusercontent.com/${USER}/${REPO}/main/caddyfile/release/Caddyfile
-RUN wget -O /data/${APPLICATION}/config.toml https://raw.githubusercontent.com/${USER}/${REPO}/main/config/config.toml
-RUN wget -O /data/${APPLICATION}/blacklist.json https://raw.githubusercontent.com/${USER}/${REPO}/main/config/blacklist.json
-RUN wget -O /data/${APPLICATION}/whitelist.json https://raw.githubusercontent.com/${USER}/${REPO}/main/config/whitelist.json
+RUN wget -O /data/${APPLICATION}/config.toml https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/config/config.toml
+RUN wget -O /data/${APPLICATION}/blacklist.json https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/config/blacklist.json
+RUN wget -O /data/${APPLICATION}/whitelist.json https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/config/whitelist.json
 
 # 权限
 RUN chmod +x /data/${APPLICATION}/${APPLICATION}

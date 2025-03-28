@@ -3,6 +3,7 @@ FROM alpine:latest AS builder
 ARG USER=WJQSERVER-STUDIO
 ARG REPO=ghproxy
 ARG APPLICATION=ghproxy
+ARG BRANCH=v3
 ARG TARGETOS
 ARG TARGETARCH
 ARG TARGETPLATFORM
@@ -16,17 +17,16 @@ RUN mkdir -p /data/${APPLICATION}/log
 RUN apk add --no-cache curl wget tar
 
 # 后端
-RUN VERSION=$(curl -s https://raw.githubusercontent.com/${USER}/${REPO}/dev/DEV-VERSION) && \
+RUN VERSION=$(curl -s https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/DEV-VERSION) && \
     wget -O /data/${APPLICATION}/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz https://github.com/${USER}/${REPO}/releases/download/$VERSION/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz && \
     tar -zxvf /data/${APPLICATION}/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz -C /data/${APPLICATION} && \
     rm -rf /data/${APPLICATION}/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz
-RUN wget -O /usr/local/bin/init.sh https://raw.githubusercontent.com/${USER}/${REPO}/dev/docker/dockerfile/dev/init.sh
+RUN wget -O /usr/local/bin/init.sh https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/docker/dockerfile//init.sh
 
 # 拉取配置
-#RUN wget -O /data/caddy/Caddyfile https://raw.githubusercontent.com/${USER}/${REPO}/dev/caddyfile/dev/Caddyfile
-RUN wget -O /data/${APPLICATION}/config.toml https://raw.githubusercontent.com/${USER}/${REPO}/dev/config/config.toml
-RUN wget -O /data/${APPLICATION}/blacklist.json https://raw.githubusercontent.com/${USER}/${REPO}/dev/config/blacklist.json
-RUN wget -O /data/${APPLICATION}/whitelist.json https://raw.githubusercontent.com/${USER}/${REPO}/dev/config/whitelist.json
+RUN wget -O /data/${APPLICATION}/config.toml https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/config/config.toml
+RUN wget -O /data/${APPLICATION}/blacklist.json https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/config/blacklist.json
+RUN wget -O /data/${APPLICATION}/whitelist.json https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/config/whitelist.json
 
 # 权限
 RUN chmod +x /data/${APPLICATION}/${APPLICATION}
