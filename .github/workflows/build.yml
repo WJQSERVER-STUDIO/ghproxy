@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - 'main'
+      - 'v3'
     paths:
       - 'VERSION'
 
@@ -49,6 +49,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: v3
       - name: 加载版本号
         run: |
           if [ -f VERSION ]; then
@@ -107,6 +109,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: v3
       - name: Load VERSION
         run: |
           if [ -f VERSION ]; then
@@ -135,4 +139,4 @@ jobs:
           push: true
           tags: | 
             ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
-            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:v3
