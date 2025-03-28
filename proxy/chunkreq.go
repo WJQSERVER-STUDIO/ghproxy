@@ -116,7 +116,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		c.Header("Access-Control-Allow-Origin", cfg.Server.Cors)
 	}
 
-	//c.Status(resp.StatusCode)
+	c.Status(resp.StatusCode)
 	//c.Response.HijackWriter(hresp.NewChunkedBodyWriter(&c.Response, c.GetWriter()))
 
 	if MatcherShell(u) && matchString(matcher, matchedMatchers) && cfg.Shell.Editor {
