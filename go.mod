@@ -8,7 +8,7 @@ require (
 	github.com/WJQSERVER-STUDIO/go-utils/logger v1.5.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/satomitouka/touka-httpc v0.3.3
-	golang.org/x/net v0.37.0
+	golang.org/x/net v0.38.0
 	golang.org/x/time v0.11.0
 )
 
