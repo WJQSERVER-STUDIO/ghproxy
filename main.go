@@ -146,7 +146,7 @@ func InitReq(cfg *config.Config) {
 }
 
 // loadEmbeddedPages 加载嵌入式页面资源
-func loadEmbeddedPages(cfg *config.Config) (fs.FS, error) {
+func loadEmbeddedPages(cfg *config.Config) (fs.FS, fs.FS, error) {
 	var pages fs.FS
 	var err error
 	switch cfg.Pages.Theme {
@@ -168,9 +168,15 @@ func loadEmbeddedPages(cfg *config.Config) (fs.FS, error) {
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to load embedded pages: %w", err)
+		return nil, nil, fmt.Errorf("failed to load embedded pages: %w", err)
 	}
-	return pages, nil
+
+	var assets fs.FS
+	assets, err = fs.Sub(pagesFS, "pages/assets")
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to load embedded assets: %w", err)
+	}
+	return pages, assets, nil
 }
 
 // setupPages 设置页面路由
@@ -178,7 +184,7 @@ func setupPages(cfg *config.Config, router *gin.Engine) {
 	switch cfg.Pages.Mode {
 	case "internal":
 		// 加载嵌入式资源
-		pages, err := loadEmbeddedPages(cfg)
+		pages, assets, err := loadEmbeddedPages(cfg)
 		if err != nil {
 			logError("Failed when processing internal pages: %s", err)
 			return
@@ -189,7 +195,8 @@ func setupPages(cfg *config.Config, router *gin.Engine) {
 		router.GET("/favicon.ico", gin.WrapH(http.FileServer(http.FS(pages))))
 		router.GET("/script.js", gin.WrapH(http.FileServer(http.FS(pages))))
 		router.GET("/style.css", gin.WrapH(http.FileServer(http.FS(pages))))
-		//router.GET("/bootstrap.min.css", gin.WrapH(http.FileServer(http.FS(pages))))
+		router.GET("/bootstrap.min.css", gin.WrapH(http.FileServer(http.FS(assets))))
+		router.GET("/bootstrap.bundle.min.js", gin.WrapH(http.FileServer(http.FS(assets))))
 
 	case "external":
 		// 设置外部资源路径
@@ -197,7 +204,8 @@ func setupPages(cfg *config.Config, router *gin.Engine) {
 		faviconPath := fmt.Sprintf("%s/favicon.ico", cfg.Pages.StaticDir)
 		javascriptsPath := fmt.Sprintf("%s/script.js", cfg.Pages.StaticDir)
 		stylesheetsPath := fmt.Sprintf("%s/style.css", cfg.Pages.StaticDir)
-		//bootstrapPath := fmt.Sprintf("%s/bootstrap.min.css", cfg.Pages.StaticDir)
+		bootstrapPath := fmt.Sprintf("%s/bootstrap.min.css", cfg.Pages.StaticDir)
+		bootstrapBundlePath := fmt.Sprintf("%s/bootstrap.bundle.min.js", cfg.Pages.StaticDir)
 
 		// 设置外部资源路由
 		router.GET("/", func(c *gin.Context) {
@@ -207,6 +215,9 @@ func setupPages(cfg *config.Config, router *gin.Engine) {
 		router.StaticFile("/favicon.ico", faviconPath)
 		router.StaticFile("/script.js", javascriptsPath)
 		router.StaticFile("/style.css", stylesheetsPath)
+		router.StaticFile("/bootstrap.min.css", bootstrapPath)
+		router.StaticFile("/bootstrap.bundle.min.js", bootstrapBundlePath)
+
 		//router.StaticFile("/bootstrap.min.css", bootstrapPath)
 
 	default:
@@ -214,7 +225,7 @@ func setupPages(cfg *config.Config, router *gin.Engine) {
 		logWarning("Invalid Pages Mode: %s, using default embedded theme", cfg.Pages.Mode)
 
 		// 加载嵌入式资源
-		pages, err := loadEmbeddedPages(cfg)
+		pages, assets, err := loadEmbeddedPages(cfg)
 		if err != nil {
 			logError("Failed when processing pages: %s", err)
 			return
@@ -224,6 +235,8 @@ func setupPages(cfg *config.Config, router *gin.Engine) {
 		router.GET("/favicon.ico", gin.WrapH(http.FileServer(http.FS(pages))))
 		router.GET("/script.js", gin.WrapH(http.FileServer(http.FS(pages))))
 		router.GET("/style.css", gin.WrapH(http.FileServer(http.FS(pages))))
+		router.GET("/bootstrap.min.css", gin.WrapH(http.FileServer(http.FS(assets))))
+		router.GET("/bootstrap.bundle.min.js", gin.WrapH(http.FileServer(http.FS(assets))))
 	}
 }
 
