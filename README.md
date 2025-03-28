@@ -22,7 +22,7 @@
 - 支持Git clone,raw,realeases等文件拉取
 - 支持多个前端主题
 - 支持自定义黑名单/白名单
-- 支持Git Clone缓存(配合组件)
+- 支持Git Clone缓存(配合[Smart-Git](https://github.com/WJQSERVER-STUDIO/smart-git))
 - 支持Docker部署
 - 支持速率限制
 - 支持用户鉴权
@@ -61,6 +61,8 @@ git clone https://ghproxy.1888866.xyz/https://github.com/WJQSERVER-STUDIO/ghprox
 ```
 
 ## 部署说明
+
+可参考文章: https://blog.wjqserver.com/post/ghproxy-deploy-with-smart-git/
 
 ### Docker部署
 
@@ -183,6 +185,8 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890" 支持Socks5/HTTP(S)�
 ```
 
 ### 前端页面
+
+参看[GHProxy-Frontend](https://github.com/WJQSERVER-STUDIO/GHProxy-Frontend)
 
 #### Bootstrap主题
 ![ghproxy-demo.png](https://webp.wjqserver.com/ghproxy/1.8.1-light.png)

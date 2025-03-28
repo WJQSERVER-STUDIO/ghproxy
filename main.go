@@ -156,7 +156,7 @@ func InitReq(cfg *config.Config) {
 }
 
 // loadEmbeddedPages 加载嵌入式页面资源
-func loadEmbeddedPages(cfg *config.Config) (fs.FS, error) {
+func loadEmbeddedPages(cfg *config.Config) (fs.FS, fs.FS, error) {
 	var pages fs.FS
 	var err error
 	switch cfg.Pages.Theme {
@@ -178,59 +178,24 @@ func loadEmbeddedPages(cfg *config.Config) (fs.FS, error) {
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to load embedded pages: %w", err)
+		return nil, nil, fmt.Errorf("failed to load embedded pages: %w", err)
 	}
-	return pages, nil
+
+	var assets fs.FS
+	assets, err = fs.Sub(pagesFS, "pages/assets")
+	return pages, assets, nil
 }
 
 // setupPages 设置页面路由
 func setupPages(cfg *config.Config, r *server.Hertz) {
 	switch cfg.Pages.Mode {
 	case "internal":
-		// 加载嵌入式资源
-		pages, err := loadEmbeddedPages(cfg)
+		err := setInternalRoute(cfg, r)
 		if err != nil {
 			logError("Failed when processing internal pages: %s", err)
+			fmt.Println(err.Error())
 			return
 		}
-
-		// 设置嵌入式资源路由
-		r.GET("/", func(ctx context.Context, c *app.RequestContext) {
-			staticServer := http.FileServer(http.FS(pages))
-			req, err := adaptor.GetCompatRequest(&c.Request)
-			if err != nil {
-				logError("%s", err)
-				return
-			}
-			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-		})
-		r.GET("/favicon.ico", func(ctx context.Context, c *app.RequestContext) {
-			staticServer := http.FileServer(http.FS(pages))
-			req, err := adaptor.GetCompatRequest(&c.Request)
-			if err != nil {
-				logError("%s", err)
-				return
-			}
-			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-		})
-		r.GET("/script.js", func(ctx context.Context, c *app.RequestContext) {
-			staticServer := http.FileServer(http.FS(pages))
-			req, err := adaptor.GetCompatRequest(&c.Request)
-			if err != nil {
-				logError("%s", err)
-				return
-			}
-			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-		})
-		r.GET("/style.css", func(ctx context.Context, c *app.RequestContext) {
-			staticServer := http.FileServer(http.FS(pages))
-			req, err := adaptor.GetCompatRequest(&c.Request)
-			if err != nil {
-				logError("%s", err)
-				return
-			}
-			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-		})
 
 	case "external":
 		// 设置外部资源路径
@@ -238,63 +203,96 @@ func setupPages(cfg *config.Config, r *server.Hertz) {
 		faviconPath := fmt.Sprintf("%s/favicon.ico", cfg.Pages.StaticDir)
 		javascriptsPath := fmt.Sprintf("%s/script.js", cfg.Pages.StaticDir)
 		stylesheetsPath := fmt.Sprintf("%s/style.css", cfg.Pages.StaticDir)
-		//bootstrapPath := fmt.Sprintf("%s/bootstrap.min.css", cfg.Pages.StaticDir)
+		bootstrapPath := fmt.Sprintf("%s/bootstrap.min.css", cfg.Pages.StaticDir)
+		bootstrapBundlePath := fmt.Sprintf("%s/bootstrap.bundle.min.js", cfg.Pages.StaticDir)
 
 		// 设置外部资源路由
 		r.StaticFile("/", indexPagePath)
 		r.StaticFile("/favicon.ico", faviconPath)
 		r.StaticFile("/script.js", javascriptsPath)
 		r.StaticFile("/style.css", stylesheetsPath)
+		r.StaticFile("/bootstrap.min.css", bootstrapPath)
+		r.StaticFile("/bootstrap.bundle.min.js", bootstrapBundlePath)
 		//router.StaticFile("/bootstrap.min.css", bootstrapPath)
 
 	default:
 		// 处理无效的Pages Mode
 		logWarning("Invalid Pages Mode: %s, using default embedded theme", cfg.Pages.Mode)
 
-		// 加载嵌入式资源
-		pages, err := loadEmbeddedPages(cfg)
+		err := setInternalRoute(cfg, r)
 		if err != nil {
-			logError("Failed when processing pages: %s", err)
+			logError("Failed when processing internal pages: %s", err)
+			fmt.Println(err.Error())
 			return
 		}
-		// 设置嵌入式资源路由
-		r.GET("/", func(ctx context.Context, c *app.RequestContext) {
-			staticServer := http.FileServer(http.FS(pages))
-			req, err := adaptor.GetCompatRequest(&c.Request)
-			if err != nil {
-				logError("%s", err)
-				return
-			}
-			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-		})
-		r.GET("/favicon.ico", func(ctx context.Context, c *app.RequestContext) {
-			staticServer := http.FileServer(http.FS(pages))
-			req, err := adaptor.GetCompatRequest(&c.Request)
-			if err != nil {
-				logError("%s", err)
-				return
-			}
-			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-		})
-		r.GET("/script.js", func(ctx context.Context, c *app.RequestContext) {
-			staticServer := http.FileServer(http.FS(pages))
-			req, err := adaptor.GetCompatRequest(&c.Request)
-			if err != nil {
-				logError("%s", err)
-				return
-			}
-			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-		})
-		r.GET("/style.css", func(ctx context.Context, c *app.RequestContext) {
-			staticServer := http.FileServer(http.FS(pages))
-			req, err := adaptor.GetCompatRequest(&c.Request)
-			if err != nil {
-				logError("%s", err)
-				return
-			}
-			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-		})
+
 	}
+}
+
+func setInternalRoute(cfg *config.Config, r *server.Hertz) error {
+
+	// 加载嵌入式资源
+	pages, assets, err := loadEmbeddedPages(cfg)
+	if err != nil {
+		logError("Failed when processing pages: %s", err)
+		return err
+	}
+	// 设置嵌入式资源路由
+	r.GET("/", func(ctx context.Context, c *app.RequestContext) {
+		staticServer := http.FileServer(http.FS(pages))
+		req, err := adaptor.GetCompatRequest(&c.Request)
+		if err != nil {
+			logError("%s", err)
+			return
+		}
+		staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
+	})
+	r.GET("/favicon.ico", func(ctx context.Context, c *app.RequestContext) {
+		staticServer := http.FileServer(http.FS(pages))
+		req, err := adaptor.GetCompatRequest(&c.Request)
+		if err != nil {
+			logError("%s", err)
+			return
+		}
+		staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
+	})
+	r.GET("/script.js", func(ctx context.Context, c *app.RequestContext) {
+		staticServer := http.FileServer(http.FS(pages))
+		req, err := adaptor.GetCompatRequest(&c.Request)
+		if err != nil {
+			logError("%s", err)
+			return
+		}
+		staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
+	})
+	r.GET("/style.css", func(ctx context.Context, c *app.RequestContext) {
+		staticServer := http.FileServer(http.FS(pages))
+		req, err := adaptor.GetCompatRequest(&c.Request)
+		if err != nil {
+			logError("%s", err)
+			return
+		}
+		staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
+	})
+	r.GET("/bootstrap.min.css", func(ctx context.Context, c *app.RequestContext) {
+		staticServer := http.FileServer(http.FS(assets))
+		req, err := adaptor.GetCompatRequest(&c.Request)
+		if err != nil {
+			logError("%s", err)
+			return
+		}
+		staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
+	})
+	r.GET("/bootstrap.bundle.min.js", func(ctx context.Context, c *app.RequestContext) {
+		staticServer := http.FileServer(http.FS(assets))
+		req, err := adaptor.GetCompatRequest(&c.Request)
+		if err != nil {
+			logError("%s", err)
+			return
+		}
+		staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
+	})
+	return nil
 }
 
 func init() {
