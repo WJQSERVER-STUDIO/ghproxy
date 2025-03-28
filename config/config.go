@@ -64,9 +64,11 @@ type GitCloneConfig struct {
 /*
 [shell]
 editor = true
+rewriteAPI = false
 */
 type ShellConfig struct {
-	Editor bool `toml:"editor"`
+	Editor     bool `toml:"editor"`
+	RewriteAPI bool `toml:"rewriteAPI"`
 }
 
 /*

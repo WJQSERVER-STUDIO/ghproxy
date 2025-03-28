@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"flag"
 	"fmt"
@@ -8,6 +9,8 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"ghproxy/api"
@@ -334,10 +337,37 @@ func main() {
 	if showVersion || showHelp {
 		return
 	}
-	err := router.Run(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port))
-	if err != nil {
-		logError("Failed to start server: %v\n", err)
+
+	server := &http.Server{
+		Addr:    fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
+		Handler: router,
 	}
-	defer logger.Close()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	/*
+		go func() {
+			err := router.Run(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port))
+			if err != nil {
+				logError("Failed to start server: %v\n", err)
+			}
+		}()
+	*/
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logError("Failed to start server: %v\n", err)
+			os.Exit(1)
+		}
+	}()
+
+	<-quit
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	if err := server.Shutdown(ctx); err != nil {
+		logError("Server forced to shutdown: %v\n", err)
+	}
+	defer cancel()
+	logger.Close()
 	fmt.Println("Program Exit")
 }

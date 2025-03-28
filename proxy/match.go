@@ -46,6 +46,19 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, error)
 		repo    string
 		matcher string
 	)
+	// 匹配 "https://raw"开头的链接
+	if strings.HasPrefix(rawPath, "https://raw") {
+		remainingPath := strings.TrimPrefix(rawPath, "https://")
+		parts := strings.Split(remainingPath, "/")
+		if len(parts) <= 3 {
+			return "", "", "", ErrInvalidURL
+		}
+		user = parts[1]
+		repo = parts[2]
+		matcher = "raw"
+
+		return user, repo, matcher, nil
+	}
 	// 匹配 "https://github.com"开头的链接
 	if strings.HasPrefix(rawPath, "https://github.com") {
 		remainingPath := strings.TrimPrefix(rawPath, "https://github.com")
@@ -73,19 +86,6 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, error)
 				return "", "", "", ErrInvalidURL
 			}
 		}
-		return user, repo, matcher, nil
-	}
-	// 匹配 "https://raw"开头的链接
-	if strings.HasPrefix(rawPath, "https://raw") {
-		remainingPath := strings.TrimPrefix(rawPath, "https://")
-		parts := strings.Split(remainingPath, "/")
-		if len(parts) <= 3 {
-			return "", "", "", ErrInvalidURL
-		}
-		user = parts[1]
-		repo = parts[2]
-		matcher = "raw"
-
 		return user, repo, matcher, nil
 	}
 	// 匹配 "https://gist"开头的链接
@@ -129,10 +129,12 @@ func EditorMatcher(rawPath string, cfg *config.Config) (bool, string, error) {
 	)
 	// 匹配 "https://github.com"开头的链接
 	if strings.HasPrefix(rawPath, "https://github.com") {
-		remainingPath := strings.TrimPrefix(rawPath, "https://github.com")
-		if strings.HasPrefix(remainingPath, "/") {
-			remainingPath = strings.TrimPrefix(remainingPath, "/")
-		}
+		/*
+			remainingPath := strings.TrimPrefix(rawPath, "https://github.com")
+			if strings.HasPrefix(remainingPath, "/") {
+				remainingPath = strings.TrimPrefix(remainingPath, "/")
+			}
+		*/
 		return true, "", nil
 	}
 	// 匹配 "https://raw.githubusercontent.com"开头的链接
@@ -152,19 +154,24 @@ func EditorMatcher(rawPath string, cfg *config.Config) (bool, string, error) {
 		return true, matcher, nil
 	}
 	// 匹配 "https://api.github.com/"开头的链接
-	if strings.HasPrefix(rawPath, "https://api.github.com") {
-		matcher = "api"
-		return true, matcher, nil
+	if cfg.Shell.RewriteAPI {
+		if strings.HasPrefix(rawPath, "https://api.github.com") {
+			matcher = "api"
+			return true, matcher, nil
+		}
 	}
 	return false, "", ErrInvalidURL
 }
 
 // 匹配文件扩展名是sh的rawPath
 func MatcherShell(rawPath string) bool {
-	if strings.HasSuffix(rawPath, ".sh") {
-		return true
-	}
-	return false
+	/*
+		if strings.HasSuffix(rawPath, ".sh") {
+			return true
+		}
+		return false
+	*/
+	return strings.HasSuffix(rawPath, ".sh")
 }
 
 // LinkProcessor 是一个函数类型，用于处理提取到的链接。
@@ -179,9 +186,9 @@ func modifyURL(url string, host string, cfg *config.Config) string {
 		return url
 	}
 	if matched {
-
-		u := strings.TrimPrefix(url, "https://")
-		u = strings.TrimPrefix(url, "http://")
+		var u = url
+		u = strings.TrimPrefix(u, "https://")
+		u = strings.TrimPrefix(u, "http://")
 		logDump("Modified URL: %s", "https://"+host+"/"+u)
 		return "https://" + host + "/" + u
 	}
