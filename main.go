@@ -63,10 +63,19 @@ var (
 )
 
 func readFlag() {
-	flag.StringVar(&cfgfile, "cfg", configfile, "config file path")
+	flag.StringVar(&cfgfile, "c", configfile, "config file path")
+	flag.Func("cfg", "exit", func(s string) error {
+
+		// 被弃用的flag, fail退出
+		fmt.Printf("\n")
+		fmt.Println("[ERROR] cfg flag is deprecated, please use -c instead")
+		fmt.Printf("\n")
+		flag.Usage()
+		os.Exit(1)
+		return nil
+	})
 	flag.BoolVar(&showVersion, "v", false, "show version and exit")   // 添加-v标志
 	flag.BoolVar(&showHelp, "h", false, "show help message and exit") // 添加-h标志
-
 	// 捕获未定义的 flag
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])

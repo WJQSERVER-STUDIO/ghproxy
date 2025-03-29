@@ -123,7 +123,7 @@ Description=Github Proxy Service
 After=network.target
 
 [Service]
-ExecStart=/bin/bash -c '$ghproxy_dir/ghproxy -cfg $ghproxy_dir/config/config.toml > $ghproxy_dir/log/run.log 2>&1'
+ExecStart=/bin/bash -c '$ghproxy_dir/ghproxy -c $ghproxy_dir/config/config.toml > $ghproxy_dir/log/run.log 2>&1'
 WorkingDirectory=$ghproxy_dir
 Restart=always
 User=root

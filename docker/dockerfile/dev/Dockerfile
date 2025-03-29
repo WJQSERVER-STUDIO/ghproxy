@@ -36,12 +36,18 @@ FROM alpine:latest
 
 RUN apk add --no-cache curl
 
+ARG USER=WJQSERVER-STUDIO
+ARG REPO=ghproxy
+ARG BRANCH=v3
+ARG APPLICATION=ghproxy
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETPLATFORM
+
 COPY --from=builder /data/www /data/www
 COPY --from=builder /data/${APPLICATION} /data/${APPLICATION}
-COPY --from=builder /usr/local/bin/init.sh /usr/local/bin/init.sh
 
 # 权限
 RUN chmod +x /data/${APPLICATION}/${APPLICATION}
-RUN chmod +x /usr/local/bin/init.sh
 
-CMD ["/usr/local/bin/init.sh"]
+CMD ["/data/ghproxy/ghproxy"]
