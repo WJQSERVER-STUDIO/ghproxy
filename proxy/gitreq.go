@@ -118,6 +118,11 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 	}
 
 	c.Status(resp.StatusCode)
+	if cfg.GitClone.Mode == "cache" {
+		c.Response.Header.Set("Cache-Control", "no-store, no-cache, must-revalidate")
+		c.Response.Header.Set("Pragma", "no-cache")
+		c.Response.Header.Set("Expires", "0")
+	}
 	c.SetBodyStream(resp.Body, -1)
 	//err = hwriter.Writer(resp.Body, c)
 	/*
