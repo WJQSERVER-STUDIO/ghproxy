@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/cloudwego/hertz/pkg/app"
 )
@@ -19,6 +18,7 @@ func removeWSHeader(req *http.Request) {
 	req.Header.Del("Connection")
 }
 
+/*
 func reWriteEncodeHeader(req *http.Request) {
 
 	if isGzipAccepted(req.Header) {
@@ -46,3 +46,4 @@ func isGzipAccepted(header http.Header) bool {
 	}
 	return false
 }
+*/
