@@ -23,7 +23,6 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, matcher s
 	}
 	setRequestHeaders(c, headReq)
 	removeWSHeader(headReq) // 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
-	reWriteEncodeHeader(headReq)
 	AuthPassThrough(c, cfg, headReq)
 
 	headResp, err := client.Do(headReq)
@@ -65,7 +64,6 @@ func ChunkedProxyRequest(c *gin.Context, u string, cfg *config.Config, matcher s
 	}
 	setRequestHeaders(c, req)
 	removeWSHeader(req) // 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
-	reWriteEncodeHeader(req)
 	AuthPassThrough(c, cfg, req)
 
 	resp, err := client.Do(req)

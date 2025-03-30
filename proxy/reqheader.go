@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,8 +20,8 @@ func removeWSHeader(req *http.Request) {
 	req.Header.Del("Connection")
 }
 
+/*
 func reWriteEncodeHeader(req *http.Request) {
-
 	if isGzipAccepted(req.Header) {
 		req.Header.Set("Content-Encoding", "gzip")
 		req.Header.Set("Accept-Encoding", "gzip")
@@ -48,3 +47,4 @@ func isGzipAccepted(header http.Header) bool {
 	}
 	return false
 }
+*/
