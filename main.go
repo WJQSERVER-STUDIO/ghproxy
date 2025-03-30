@@ -71,7 +71,7 @@ func readFlag() {
 		fmt.Println("[ERROR] cfg flag is deprecated, please use -c instead")
 		fmt.Printf("\n")
 		flag.Usage()
-		os.Exit(1)
+		os.Exit(2)
 		return nil
 	})
 	flag.BoolVar(&showVersion, "v", false, "show version and exit")   // 添加-v标志

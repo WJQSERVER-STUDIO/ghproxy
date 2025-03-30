@@ -43,7 +43,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 
 		rawPath := strings.TrimPrefix(string(c.Request.RequestURI()), "/") // 去掉前缀/
 		matches := re.FindStringSubmatch(rawPath)                          // 匹配路径
-		logInfo("Matches: %v", matches)
+		logInfo("URL: %v", matches)
 
 		// 匹配路径错误处理
 		if len(matches) < 3 {
@@ -116,7 +116,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		}
 
 		// IP METHOD URL USERAGENT PROTO MATCHES
-		logDebug("%s %s %s %s %s Matches: %v", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), matches)
+		logDebug("%s %s %s %s %s Matched: %v", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), matcher)
 
 		switch matcher {
 		case "releases", "blob", "raw", "gist", "api":
