@@ -50,7 +50,6 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 		}
 		setRequestHeaders(c, req)
 		removeWSHeader(req)
-		reWriteEncodeHeader(req)
 		AuthPassThrough(c, cfg, req)
 
 		resp, err = gitclient.Do(req)
@@ -66,7 +65,6 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 		}
 		setRequestHeaders(c, req)
 		removeWSHeader(req)
-		reWriteEncodeHeader(req)
 		AuthPassThrough(c, cfg, req)
 
 		resp, err = client.Do(req)
@@ -81,6 +79,10 @@ func GitReq(c *gin.Context, u string, cfg *config.Config, mode string, runMode s
 			logError("Failed to close response body: %v", err)
 		}
 	}(resp.Body)
+
+	// 记录返回结果信息
+	logDump("Resp Header: %v", resp.Header)
+	logDump("Resp Status: %v", resp.StatusCode)
 
 	contentLength := resp.Header.Get("Content-Length")
 	if contentLength != "" {
