@@ -93,16 +93,18 @@ type LogConfig struct {
 
 /*
 [auth]
-authMethod = "parameters" # "header" or "parameters"
-authToken = "token"
+Method = "parameters" # "header" or "parameters"
+Key = ""
+Token = "token"
 enabled = false
 passThrough = false
 ForceAllowApi = true
 */
 type AuthConfig struct {
 	Enabled       bool   `toml:"enabled"`
-	AuthMethod    string `toml:"authMethod"`
-	AuthToken     string `toml:"authToken"`
+	Method        string `toml:"method"`
+	Key           string `toml:"key"`
+	Token         string `toml:"token"`
 	PassThrough   bool   `toml:"passThrough"`
 	ForceAllowApi bool   `toml:"ForceAllowApi"`
 }
@@ -208,8 +210,9 @@ func DefaultConfig() *Config {
 		},
 		Auth: AuthConfig{
 			Enabled:       false,
-			AuthMethod:    "parameters",
-			AuthToken:     "token",
+			Method:        "parameters",
+			Key:           "",
+			Token:         "token",
 			PassThrough:   false,
 			ForceAllowApi: true,
 		},

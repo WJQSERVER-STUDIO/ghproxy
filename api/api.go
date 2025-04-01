@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"ghproxy/config"
+	"ghproxy/middleware/nocache"
 
 	"github.com/WJQSERVER-STUDIO/go-utils/logger"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -18,18 +19,8 @@ var (
 	logError   = logger.LogError
 )
 
-func NoCacheMiddleware() app.HandlerFunc {
-	return func(ctx context.Context, c *app.RequestContext) {
-		// 设置禁止缓存的响应头
-		c.Response.Header.Set("Cache-Control", "no-store, no-cache, must-revalidate")
-		c.Response.Header.Set("Pragma", "no-cache")
-		c.Response.Header.Set("Expires", "0")
-		c.Next(ctx) // 继续处理请求
-	}
-}
-
 func InitHandleRouter(cfg *config.Config, r *server.Hertz, version string) {
-	apiRouter := r.Group("/api", NoCacheMiddleware())
+	apiRouter := r.Group("/api", nocache.NoCacheMiddleware())
 	{
 		apiRouter.GET("/size_limit", func(ctx context.Context, c *app.RequestContext) {
 			SizeLimitHandler(cfg, c, ctx)

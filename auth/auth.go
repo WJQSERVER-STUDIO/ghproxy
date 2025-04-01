@@ -37,17 +37,17 @@ func Init(cfg *config.Config) {
 }
 
 func AuthHandler(ctx context.Context, c *app.RequestContext, cfg *config.Config) (isValid bool, err error) {
-	if cfg.Auth.AuthMethod == "parameters" {
+	if cfg.Auth.Method == "parameters" {
 		isValid, err = AuthParametersHandler(c, cfg)
 		return isValid, err
-	} else if cfg.Auth.AuthMethod == "header" {
+	} else if cfg.Auth.Method == "header" {
 		isValid, err = AuthHeaderHandler(c, cfg)
 		return isValid, err
-	} else if cfg.Auth.AuthMethod == "" {
+	} else if cfg.Auth.Method == "" {
 		logError("Auth method not set")
 		return true, nil
 	} else {
 		logError("Auth method not supported")
-		return false, fmt.Errorf(fmt.Sprintf("Auth method %s not supported", cfg.Auth.AuthMethod))
+		return false, fmt.Errorf(fmt.Sprintf("Auth method %s not supported", cfg.Auth.Method))
 	}
 }

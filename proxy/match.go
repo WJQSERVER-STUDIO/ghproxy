@@ -114,7 +114,7 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, error)
 			user = parts[1]
 		}
 		if !cfg.Auth.ForceAllowApi {
-			if cfg.Auth.AuthMethod != "header" || !cfg.Auth.Enabled {
+			if cfg.Auth.Method != "header" || !cfg.Auth.Enabled {
 				return "", "", "", ErrAuthHeaderUnavailable
 			}
 		}

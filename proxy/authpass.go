@@ -12,7 +12,7 @@ func AuthPassThrough(c *app.RequestContext, cfg *config.Config, req *http.Reques
 		token := c.Query("token")
 		if token != "" {
 			logDebug("%s %s %s %s %s Auth-PassThrough: token %s", c.ClientIP(), c.Method(), string(c.Path()), c.UserAgent(), c.Request.Header.GetProtocol(), token)
-			switch cfg.Auth.AuthMethod {
+			switch cfg.Auth.Method {
 			case "parameters":
 				if !cfg.Auth.Enabled {
 					req.Header.Set("Authorization", "token "+token)
