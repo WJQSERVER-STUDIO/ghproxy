@@ -15,5 +15,5 @@ jobs:
       uses: pozil/auto-assign-issue@v1
       with:
           repo-token: ${{ secrets.AUTO_ASSIGN }}
-          assignees: WJQSERVER, satomitoka
+          assignees: WJQSERVER, satomitouka
           numOfAssignee: 2

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - 'v3'
+      - 'dev'
     paths:
       - 'DEV-VERSION'
 
@@ -51,8 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          #ref: dev
-          ref: v3
+          ref: dev
       - name: 加载版本号
         run: |
           if [ -f DEV-VERSION ]; then
@@ -115,8 +114,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          #ref: dev
-          ref: v3
+          ref: dev
       - name: Load VERSION
         run: |
           if [ -f DEV-VERSION ]; then

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - 'v3'
+      - 'main'
     paths:
       - 'VERSION'
 
@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with: 
+          ref: main
       - name: 加载版本号
         run: |
           if [ -f VERSION ]; then
@@ -50,7 +52,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: v3
+          ref: main
       - name: 加载版本号
         run: |
           if [ -f VERSION ]; then
@@ -110,7 +112,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: v3
+          ref: main
       - name: Load VERSION
         run: |
           if [ -f VERSION ]; then

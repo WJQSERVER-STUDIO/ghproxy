@@ -1,54 +1,34 @@
 # GHProxy
 
-![pull](https://img.shields.io/docker/pulls/wjqserver/ghproxy.svg)
-![Docker Image Size (tag)](https://img.shields.io/docker/image-size/wjqserver/ghproxy/latest)
-[![Go Report Card](https://goreportcard.com/badge/github.com/WJQSERVER-STUDIO/ghproxy)](https://goreportcard.com/report/github.com/WJQSERVER-STUDIO/ghproxy)
+![pull](https://img.shields.io/docker/pulls/wjqserver/ghproxy.svg)![Docker Image Size (tag)](https://img.shields.io/docker/image-size/wjqserver/ghproxy/latest)[![Go Report Card](https://goreportcard.com/badge/github.com/WJQSERVER-STUDIO/ghproxy)](https://goreportcard.com/report/github.com/WJQSERVER-STUDIO/ghproxy)
 
 使用Go实现的GHProxy,用于加速部分地区Github仓库的拉取,支持速率限制,用户鉴权,支持Docker部署
-
-[DEMO](https://ghproxy.1888866.xyz)
-
-[TG讨论群组](https://t.me/ghproxy_go)
-
-[版本更新介绍](https://blog.wjqserver.com/categories/my-program/)
 
 ## 项目说明
 
 ### 项目特点
 
-- 基于Go语言实现,支持多平台
-- 使用字节旗下的[HertZ](https://github.com/cloudwego/hertz)作为Web框架
-- 使用[Touka-HTTPC](https://github.com/satomitouka/touka-httpc)作为HTTP客户端
-- 支持Git clone,raw,realeases等文件拉取
-- 支持多个前端主题
-- 支持自定义黑名单/白名单
-- 支持Git Clone缓存(配合[Smart-Git](https://github.com/WJQSERVER-STUDIO/smart-git))
-- 支持Docker部署
-- 支持速率限制
-- 支持用户鉴权
-- 支持shell脚本嵌套加速
-- 基于[WJQSERVER-STUDIO/golang-temp](https://github.com/WJQSERVER-STUDIO/golang-temp)模板构建,具有标准化的日志记录与构建流程
+- ⚡ **基于 Go 语言实现，跨平台的同时提供高并发性能**
+- 🌐 **使用字节旗下的 [HertZ](https://github.com/cloudwego/hertz) 作为 Web 框架**
+- 📡 **使用 [Touka-HTTPC](https://github.com/satomitouka/touka-httpc) 作为 HTTP 客户端**
+- 📥 **支持 Git clone、raw、releases 等文件拉取**
+- 🎨 **支持多个前端主题**
+- 🚫 **支持自定义黑名单/白名单**
+- 🗄️ **支持 Git Clone 缓存（配合 [Smart-Git](https://github.com/WJQSERVER-STUDIO/smart-git)）**
+- 🐳 **支持 Docker 部署**
+- ⚡ **支持速率限制**
+- 🔒 **支持用户鉴权**
+- 🐚 **支持 shell 脚本嵌套加速**
 
-### 项目开发过程
+### 项目相关
 
-**本项目是[WJQSERVER-STUDIO/ghproxy-go](https://github.com/WJQSERVER-STUDIO/ghproxy-go)的重构版本,实现了原项目原定功能的同时,进一步优化了性能**
-关于此项目的详细开发过程,请参看Commit记录与[CHANGELOG.md](https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/CHANGELOG.md)
+[DEMO](https://ghproxy.1888866.xyz)
 
-- v3.0.0 迁移到HertZ框架, 进一步提升效率, 同时v3.0.0与v2.4.0及以上版本兼容, 可直接平顺升级
-- v2.4.1 对路径匹配进行优化
-- v2.0.0 对`proxy`核心模块进行了重构,大幅优化内存占用
-- v1.0.0 迁移至本仓库,并再次重构内容实现
-- v0.2.0 重构项目实现
+[TG讨论群组](https://t.me/ghproxy_go)
 
-### LICENSE
+[相关文章](https://blog.wjqserver.com/categories/my-program/)
 
-本项目使用WJQserver Studio License 2.0 [WJQserver Studio License 2.0](https://wjqserver-studio.github.io/LICENSE/LICENSE.html)
-
-在v2.3.0之前, 本项目使用WJQserver Studio License 1.2
-
-在v1.0.0版本之前,本项目继承于[WJQSERVER-STUDIO/ghproxy-go](https://github.com/WJQSERVER-STUDIO/ghproxy-go)的APACHE2.0 LICENSE VERSION
-
-## 使用示例
+### 使用示例
 
 ```
 # 下载文件
@@ -188,13 +168,24 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890" 支持Socks5/HTTP(S)�
 
 参看[GHProxy-Frontend](https://github.com/WJQSERVER-STUDIO/GHProxy-Frontend)
 
-#### Bootstrap主题
-![ghproxy-demo.png](https://webp.wjqserver.com/ghproxy/1.8.1-light.png)
-![ghproxy-demo-dark.png](https://webp.wjqserver.com/ghproxy/1.8.1-dark.png)
+## 项目简史
 
-#### Nebula主题
-![nebula-dark-v2.3.0.png](https://webp.wjqserver.com/ghproxy/nebula-dark.png)
-![nebula-light-v2.3.0.png](https://webp.wjqserver.com/ghproxy/nebula-light.png)
+**本项目是[WJQSERVER-STUDIO/ghproxy-go](https://github.com/WJQSERVER-STUDIO/ghproxy-go)的重构版本,实现了原项目原定功能的同时,进一步优化了性能**
+关于此项目的详细开发过程,请参看Commit记录与[CHANGELOG.md](https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/CHANGELOG.md)
+
+- v3.0.0 迁移到HertZ框架, 进一步提升效率
+- v2.4.1 对路径匹配进行优化
+- v2.0.0 对`proxy`核心模块进行了重构,大幅优化内存占用
+- v1.0.0 迁移至本仓库,并再次重构内容实现
+- v0.2.0 重构项目实现
+
+## LICENSE
+
+本项目使用WJQserver Studio License 2.0 [WJQserver Studio License 2.0](https://wjqserver-studio.github.io/LICENSE/LICENSE.html)
+
+在v2.3.0之前, 本项目使用WJQserver Studio License 1.2
+
+在v1.0.0版本之前,本项目继承于[WJQSERVER-STUDIO/ghproxy-go](https://github.com/WJQSERVER-STUDIO/ghproxy-go)的APACHE2.0 LICENSE VERSION
 
 ## 赞助
 
