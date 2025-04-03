@@ -17,9 +17,9 @@
 
 本项目为开源项目,开发者不对使用本项目造成的任何损失或问题承担责任。用户需自行评估并承担使用本项目的风险。
 
-使用本项目,请遵循 **[WSL (WJQSERVER-STUDIO LICENSE)](https://wjqserver-studio.github.io/LICENSE/LICENSE.html)** 协议。
+使用本项目,请遵循 **[WSL 2.0 (WJQSERVER-STUDIO LICENSE 2.0)](https://wjqserver-studio.github.io/LICENSE/LICENSE.html)** 协议。
 
-本项目所有文件均受到 WSL (WJQSERVER-STUDIO LICENSE) 协议保护,任何人不得在任何情况下以非 WSL (WJQSERVER-STUDIO LICENSE) 协议内规定的方式使用,复制,修改,编译,发布,分发,再许可,或者出售本项目的任何部分。
+本项目所有文件均受到 WSL 2.0 (WJQSERVER-STUDIO LICENSE 2.0) 协议保护,任何人不得在任何情况下以非 WSL 2.0 (WJQSERVER-STUDIO LICENSE 2.0) 协议内规定的方式使用,复制,修改,编译,发布,分发,再许可,或者出售本项目的任何部分。
 
 ## 报告漏洞
 
