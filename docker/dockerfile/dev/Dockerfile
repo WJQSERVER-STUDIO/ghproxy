@@ -29,7 +29,6 @@ RUN wget -O /data/${APPLICATION}/whitelist.json https://raw.githubusercontent.co
 
 # 权限
 RUN chmod +x /data/${APPLICATION}/${APPLICATION}
-RUN chmod +x /usr/local/bin/init.sh
 
 FROM alpine:latest
 
