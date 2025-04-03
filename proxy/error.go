@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/WJQSERVER-STUDIO/go-utils/logger"
@@ -19,6 +18,6 @@ var (
 )
 
 func HandleError(c *app.RequestContext, message string) {
-	c.String(http.StatusInternalServerError, fmt.Sprintf("server error %v", message))
+	c.JSON(http.StatusInternalServerError, map[string]string{"error": message})
 	logError(message)
 }

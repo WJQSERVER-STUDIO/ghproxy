@@ -36,21 +36,13 @@ var (
 	runMode     string
 	limiter     *rate.RateLimiter
 	iplimiter   *rate.IPRateLimiter
-	showVersion bool // 新增的版本号标志
-	showHelp    bool // 新增的帮助标志
+	showVersion bool
+	showHelp    bool
 )
 
 var (
 	//go:embed pages/*
 	pagesFS embed.FS
-	/*
-		//go:embed pages/bootstrap/*
-		BootstrapPagesFS embed.FS
-		//go:embed pages/nebula/*
-		NebulaPagesFS embed.FS
-		//go:embed pages/design/*
-		DesignPagesFS embed.FS
-	*/
 )
 
 var (
@@ -101,7 +93,7 @@ func readFlag() {
 			fmt.Fprintf(os.Stderr, "  %s\n", flag)
 		}
 		if len(invalidFlags) > 0 {
-			os.Exit(2) // 使用非零状态码退出，表示有错误
+			os.Exit(2)
 		}
 
 	}

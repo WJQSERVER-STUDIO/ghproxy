@@ -32,8 +32,9 @@ maxLogSize = 5 # MB
 level = "info" # dump, debug, info, warn, error, none
 
 [auth]
-authMethod = "parameters" # "header" or "parameters"
-authToken = "token"
+method = "parameters" # "header" or "parameters"
+token = "token"
+key = ""
 enabled = false
 passThrough = false
 ForceAllowApi = false

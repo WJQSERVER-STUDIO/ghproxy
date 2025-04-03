@@ -44,7 +44,6 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 		}
 		setRequestHeaders(c, req)
 		removeWSHeader(req)
-		//reWriteEncodeHeader(req)
 		AuthPassThrough(c, cfg, req)
 
 		resp, err = gitclient.Do(req)
@@ -60,7 +59,6 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 		}
 		setRequestHeaders(c, req)
 		removeWSHeader(req)
-		//reWriteEncodeHeader(req)
 		AuthPassThrough(c, cfg, req)
 
 		resp, err = client.Do(req)
@@ -69,14 +67,6 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 			return
 		}
 	}
-	/*
-		//defer resp.Body.Close()
-		defer func(Body io.ReadCloser) {
-			if err := Body.Close(); err != nil {
-				logError("Failed to close response body: %v", err)
-			}
-		}(resp.Body)
-	*/
 
 	contentLength := resp.Header.Get("Content-Length")
 	if contentLength != "" {
@@ -123,18 +113,6 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 		c.Response.Header.Set("Pragma", "no-cache")
 		c.Response.Header.Set("Expires", "0")
 	}
+
 	c.SetBodyStream(resp.Body, -1)
-	//err = hwriter.Writer(resp.Body, c)
-	/*
-		_, err = copyb.Copy(c.Response.BodyWriter(), resp.Body)
-
-		if err != nil {
-			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
-			return
-		} else {
-
-			c.Flush() // 确保刷入
-		}
-	*/
-
 }

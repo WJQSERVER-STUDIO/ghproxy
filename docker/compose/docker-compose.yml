@@ -4,8 +4,7 @@ services:
         image: 'wjqserver/ghproxy:latest'
         restart: always
         volumes:
-            - './ghproxy/log/run:/data/ghproxy/log'
-            - './ghproxy/log/caddy:/data/caddy/log'
+            - './ghproxy/log:/data/ghproxy/log'
             - './ghproxy/config:/data/ghproxy/config'
         ports:
             - '7210:8080'

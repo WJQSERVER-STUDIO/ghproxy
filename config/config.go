@@ -192,10 +192,10 @@ func DefaultConfig() *Config {
 		GitClone: GitCloneConfig{
 			Mode:         "bypass",
 			SmartGitAddr: "http://127.0.0.1:8080",
-			ForceH2C:     true,
+			ForceH2C:     false,
 		},
 		Shell: ShellConfig{
-			Editor:     true,
+			Editor:     false,
 			RewriteAPI: false,
 		},
 		Pages: PagesConfig{
@@ -205,7 +205,7 @@ func DefaultConfig() *Config {
 		},
 		Log: LogConfig{
 			LogFilePath: "/data/ghproxy/log/ghproxy.log",
-			MaxLogSize:  100,
+			MaxLogSize:  10,
 			Level:       "info",
 		},
 		Auth: AuthConfig{
@@ -214,7 +214,7 @@ func DefaultConfig() *Config {
 			Key:           "",
 			Token:         "token",
 			PassThrough:   false,
-			ForceAllowApi: true,
+			ForceAllowApi: false,
 		},
 		Blacklist: BlacklistConfig{
 			Enabled:       false,
@@ -227,8 +227,8 @@ func DefaultConfig() *Config {
 		RateLimit: RateLimitConfig{
 			Enabled:       false,
 			RateMethod:    "total",
-			RatePerMinute: 1000,
-			Burst:         100,
+			RatePerMinute: 100,
+			Burst:         10,
 		},
 		Outbound: OutboundConfig{
 			Enabled: false,
