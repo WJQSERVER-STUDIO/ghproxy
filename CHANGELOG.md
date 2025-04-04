@@ -1,5 +1,23 @@
 # 更新日志
 
+3.0.0 - 2025-04-04
+---
+- RELEASE: Next Gen; 下一个起点; 
+- CHANGE: 使用HertZ框架重构, 提升性能
+- CHANGE: 前端在构建时加入, 新增`Design`,`Metro`,`Classic`主题
+- CHANGE: 加入`Mino`主题对接选项
+- FIX: 修正部分日志输出问题
+- CHANGE: 移除gin残留
+- CHANGE: 移除无用传入参数, 调整代码结构
+- CHANGE: 改进cli
+- CHANGE: 改进`脚本嵌套加速处理器`
+- CHANGE&FIX: 使用`c.SetBodyStream`方式, 修正此前`chunked`传输中存在的诸多问题, 参看[HertZ Issues #1309](https://github.com/cloudwego/hertz/issues/1309)
+- PORT: 从v2移植`matcher`相关改进
+- CHANGE: 增加默认配置生成
+- CHANGE: 优化前端资源加载
+- CHANGE: 将`cfg`flag改为`c`以符合`POSIX`规范
+- CHANGE: 为`smart-git`添加`no-cache`标头
+
 25w26a - 2025-04-03
 ---
 - PRE-RELEASE: 此版本是v3的预发布版本,请勿在生产环境中使用;
