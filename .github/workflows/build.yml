@@ -141,4 +141,4 @@ jobs:
           push: true
           tags: | 
             ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
-            ${{ env.IMAGE_NAME }}:v3
+            ${{ env.IMAGE_NAME }}:latest
