@@ -70,6 +70,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 	// 错误处理(404)
 	if resp.StatusCode == 404 {
 		c.String(http.StatusNotFound, "File Not Found")
+		//c.Status(http.StatusNotFound)
 		return
 	}
 

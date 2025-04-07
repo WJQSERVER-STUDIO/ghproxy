@@ -32,6 +32,7 @@ type ServerConfig struct {
 	Port      int    `toml:"port"`
 	Host      string `toml:"host"`
 	SizeLimit int    `toml:"sizeLimit"`
+	MemLimit  int64  `toml:"memLimit"`
 	H2C       bool   `toml:"H2C"`
 	Cors      string `toml:"cors"`
 	Debug     bool   `toml:"debug"`
@@ -86,9 +87,10 @@ type PagesConfig struct {
 }
 
 type LogConfig struct {
-	LogFilePath string `toml:"logFilePath"`
-	MaxLogSize  int    `toml:"maxLogSize"`
-	Level       string `toml:"level"`
+	LogFilePath  string `toml:"logFilePath"`
+	MaxLogSize   int    `toml:"maxLogSize"`
+	Level        string `toml:"level"`
+	HertZLogPath string `toml:"hertzLogPath"`
 }
 
 /*
@@ -179,6 +181,7 @@ func DefaultConfig() *Config {
 			Port:      8080,
 			Host:      "0.0.0.0",
 			SizeLimit: 125,
+			MemLimit:  0,
 			H2C:       true,
 			Cors:      "*",
 			Debug:     false,
@@ -204,9 +207,10 @@ func DefaultConfig() *Config {
 			StaticDir: "/data/www",
 		},
 		Log: LogConfig{
-			LogFilePath: "/data/ghproxy/log/ghproxy.log",
-			MaxLogSize:  10,
-			Level:       "info",
+			LogFilePath:  "/data/ghproxy/log/ghproxy.log",
+			MaxLogSize:   10,
+			Level:        "info",
+			HertZLogPath: "/data/ghproxy/log/hertz.log",
 		},
 		Auth: AuthConfig{
 			Enabled:       false,

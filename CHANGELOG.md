@@ -1,5 +1,12 @@
 # 更新日志
 
+25w27a - 2025-04-07
+---
+- PRE-RELEASE: 此版本是v3.0.1的预发布版本,请勿在生产环境中使用;
+- CHANGE: 加入`memLimit`指示gc
+- CHANGE: 加入`hlog`输出路径配置
+- CHANGE: 修正H2C配置问题
+
 3.0.0 - 2025-04-04
 ---
 - RELEASE: Next Gen; 下一个起点; 
