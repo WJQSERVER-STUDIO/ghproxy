@@ -141,11 +141,11 @@ func setupHertZLogger(cfg *config.Config) {
 	if cfg.Log.HertZLogPath != "" {
 		hertZfile, err = os.OpenFile(cfg.Log.HertZLogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 		if err != nil {
-			fmt.Printf("Failed to open log file: %v\n", err)
-			os.Exit(1)
+			hlog.SetOutput(os.Stdout)
+			logWarning("Failed to open hertz log file: %v", err)
+		} else {
+			hlog.SetOutput(hertZfile)
 		}
-
-		hlog.SetOutput(hertZfile)
 	}
 
 }
@@ -446,6 +446,13 @@ func main() {
 
 	r.Spin()
 	defer logger.Close()
-	defer hertZfile.Close()
+	defer func() {
+		if hertZfile != nil {
+			err := hertZfile.Close()
+			if err != nil {
+				logError("Failed to close hertz log file: %v", err)
+			}
+		}
+	}()
 	fmt.Println("Program Exit")
 }
