@@ -13,6 +13,7 @@
 host = "0.0.0.0"
 port = 8080
 sizeLimit = 125 # MB
+memLimit = 0 # MB
 H2C = true
 cors = "*" # "*"/"" -> "*" ; "nil" -> "" ;
 debug = false
@@ -41,6 +42,7 @@ staticDir = "/data/www"
 logFilePath = "/data/ghproxy/log/ghproxy.log"
 maxLogSize = 5 # MB
 level = "info" # dump, debug, info, warn, error, none
+hertzLogPath = "/data/ghproxy/log/hertz.log"
 
 [auth]
 method = "parameters" # "header" or "parameters"
@@ -85,6 +87,10 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
         *   类型: 整数 (`int`)
         *   默认值: `125` (MB)
         *   说明:  限制允许接收的请求体最大大小，单位为 MB。用于防止过大的请求导致服务压力过大。
+    *   `memLimit`:  `runtime`内存限制
+        *   类型: 整数 (`int64`)
+        *   默认值: `0` (不传入)
+        *   说明: 给`runtime`的指标, 让gc行为更高效
     *   `H2C`:  是否启用 H2C (HTTP/2 Cleartext) 传输。
         *   类型: 布尔值 (`bool`)
         *   默认值: `true` (启用)
@@ -193,6 +199,10 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
             *   `"warn"`:   输出警告和错误日志。
             *   `"error"`:  仅输出错误日志。
             *   `"none"`:   禁用所有日志输出。
+    *   `hertzLogPath`:  `HertZ`日志文件路径。
+        *   类型: 字符串 (`string`)
+        *   默认值: `"/data/ghproxy/log/hertz.log"`
+        *   说明:  设置 `HertZ` 日志文件的存储路径。
 
 *   **`[auth]` - 认证配置**
 

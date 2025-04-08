@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"time"
 
 	"ghproxy/api"
@@ -23,6 +24,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/adaptor"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 
 	"github.com/hertz-contrib/http2/factory"
 )
@@ -31,6 +33,7 @@ var (
 	cfg         *config.Config
 	r           *server.Hertz
 	configfile  = "/data/ghproxy/config/config.toml"
+	hertZfile   *os.File
 	cfgfile     string
 	version     string
 	runMode     string
@@ -129,7 +132,29 @@ func setupLogger(cfg *config.Config) {
 	fmt.Printf("Log Level: %s\n", cfg.Log.Level)
 	logDebug("Config File Path: ", cfgfile)
 	logDebug("Loaded config: %v\n", cfg)
-	logInfo("Init Completed")
+	logInfo("Logger Initialized Successfully")
+}
+
+func setupHertZLogger(cfg *config.Config) {
+	var err error
+
+	if cfg.Log.HertZLogPath != "" {
+		hertZfile, err = os.OpenFile(cfg.Log.HertZLogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		if err != nil {
+			hlog.SetOutput(os.Stdout)
+			logWarning("Failed to open hertz log file: %v", err)
+		} else {
+			hlog.SetOutput(hertZfile)
+		}
+	}
+
+}
+
+func setMemLimit(cfg *config.Config) {
+	if cfg.Server.MemLimit > 0 {
+		debug.SetMemoryLimit((cfg.Server.MemLimit) * 1024 * 1024)
+		logInfo("Set Memory Limit to %d MB", cfg.Server.MemLimit)
+	}
 }
 
 func loadlist(cfg *config.Config) {
@@ -315,7 +340,9 @@ func init() {
 	loadConfig()
 	if cfg != nil { // 在setupLogger前添加空值检查
 		setupLogger(cfg)
+		setupHertZLogger(cfg)
 		InitReq(cfg)
+		setMemLimit(cfg)
 		loadlist(cfg)
 		setupRateLimit(cfg)
 
@@ -346,12 +373,17 @@ func main() {
 
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 
-	r := server.New(
-		server.WithHostPorts(addr),
-		server.WithH2C(true),
-	)
-
-	r.AddProtocol("h2", factory.NewServerFactory())
+	if cfg.Server.H2C {
+		r = server.New(
+			server.WithHostPorts(addr),
+			server.WithH2C(true),
+		)
+		r.AddProtocol("h2", factory.NewServerFactory())
+	} else {
+		r = server.New(
+			server.WithHostPorts(addr),
+		)
+	}
 
 	// 添加Recovery中间件
 	r.Use(recovery.Recovery())
@@ -414,5 +446,13 @@ func main() {
 
 	r.Spin()
 	defer logger.Close()
+	defer func() {
+		if hertZfile != nil {
+			err := hertZfile.Close()
+			if err != nil {
+				logError("Failed to close hertz log file: %v", err)
+			}
+		}
+	}()
 	fmt.Println("Program Exit")
 }
