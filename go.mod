@@ -8,7 +8,7 @@ require (
 	github.com/cloudwego/hertz v0.9.6
 	github.com/hertz-contrib/http2 v0.1.8
 	github.com/satomitouka/touka-httpc v0.3.3
-	golang.org/x/net v0.38.0
+	golang.org/x/net v0.39.0
 	golang.org/x/time v0.11.0
 )
 
