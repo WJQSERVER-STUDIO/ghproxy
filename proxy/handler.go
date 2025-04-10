@@ -106,13 +106,15 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		}
 
 		// 鉴权
-		var authcheck bool
-		authcheck, err = auth.AuthHandler(ctx, c, cfg)
-		if !authcheck {
-			//c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
-			c.AbortWithStatusJSON(401, map[string]string{"error": "Unauthorized"})
-			logWarning("%s %s %s %s %s Auth-Error: %v", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), err)
-			return
+		if cfg.Auth.Enabled {
+			var authcheck bool
+			authcheck, err = auth.AuthHandler(ctx, c, cfg)
+			if !authcheck {
+				//c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
+				c.AbortWithStatusJSON(401, map[string]string{"error": "Unauthorized"})
+				logWarning("%s %s %s %s %s Auth-Error: %v", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), err)
+				return
+			}
 		}
 
 		// IP METHOD URL USERAGENT PROTO MATCHES
