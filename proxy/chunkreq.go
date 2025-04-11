@@ -74,13 +74,15 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		return
 	}
 
+	var bodySize int
 	contentLength = resp.Header.Get("Content-Length")
 	if contentLength != "" {
-		size, err := strconv.Atoi(contentLength)
-		if err == nil && size > sizelimit {
+		var err error
+		bodySize, err = strconv.Atoi(contentLength)
+		if err == nil && bodySize > sizelimit {
 			finalURL := resp.Request.URL.String()
 			c.Redirect(http.StatusMovedPermanently, []byte(finalURL))
-			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Method(), c.Path(), c.UserAgent(), c.Request.Header.GetProtocol(), finalURL, size)
+			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Method(), c.Path(), c.UserAgent(), c.Request.Header.GetProtocol(), finalURL, bodySize)
 			return
 		}
 	}
@@ -132,6 +134,10 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 			return
 		}
 	} else {
+		if contentLength != "" {
+			c.SetBodyStream(resp.Body, bodySize)
+			return
+		}
 		c.SetBodyStream(resp.Body, -1)
 	}
 
