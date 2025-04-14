@@ -27,7 +27,6 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 
 	//"github.com/cloudwego/hertz/pkg/network/standard"
-
 	"github.com/hertz-contrib/http2/factory"
 )
 

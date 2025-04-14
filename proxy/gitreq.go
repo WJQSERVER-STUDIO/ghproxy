@@ -72,6 +72,9 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 	if contentLength != "" {
 		size, err := strconv.Atoi(contentLength)
 		sizelimit := cfg.Server.SizeLimit * 1024 * 1024
+		if err != nil {
+			logWarning("%s %s %s %s %s Content-Length header is not a valid integer: %v", c.ClientIP(), c.Method(), c.Path(), c.UserAgent(), c.Request.Header.GetProtocol(), err)
+		}
 		if err == nil && size > sizelimit {
 			finalURL := []byte(resp.Request.URL.String())
 			c.Redirect(http.StatusMovedPermanently, finalURL)

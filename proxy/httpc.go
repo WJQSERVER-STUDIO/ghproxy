@@ -42,7 +42,6 @@ func initHTTPClient(cfg *config.Config) {
 	if cfg.Httpc.Mode == "auto" {
 
 		tr = &http.Transport{
-			//MaxIdleConns:    160,
 			IdleConnTimeout: 30 * time.Second,
 			WriteBufferSize: 32 * 1024, // 32KB
 			ReadBufferSize:  32 * 1024, // 32KB
@@ -64,7 +63,6 @@ func initHTTPClient(cfg *config.Config) {
 		logWarning("use Auto to Run HTTP Client")
 		fmt.Println("use Auto to Run HTTP Client")
 		tr = &http.Transport{
-			//MaxIdleConns:    160,
 			IdleConnTimeout: 30 * time.Second,
 			WriteBufferSize: 32 * 1024, // 32KB
 			ReadBufferSize:  32 * 1024, // 32KB
@@ -89,7 +87,6 @@ func initGitHTTPClient(cfg *config.Config) {
 
 	if cfg.Httpc.Mode == "auto" {
 		gittr = &http.Transport{
-			//MaxIdleConns:    160,
 			IdleConnTimeout: 30 * time.Second,
 			WriteBufferSize: 32 * 1024, // 32KB
 			ReadBufferSize:  32 * 1024, // 32KB
@@ -123,18 +120,14 @@ func initGitHTTPClient(cfg *config.Config) {
 			httpc.WithTransport(gittr),
 			httpc.WithDumpLog(),
 			httpc.WithProtocols(httpc.ProtocolsConfig{
-				Http1:           false,
-				Http2:           false,
-				Http2_Cleartext: true,
+				ForceH2C: true,
 			}),
 		)
 	} else if !cfg.Server.Debug && cfg.GitClone.ForceH2C {
 		gitclient = httpc.New(
 			httpc.WithTransport(gittr),
 			httpc.WithProtocols(httpc.ProtocolsConfig{
-				Http1:           false,
-				Http2:           false,
-				Http2_Cleartext: true,
+				ForceH2C: true,
 			}),
 		)
 	} else if cfg.Server.Debug && !cfg.GitClone.ForceH2C {
