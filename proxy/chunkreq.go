@@ -56,6 +56,10 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		}
 		if err == nil && bodySize > sizelimit {
 			finalURL := resp.Request.URL.String()
+			err := resp.Body.Close()
+			if err != nil {
+				logError("Failed to close response body: %v", err)
+			}
 			c.Redirect(http.StatusMovedPermanently, []byte(finalURL))
 			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Method(), c.Path(), c.UserAgent(), c.Request.Header.GetProtocol(), finalURL, bodySize)
 			return

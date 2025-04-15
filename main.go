@@ -241,7 +241,6 @@ func setupPages(cfg *config.Config, r *server.Hertz) {
 		r.StaticFile("/style.css", stylesheetsPath)
 		r.StaticFile("/bootstrap.min.css", bootstrapPath)
 		r.StaticFile("/bootstrap.bundle.min.js", bootstrapBundlePath)
-		//router.StaticFile("/bootstrap.min.css", bootstrapPath)
 
 	default:
 		// 处理无效的Pages Mode

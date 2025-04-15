@@ -13,6 +13,9 @@ func setRequestHeaders(c *app.RequestContext, req *http.Request) {
 	})
 }
 
+// removeWSHeader removes the "Upgrade" and "Connection" headers from the given
+// Request, which are added by the client when it wants to upgrade the
+// connection to a WebSocket connection.
 func removeWSHeader(req *http.Request) {
 	req.Header.Del("Upgrade")
 	req.Header.Del("Connection")

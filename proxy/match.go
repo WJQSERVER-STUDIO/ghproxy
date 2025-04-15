@@ -243,6 +243,8 @@ func extractParts(rawURL string) (string, string, string, url.Values, error) {
 	return repoOwner, repoName, remainingPath, queryParams, nil
 }
 
+var urlPattern = regexp.MustCompile(`https?://[^\s'"]+`)
+
 // processLinks 处理链接，返回包含处理后数据的 io.Reader
 func processLinks(input io.Reader, compress string, host string, cfg *config.Config) (readerOut io.Reader, written int64, err error) {
 	pipeReader, pipeWriter := io.Pipe() // 创建 io.Pipe
@@ -315,7 +317,6 @@ func processLinks(input io.Reader, compress string, host string, cfg *config.Con
 		}()
 
 		// 使用正则表达式匹配 http 和 https 链接
-		urlPattern := regexp.MustCompile(`https?://[^\s'"]+`)
 		for {
 			line, readErr := bufReader.ReadString('\n')
 			if readErr != nil {
