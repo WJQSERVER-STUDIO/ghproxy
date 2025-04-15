@@ -26,7 +26,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/adaptor"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 
-	//"github.com/cloudwego/hertz/pkg/network/standard"
+	"github.com/cloudwego/hertz/pkg/network/standard"
 	"github.com/hertz-contrib/http2/factory"
 )
 
@@ -378,8 +378,8 @@ func main() {
 		r = server.New(
 			server.WithHostPorts(addr),
 			server.WithH2C(true),
-		//	server.WithALPN(true),
-		//	server.WithTransport(standard.NewTransporter),
+			//	server.WithALPN(true),
+			server.WithTransport(standard.NewTransporter),
 		)
 		r.AddProtocol("h2", factory.NewServerFactory())
 	} else {
