@@ -42,7 +42,6 @@ func initHTTPClient(cfg *config.Config) {
 	if cfg.Httpc.Mode == "auto" {
 
 		tr = &http.Transport{
-			//MaxIdleConns:    160,
 			IdleConnTimeout: 30 * time.Second,
 			WriteBufferSize: 32 * 1024, // 32KB
 			ReadBufferSize:  32 * 1024, // 32KB
@@ -64,7 +63,6 @@ func initHTTPClient(cfg *config.Config) {
 		logWarning("use Auto to Run HTTP Client")
 		fmt.Println("use Auto to Run HTTP Client")
 		tr = &http.Transport{
-			//MaxIdleConns:    160,
 			IdleConnTimeout: 30 * time.Second,
 			WriteBufferSize: 32 * 1024, // 32KB
 			ReadBufferSize:  32 * 1024, // 32KB
@@ -87,23 +85,11 @@ func initHTTPClient(cfg *config.Config) {
 
 func initGitHTTPClient(cfg *config.Config) {
 
-	var proTolcols = new(http.Protocols)
-	proTolcols.SetHTTP1(true)
-	proTolcols.SetHTTP2(true)
-	proTolcols.SetUnencryptedHTTP2(true)
-	if cfg.GitClone.ForceH2C {
-		proTolcols.SetHTTP1(false)
-		proTolcols.SetHTTP2(false)
-		proTolcols.SetUnencryptedHTTP2(true)
-	}
 	if cfg.Httpc.Mode == "auto" {
-
 		gittr = &http.Transport{
-			//MaxIdleConns:    160,
 			IdleConnTimeout: 30 * time.Second,
 			WriteBufferSize: 32 * 1024, // 32KB
 			ReadBufferSize:  32 * 1024, // 32KB
-			Protocols:       proTolcols,
 		}
 	} else if cfg.Httpc.Mode == "advanced" {
 		gittr = &http.Transport{
@@ -112,7 +98,6 @@ func initGitHTTPClient(cfg *config.Config) {
 			MaxIdleConnsPerHost: cfg.Httpc.MaxIdleConnsPerHost,
 			WriteBufferSize:     32 * 1024, // 32KB
 			ReadBufferSize:      32 * 1024, // 32KB
-			Protocols:           proTolcols,
 		}
 	} else {
 		// 错误的模式
@@ -130,14 +115,39 @@ func initGitHTTPClient(cfg *config.Config) {
 	if cfg.Outbound.Enabled {
 		initTransport(cfg, gittr)
 	}
-	if cfg.Server.Debug {
+	if cfg.Server.Debug && cfg.GitClone.ForceH2C {
 		gitclient = httpc.New(
 			httpc.WithTransport(gittr),
 			httpc.WithDumpLog(),
+			httpc.WithProtocols(httpc.ProtocolsConfig{
+				ForceH2C: true,
+			}),
+		)
+	} else if !cfg.Server.Debug && cfg.GitClone.ForceH2C {
+		gitclient = httpc.New(
+			httpc.WithTransport(gittr),
+			httpc.WithProtocols(httpc.ProtocolsConfig{
+				ForceH2C: true,
+			}),
+		)
+	} else if cfg.Server.Debug && !cfg.GitClone.ForceH2C {
+		gitclient = httpc.New(
+			httpc.WithTransport(gittr),
+			httpc.WithDumpLog(),
+			httpc.WithProtocols(httpc.ProtocolsConfig{
+				Http1:           true,
+				Http2:           true,
+				Http2_Cleartext: true,
+			}),
 		)
 	} else {
 		gitclient = httpc.New(
 			httpc.WithTransport(gittr),
+			httpc.WithProtocols(httpc.ProtocolsConfig{
+				Http1:           true,
+				Http2:           true,
+				Http2_Cleartext: true,
+			}),
 		)
 	}
 }

@@ -2,7 +2,7 @@
 
 ![pull](https://img.shields.io/docker/pulls/wjqserver/ghproxy.svg)![Docker Image Size (tag)](https://img.shields.io/docker/image-size/wjqserver/ghproxy/latest)[![Go Report Card](https://goreportcard.com/badge/github.com/WJQSERVER-STUDIO/ghproxy)](https://goreportcard.com/report/github.com/WJQSERVER-STUDIO/ghproxy)
 
-使用Go实现的GHProxy,用于加速部分地区Github仓库的拉取,支持速率限制,用户鉴权,支持Docker部署
+支持 Git clone、raw、releases的 Github 加速项目, 支持自托管的同时带来卓越的性能与极低的资源占用(Golang和HertZ带来的优势), 同时支持多种额外功能
 
 ## 项目说明
 
@@ -16,9 +16,10 @@
 - 🚫 **支持自定义黑名单/白名单**
 - 🗄️ **支持 Git Clone 缓存（配合 [Smart-Git](https://github.com/WJQSERVER-STUDIO/smart-git)）**
 - 🐳 **支持 Docker 部署**
+- 🐳 **支持自托管**
 - ⚡ **支持速率限制**
 - 🔒 **支持用户鉴权**
-- 🐚 **支持 shell 脚本嵌套加速**
+- 🐚 **支持 shell 脚本多层嵌套加速**
 
 ### 项目相关
 
