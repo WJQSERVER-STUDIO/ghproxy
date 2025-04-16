@@ -5,20 +5,39 @@ import (
 	"context"
 	"fmt"
 	"ghproxy/config"
+	"io"
 	"net/http"
 	"strconv"
 
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
+var (
+	headersToRemove = map[string]struct{}{
+		"Content-Security-Policy":   {},
+		"Referrer-Policy":           {},
+		"Strict-Transport-Security": {},
+		"X-Github-Request-Id":       {},
+		"X-Timer":                   {},
+		"X-Served-By":               {},
+		"X-Fastly-Request-Id":       {},
+	}
+)
+
 func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, cfg *config.Config, matcher string) {
-	method := c.Request.Method
 
-	body := c.Request.Body()
+	var (
+		method     []byte
+		bodyReader *bytes.Buffer
+		req        *http.Request
+		resp       *http.Response
+		err        error
+	)
 
-	bodyReader := bytes.NewBuffer(body)
+	method = c.Request.Method()
+	bodyReader = bytes.NewBuffer(c.Request.Body())
 
-	req, err := client.NewRequest(string(method()), u, bodyReader)
+	req, err = client.NewRequest(string(method), u, bodyReader)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
@@ -27,7 +46,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 	removeWSHeader(req) // 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
 	AuthPassThrough(c, cfg, req)
 
-	resp, err := client.Do(req)
+	resp, err = client.Do(req)
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
@@ -55,8 +74,9 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 			bodySize = -1
 		}
 		if err == nil && bodySize > sizelimit {
-			finalURL := resp.Request.URL.String()
-			err := resp.Body.Close()
+			var finalURL string
+			finalURL = resp.Request.URL.String()
+			err = resp.Body.Close()
 			if err != nil {
 				logError("Failed to close response body: %v", err)
 			}
@@ -66,20 +86,26 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		}
 	}
 
-	for key, values := range resp.Header {
-		for _, value := range values {
-			c.Header(key, value)
+	/*
+		for header := range headersToRemove {
+			resp.Header.Del(header)
 		}
-	}
 
-	headersToRemove := map[string]struct{}{
-		"Content-Security-Policy":   {},
-		"Referrer-Policy":           {},
-		"Strict-Transport-Security": {},
-	}
+		for key := range resp.Header {
+			var values []string = resp.Header.Values(key)
+			for _, value := range values {
+				c.Header(key, value)
+			}
+		}
+	*/
 
-	for header := range headersToRemove {
-		resp.Header.Del(header)
+	// 复制响应头，排除需要移除的 header
+	for key, values := range resp.Header {
+		if _, shouldRemove := headersToRemove[key]; !shouldRemove {
+			for _, value := range values {
+				c.Header(key, value)
+			}
+		}
 	}
 
 	switch cfg.Server.Cors {
@@ -105,7 +131,9 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		logInfo("Is Shell: %s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol())
 		c.Header("Content-Length", "")
 
-		reader, _, err := processLinks(resp.Body, compress, string(c.Request.Host()), cfg)
+		var reader io.Reader
+
+		reader, _, err = processLinks(resp.Body, compress, string(c.Request.Host()), cfg)
 		c.SetBodyStream(reader, -1)
 
 		if err != nil {
