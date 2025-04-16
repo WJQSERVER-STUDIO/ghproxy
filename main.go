@@ -28,6 +28,8 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/network/standard"
 	"github.com/hertz-contrib/http2/factory"
+
+	_ "net/http/pprof"
 )
 
 var (
@@ -385,6 +387,7 @@ func main() {
 	} else {
 		r = server.New(
 			server.WithHostPorts(addr),
+			server.WithTransport(standard.NewTransporter),
 		)
 	}
 
@@ -447,11 +450,18 @@ func main() {
 	fmt.Printf("A Go Based High-Performance Github Proxy \n")
 	fmt.Printf("Made by WJQSERVER-STUDIO\n")
 
+	if cfg.Server.Debug {
+		go func() {
+			http.ListenAndServe("localhost:6060", nil)
+		}()
+	}
+
 	r.Spin()
 	defer logger.Close()
 	defer func() {
 		if hertZfile != nil {
-			err := hertZfile.Close()
+			var err error
+			err = hertZfile.Close()
 			if err != nil {
 				logError("Failed to close hertz log file: %v", err)
 			}
