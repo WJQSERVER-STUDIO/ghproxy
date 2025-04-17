@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"ghproxy/config"
 	"net/http"
-	"sync"
 	"time"
 
 	httpc "github.com/satomitouka/touka-httpc"
@@ -13,24 +12,16 @@ import (
 var BufferSize int = 32 * 1024 // 32KB
 
 var (
-	tr         *http.Transport
-	gittr      *http.Transport
-	BufferPool *sync.Pool
-	client     *httpc.Client
-	gitclient  *httpc.Client
+	tr        *http.Transport
+	gittr     *http.Transport
+	client    *httpc.Client
+	gitclient *httpc.Client
 )
 
 func InitReq(cfg *config.Config) {
 	initHTTPClient(cfg)
 	if cfg.GitClone.Mode == "cache" {
 		initGitHTTPClient(cfg)
-	}
-
-	// 初始化固定大小的缓存池
-	BufferPool = &sync.Pool{
-		New: func() interface{} {
-			return make([]byte, BufferSize)
-		},
 	}
 }
 
