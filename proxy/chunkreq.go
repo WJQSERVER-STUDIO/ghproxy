@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	headersToRemove = map[string]struct{}{
+	respHeadersToRemove = map[string]struct{}{
 		"Content-Security-Policy":   {},
 		"Referrer-Policy":           {},
 		"Strict-Transport-Security": {},
@@ -21,6 +21,17 @@ var (
 		"X-Timer":                   {},
 		"X-Served-By":               {},
 		"X-Fastly-Request-Id":       {},
+	}
+
+	reqHeadersToRemove = map[string]struct{}{
+		"CF-IPCountry":     {},
+		"CF-RAY":           {},
+		"CF-Visitor":       {},
+		"CF-Connecting-IP": {},
+		"CF-EW-Via":        {},
+		"CDN-Loop":         {},
+		"Upgrade":          {},
+		"Connection":       {},
 	}
 )
 
@@ -42,8 +53,9 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
 	}
+
 	setRequestHeaders(c, req)
-	removeWSHeader(req) // 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
+	//removeWSHeader(req) // 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
 	AuthPassThrough(c, cfg, req)
 
 	resp, err = client.Do(req)
@@ -101,7 +113,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 
 	// 复制响应头，排除需要移除的 header
 	for key, values := range resp.Header {
-		if _, shouldRemove := headersToRemove[key]; !shouldRemove {
+		if _, shouldRemove := respHeadersToRemove[key]; !shouldRemove {
 			for _, value := range values {
 				c.Header(key, value)
 			}

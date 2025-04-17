@@ -246,7 +246,7 @@ func extractParts(rawURL string) (string, string, string, url.Values, error) {
 var urlPattern = regexp.MustCompile(`https?://[^\s'"]+`)
 
 // processLinks 处理链接，返回包含处理后数据的 io.Reader
-func processLinks(input io.Reader, compress string, host string, cfg *config.Config) (readerOut io.Reader, written int64, err error) {
+func processLinks(input io.ReadCloser, compress string, host string, cfg *config.Config) (readerOut io.Reader, written int64, err error) {
 	pipeReader, pipeWriter := io.Pipe() // 创建 io.Pipe
 	readerOut = pipeReader
 
@@ -266,6 +266,13 @@ func processLinks(input io.Reader, compress string, host string, cfg *config.Con
 					}
 				}
 			}
+		}()
+
+		defer func() {
+			if err := input.Close(); err != nil {
+				logError("input close failed: %v", err)
+			}
+
 		}()
 
 		var bufReader *bufio.Reader
