@@ -65,8 +65,10 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, error)
 			switch parts[2] {
 			case "releases", "archive":
 				matcher = "releases"
-			case "blob", "raw":
+			case "blob":
 				matcher = "blob"
+			case "raw":
+				matcher = "raw"
 			case "info", "git-upload-pack":
 				matcher = "clone"
 			default:
