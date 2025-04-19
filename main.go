@@ -364,7 +364,7 @@ func main() {
 	if showVersion || showHelp {
 		return
 	}
-	logDebug("Run Mode: %s", runMode)
+	logDebug("Run Mode: %s Netlib: %s", runMode, cfg.Server.NetLib)
 
 	if cfg == nil {
 		fmt.Println("Config not loaded, exiting.")
