@@ -6,6 +6,12 @@
 - FIX: 修正非预期的header操作行为
 - CHANGE: 合并header相关逻辑, 避免多次操作
 - CHANGE: 对editor模式下的input进行处置, 增加隐式关闭处理
+- CHANGE: 增加`netlib`配置项
+
+25w29b - 2025-04-19
+---
+- PRE-RELEASE: 此版本是v3.0.3预发布版本,请勿在生产环境中使用;
+- CHANGE: 增加`netlib`配置项
 
 25w29a - 2025-04-17
 ---

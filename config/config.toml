@@ -1,6 +1,7 @@
 [server]
 host = "0.0.0.0" 
 port = 8080 
+netlib = "netpoll" # "netpoll" / "std" "standard" "net/http" "net"
 sizeLimit = 125 # MB
 memLimit = 0 # MB
 H2C = true
