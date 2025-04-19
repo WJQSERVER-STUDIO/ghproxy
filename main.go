@@ -19,15 +19,16 @@ import (
 	"ghproxy/rate"
 
 	"github.com/WJQSERVER-STUDIO/go-utils/logger"
+	"github.com/hertz-contrib/http2/factory"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/adaptor"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/hertz/pkg/network/standard"
 
-	//"github.com/cloudwego/hertz/pkg/network/standard"
-	"github.com/hertz-contrib/http2/factory"
+	_ "net/http/pprof"
 )
 
 var (
@@ -360,32 +361,47 @@ func init() {
 }
 
 func main() {
-	// 如果 showVersion 为 true，则在 init 阶段已退出，这里直接返回
 	if showVersion || showHelp {
 		return
 	}
-	logDebug("Run Mode: %s", runMode)
+	logDebug("Run Mode: %s Netlib: %s", runMode, cfg.Server.NetLib)
 
-	// 确保在程序配置加载且非版本显示模式下执行
 	if cfg == nil {
 		fmt.Println("Config not loaded, exiting.")
-		return // 如果配置未加载，则不继续执行
+		return
 	}
 
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
-
-	if cfg.Server.H2C {
-		r = server.New(
-			server.WithHostPorts(addr),
-			server.WithH2C(true),
-		//	server.WithALPN(true),
-		//	server.WithTransport(standard.NewTransporter),
-		)
-		r.AddProtocol("h2", factory.NewServerFactory())
+	if cfg.Server.NetLib == "std" || cfg.Server.NetLib == "standard" || cfg.Server.NetLib == "net" || cfg.Server.NetLib == "net/http" {
+		if cfg.Server.H2C {
+			r = server.New(
+				server.WithH2C(true),
+				server.WithHostPorts(addr),
+				server.WithTransport(standard.NewTransporter),
+			)
+			r.AddProtocol("h2", factory.NewServerFactory())
+		} else {
+			r = server.New(
+				server.WithHostPorts(addr),
+				server.WithTransport(standard.NewTransporter),
+			)
+		}
+	} else if cfg.Server.NetLib == "netpoll" || cfg.Server.NetLib == "" {
+		if cfg.Server.H2C {
+			r = server.New(
+				server.WithH2C(true),
+				server.WithHostPorts(addr),
+			)
+			r.AddProtocol("h2", factory.NewServerFactory())
+		} else {
+			r = server.New(
+				server.WithHostPorts(addr),
+			)
+		}
 	} else {
-		r = server.New(
-			server.WithHostPorts(addr),
-		)
+		logError("Invalid NetLib: %s", cfg.Server.NetLib)
+		fmt.Printf("Invalid NetLib: %s\n", cfg.Server.NetLib)
+		os.Exit(1)
 	}
 
 	// 添加Recovery中间件
@@ -447,11 +463,18 @@ func main() {
 	fmt.Printf("A Go Based High-Performance Github Proxy \n")
 	fmt.Printf("Made by WJQSERVER-STUDIO\n")
 
+	if cfg.Server.Debug {
+		go func() {
+			http.ListenAndServe("localhost:6060", nil)
+		}()
+	}
+
 	r.Spin()
 	defer logger.Close()
 	defer func() {
 		if hertZfile != nil {
-			err := hertZfile.Close()
+			var err error
+			err = hertZfile.Close()
 			if err != nil {
 				logError("Failed to close hertz log file: %v", err)
 			}

@@ -41,13 +41,19 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 			}
 		}
 
-		rawPath := strings.TrimPrefix(string(c.Request.RequestURI()), "/") // 去掉前缀/
-		matches := re.FindStringSubmatch(rawPath)                          // 匹配路径
+		var (
+			rawPath string
+			matches []string
+			errMsg  string
+		)
+
+		rawPath = strings.TrimPrefix(string(c.Request.RequestURI()), "/") // 去掉前缀/
+		matches = re.FindStringSubmatch(rawPath)                          // 匹配路径
 		logInfo("URL: %v", matches)
 
 		// 匹配路径错误处理
 		if len(matches) < 3 {
-			errMsg := fmt.Sprintf("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
+			errMsg = fmt.Sprintf("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
 			logWarning(errMsg)
 			c.String(http.StatusForbidden, "Invalid URL Format. Path: %s", rawPath)
 			return
@@ -56,7 +62,14 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		// 制作url
 		rawPath = "https://" + matches[2]
 
-		user, repo, matcher, err := Matcher(rawPath, cfg)
+		var (
+			user    string
+			repo    string
+			matcher string
+			err     error
+		)
+
+		user, repo, matcher, err = Matcher(rawPath, cfg)
 		if err != nil {
 			if errors.Is(err, ErrInvalidURL) {
 				c.String(http.StatusForbidden, "Invalid URL Format. Path: %s", rawPath)
@@ -69,18 +82,19 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 				return
 			}
 		}
-		username := user
 
-		logInfo("%s %s %s %s %s Matched-Username: %s, Matched-Repo: %s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), username, repo)
+		logInfo("%s %s %s %s %s Matched-Username: %s, Matched-Repo: %s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), user, repo)
 		// dump log 记录详细信息 c.ClientIP(), c.Method(), rawPath,c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), full Header
 		logDump("%s %s %s %s %s %s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), c.Request.Header.Header())
-		repouser := fmt.Sprintf("%s/%s", username, repo)
+		var repouser string
+		repouser = fmt.Sprintf("%s/%s", user, repo)
 
 		// 白名单检查
 		if cfg.Whitelist.Enabled {
-			whitelist := auth.CheckWhitelist(username, repo)
+			var whitelist bool
+			whitelist = auth.CheckWhitelist(user, repo)
 			if !whitelist {
-				errMsg := fmt.Sprintf("Whitelist Blocked repo: %s", repouser)
+				errMsg = fmt.Sprintf("Whitelist Blocked repo: %s", repouser)
 				c.JSON(http.StatusForbidden, map[string]string{"error": errMsg})
 				logWarning("%s %s %s %s %s Whitelist Blocked repo: %s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), repouser)
 				return
@@ -89,9 +103,10 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 
 		// 黑名单检查
 		if cfg.Blacklist.Enabled {
-			blacklist := auth.CheckBlacklist(username, repo)
+			var blacklist bool
+			blacklist = auth.CheckBlacklist(user, repo)
 			if blacklist {
-				errMsg := fmt.Sprintf("Blacklist Blocked repo: %s", repouser)
+				errMsg = fmt.Sprintf("Blacklist Blocked repo: %s", repouser)
 				c.JSON(http.StatusForbidden, map[string]string{"error": errMsg})
 				logWarning("%s %s %s %s %s Blacklist Blocked repo: %s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), repouser)
 				return

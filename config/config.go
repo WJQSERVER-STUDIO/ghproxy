@@ -22,15 +22,20 @@ type Config struct {
 
 /*
 [server]
-host = "0.0.0.0"  # 监听地址
-port = 8080  # 监听端口
-sizeLimit = 125 # 125MB
-H2C = true # 是否开启H2C传输
+host = "0.0.0.0"
+port = 8080
+netlib = "netpoll" # "netpoll" / "std" "standard" "net/http" "net"
+sizeLimit = 125 # MB
+memLimit = 0 # MB
+H2C = true
+cors = "*" # "*"/"" -> "*" ; "nil" -> "" ;
+debug = false
 */
 
 type ServerConfig struct {
 	Port      int    `toml:"port"`
 	Host      string `toml:"host"`
+	NetLib    string `toml:"netlib"`
 	SizeLimit int    `toml:"sizeLimit"`
 	MemLimit  int64  `toml:"memLimit"`
 	H2C       bool   `toml:"H2C"`
@@ -180,6 +185,7 @@ func DefaultConfig() *Config {
 		Server: ServerConfig{
 			Port:      8080,
 			Host:      "0.0.0.0",
+			NetLib:    "netpoll",
 			SizeLimit: 125,
 			MemLimit:  0,
 			H2C:       true,

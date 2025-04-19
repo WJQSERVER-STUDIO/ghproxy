@@ -12,6 +12,7 @@
 [server]
 host = "0.0.0.0"
 port = 8080
+netlib = "netpoll" # "netpoll" / "std" "standard" "net/http" "net"
 sizeLimit = 125 # MB
 memLimit = 0 # MB
 H2C = true
@@ -83,6 +84,10 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
         *   类型: 整数 (`int`)
         *   默认值: `8080`
         *   说明:  设置 `ghproxy` 监听的端口号。
+    *   `netlib`: 底层网络库。
+        *   类型: 字符串 (`string`)
+        *   默认值: `""` (HertZ默认处置)
+        *   说明: `"std"` `"standard"` `"net/http"` `"net"` 均会被设置为go标准库`net/http`, 设置为`"netpoll"`或`""`会由`HertZ`默认逻辑处理
     *   `sizeLimit`: 请求体大小限制。
         *   类型: 整数 (`int`)
         *   默认值: `125` (MB)
