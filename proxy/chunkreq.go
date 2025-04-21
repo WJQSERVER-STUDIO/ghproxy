@@ -38,14 +38,12 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 
 	var (
 		method []byte
-		//bodyReader *bytes.Buffer
-		req  *http.Request
-		resp *http.Response
-		err  error
+		req    *http.Request
+		resp   *http.Response
+		err    error
 	)
 
 	method = c.Request.Method()
-	//bodyReader = bytes.NewBuffer(c.Request.Body())
 
 	req, err = client.NewRequest(string(method), u, c.Request.BodyStream())
 	if err != nil {

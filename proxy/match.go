@@ -27,6 +27,10 @@ var (
 		Code: 403,
 		Msg:  "AuthHeader Unavailable",
 	}
+	ErrNotFound = &MatcherErrors{
+		Code: 404,
+		Msg:  "Not Found",
+	}
 )
 
 func (e *MatcherErrors) Error() string {
@@ -122,7 +126,7 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, error)
 		}
 		return user, repo, matcher, nil
 	}
-	return "", "", "", ErrInvalidURL
+	return "", "", "", ErrNotFound
 }
 
 func EditorMatcher(rawPath string, cfg *config.Config) (bool, string, error) {
@@ -165,12 +169,6 @@ func EditorMatcher(rawPath string, cfg *config.Config) (bool, string, error) {
 
 // 匹配文件扩展名是sh的rawPath
 func MatcherShell(rawPath string) bool {
-	/*
-		if strings.HasSuffix(rawPath, ".sh") {
-			return true
-		}
-		return false
-	*/
 	return strings.HasSuffix(rawPath, ".sh")
 }
 

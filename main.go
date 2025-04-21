@@ -210,6 +210,12 @@ func loadEmbeddedPages(cfg *config.Config) (fs.FS, fs.FS, error) {
 		return nil, nil, fmt.Errorf("failed to load embedded pages: %w", err)
 	}
 
+	// 初始化errPagesFs
+	errPagesInitErr := proxy.InitErrPagesFS(pagesFS)
+	if errPagesInitErr != nil {
+		logWarning("errPagesInitErr: %s", errPagesInitErr)
+	}
+
 	var assets fs.FS
 	assets, err = fs.Sub(pagesFS, "pages/assets")
 	return pages, assets, nil

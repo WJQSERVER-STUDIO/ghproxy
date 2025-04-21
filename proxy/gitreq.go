@@ -27,13 +27,7 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 
 	var (
 		resp *http.Response
-		//err  error
 	)
-
-	//body := c.Request.Body()
-
-	//bodyReader := bytes.NewBuffer(body)
-	// 创建请求
 
 	if cfg.GitClone.Mode == "cache" {
 		req, err := gitclient.NewRequest(method, u, c.Request.BodyStream())
