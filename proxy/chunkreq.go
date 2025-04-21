@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"ghproxy/config"
@@ -38,17 +37,17 @@ var (
 func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, cfg *config.Config, matcher string) {
 
 	var (
-		method     []byte
-		bodyReader *bytes.Buffer
-		req        *http.Request
-		resp       *http.Response
-		err        error
+		method []byte
+		//bodyReader *bytes.Buffer
+		req  *http.Request
+		resp *http.Response
+		err  error
 	)
 
 	method = c.Request.Method()
-	bodyReader = bytes.NewBuffer(c.Request.Body())
+	//bodyReader = bytes.NewBuffer(c.Request.Body())
 
-	req, err = client.NewRequest(string(method), u, bodyReader)
+	req, err = client.NewRequest(string(method), u, c.Request.BodyStream())
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
