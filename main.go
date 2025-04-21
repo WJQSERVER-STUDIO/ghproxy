@@ -410,46 +410,46 @@ func main() {
 	setupPages(cfg, r)
 
 	r.GET("/github.com/:username/:repo/releases/*filepath", func(ctx context.Context, c *app.RequestContext) {
-		ctx = context.WithValue(ctx, "matcher", "release")
+		c.Set("matcher", "release")
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 
 	r.GET("/github.com/:username/:repo/archive/*filepath", func(ctx context.Context, c *app.RequestContext) {
-		ctx = context.WithValue(ctx, "matcher", "release")
+		c.Set("matcher", "release")
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 
 	r.GET("/github.com/:username/:repo/blob/*filepath", func(ctx context.Context, c *app.RequestContext) {
-		ctx = context.WithValue(ctx, "matcher", "blob")
+		c.Set("matcher", "blob")
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 
 	r.GET("/github.com/:username/:repo/raw/*filepath", func(ctx context.Context, c *app.RequestContext) {
-		ctx = context.WithValue(ctx, "matcher", "raw")
+		c.Set("matcher", "raw")
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 
 	r.GET("/github.com/:username/:repo/info/*filepath", func(ctx context.Context, c *app.RequestContext) {
-		ctx = context.WithValue(ctx, "matcher", "gitclone")
+		c.Set("matcher", "gitclone")
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 	r.GET("/github.com/:username/:repo/git-upload-pack", func(ctx context.Context, c *app.RequestContext) {
-		ctx = context.WithValue(ctx, "matcher", "gitclone")
+		c.Set("matcher", "gitclone")
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 
 	r.GET("/raw.githubusercontent.com/:username/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
-		ctx = context.WithValue(ctx, "matcher", "raw")
+		c.Set("matcher", "raw")
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 
 	r.GET("/gist.githubusercontent.com/:username/*filepath", func(ctx context.Context, c *app.RequestContext) {
-		ctx = context.WithValue(ctx, "matcher", "gist")
+		c.Set("matcher", "gist")
 		proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 
 	r.GET("/api.github.com/repos/:username/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
-		ctx = context.WithValue(ctx, "matcher", "api")
+		c.Set("matcher", "api")
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 

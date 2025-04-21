@@ -151,8 +151,7 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 func RoutingHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter) app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 		// 输出所有传入参数
-		logDebug("All Request Params: %v", c.Params)
-		logDebug("Context Params(Matcher): %v", ctx.Value("matcher"))
+		logDebug("Context Params(Matcher): %v", c.GetString("matcher"))
 
 		// 限制访问频率
 		if cfg.RateLimit.Enabled {
@@ -192,7 +191,7 @@ func RoutingHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 
 		user = c.Param("user")
 		repo = c.Param("repo")
-		matcher = ctx.Value("matcher").(string)
+		matcher = c.GetString("matcher")
 
 		logInfo("%s %s %s %s %s Matched-Username: %s, Matched-Repo: %s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), user, repo)
 		// dump log 记录详细信息 c.ClientIP(), c.Method(), rawPath,c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), full Header
