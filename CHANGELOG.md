@@ -1,5 +1,11 @@
 # 更新日志
 
+25w30b - 2025-04-21
+---
+- PRE-RELEASE: 此版本是v3.1.0预发布版本,请勿在生产环境中使用;
+- CHANGE: 使用`bodystream`进行req方向的body复制, 而不是使用额外的`buffer reader`
+- CHANGE: 使用`HertZ`的`requestContext`传递matcher参数, 而不是`25w30a`中的标准ctx
+
 25w30a - 2025-04-19
 ---
 - PRE-RELEASE: 此版本是v3.1.0预发布版本,请勿在生产环境中使用;
