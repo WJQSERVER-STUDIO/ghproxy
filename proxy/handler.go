@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"context"
-	"errors"
 	"ghproxy/config"
 	"ghproxy/rate"
 	"net/http"
@@ -43,27 +42,32 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 			user    string
 			repo    string
 			matcher string
-			err     error
+			//err     error
 		)
 
-		user, repo, matcher, err = Matcher(rawPath, cfg)
-		if err != nil {
-			if errors.Is(err, ErrInvalidURL) {
-				c.JSON(ErrInvalidURL.Code, map[string]string{"error": "Invalid URL Format, Path: " + rawPath})
-				logWarning(err.Error())
-				return
-			}
-			if errors.Is(err, ErrAuthHeaderUnavailable) {
-				c.JSON(ErrAuthHeaderUnavailable.Code, map[string]string{"error": "AuthHeader Unavailable"})
-				logWarning(err.Error())
-				return
-			}
-			if errors.Is(err, ErrNotFound) {
-				//c.JSON(ErrNotFound.Code, map[string]string{"error": "Not Found"})
-				NotFoundPage(c)
-				logWarning(err.Error())
-				return
-			}
+		var matcherErr *GHProxyErrors
+		user, repo, matcher, matcherErr = Matcher(rawPath, cfg)
+		if matcherErr != nil {
+			ErrorPage(c, matcherErr)
+			return
+			/*
+				if errors.Is(err, ErrInvalidURL) {
+					c.JSON(ErrInvalidURL.Code, map[string]string{"error": "Invalid URL Format, Path: " + rawPath})
+					logWarning(err.Error())
+					return
+				}
+				if errors.Is(err, ErrAuthHeaderUnavailable) {
+					c.JSON(ErrAuthHeaderUnavailable.Code, map[string]string{"error": "AuthHeader Unavailable"})
+					logWarning(err.Error())
+					return
+				}
+				if errors.Is(err, ErrNotFound) {
+					//c.JSON(ErrNotFound.Code, map[string]string{"error": "Not Found"})
+					NotFoundPage(c)
+					logWarning(err.Error())
+					return
+				}
+			*/
 		}
 
 		logInfo("%s %s %s %s %s Matched-Username: %s, Matched-Repo: %s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), user, repo)
