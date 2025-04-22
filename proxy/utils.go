@@ -127,7 +127,6 @@ func ErrorPage(c *app.RequestContext, errInfo *GHProxyErrors) {
 			return
 		}
 	*/
-	fmt.Printf("errInfo: %s\n", errInfo)
 	c.Data(errInfo.StatusCode, "text/html; charset=utf-8", pageData)
 	return
 }
