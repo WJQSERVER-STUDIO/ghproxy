@@ -12,7 +12,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
-func listCheck(cfg *config.Config, c *app.RequestContext, user string, repo string, rawPath string) {
+func listCheck(cfg *config.Config, c *app.RequestContext, user string, repo string, rawPath string) bool {
 	var errMsg string
 
 	// 白名单检查
@@ -22,8 +22,8 @@ func listCheck(cfg *config.Config, c *app.RequestContext, user string, repo stri
 		if !whitelist {
 			errMsg = fmt.Sprintf("Whitelist Blocked repo: %s/%s", user, repo)
 			c.JSON(403, map[string]string{"error": errMsg})
-			logWarning("%s %s %s %s %s Whitelist Blocked repo: %s/%s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), user, repo)
-			return
+			logInfo("%s %s %s %s %s Whitelist Blocked repo: %s/%s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), user, repo)
+			return true
 		}
 	}
 
@@ -34,21 +34,23 @@ func listCheck(cfg *config.Config, c *app.RequestContext, user string, repo stri
 		if blacklist {
 			errMsg = fmt.Sprintf("Blacklist Blocked repo: %s/%s", user, repo)
 			c.JSON(403, map[string]string{"error": errMsg})
-			logWarning("%s %s %s %s %s Blacklist Blocked repo: %s/%s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), user, repo)
-			return
+			logInfo("%s %s %s %s %s Blacklist Blocked repo: %s/%s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), user, repo)
+			return true
 		}
 	}
+
+	return false
 }
 
 // 鉴权
-func authCheck(c *app.RequestContext, cfg *config.Config, matcher string, rawPath string) {
+func authCheck(c *app.RequestContext, cfg *config.Config, matcher string, rawPath string) bool {
 	var err error
 
 	if matcher == "api" && !cfg.Auth.ForceAllowApi {
 		if cfg.Auth.Method != "header" || !cfg.Auth.Enabled {
 			c.JSON(403, map[string]string{"error": "Github API Req without AuthHeader is Not Allowed"})
-			logWarning("%s %s %s %s %s AuthHeader Unavailable", c.ClientIP(), c.Method(), rawPath)
-			return
+			logInfo("%s %s %s %s %s AuthHeader Unavailable", c.ClientIP(), c.Method(), rawPath)
+			return true
 		}
 	}
 
@@ -58,13 +60,15 @@ func authCheck(c *app.RequestContext, cfg *config.Config, matcher string, rawPat
 		authcheck, err = auth.AuthHandler(c, cfg)
 		if !authcheck {
 			c.JSON(401, map[string]string{"error": "Unauthorized"})
-			logWarning("%s %s %s %s %s Auth-Error: %v", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), err)
-			return
+			logInfo("%s %s %s %s %s Auth-Error: %v", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), err)
+			return true
 		}
 	}
+
+	return false
 }
 
-func rateCheck(cfg *config.Config, c *app.RequestContext, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter) {
+func rateCheck(cfg *config.Config, c *app.RequestContext, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter) bool {
 	// 限制访问频率
 	if cfg.RateLimit.Enabled {
 
@@ -78,15 +82,17 @@ func rateCheck(cfg *config.Config, c *app.RequestContext, limiter *rate.RateLimi
 		default:
 			logWarning("Invalid RateLimit Method")
 			c.JSON(500, map[string]string{"error": "Invalid RateLimit Method"})
-			return
+			return true
 		}
 
 		if !allowed {
 			c.JSON(429, map[string]string{"error": "Too Many Requests"})
 			logWarning("%s %s %s %s %s 429-TooManyRequests", c.ClientIP(), c.Method(), c.Request.RequestURI(), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
-			return
+			return true
 		}
 	}
+
+	return false
 }
 
 var errPagesFs fs.FS

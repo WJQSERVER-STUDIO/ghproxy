@@ -16,7 +16,11 @@ var re = regexp.MustCompile(`^(http:|https:)?/?/?(.*)`) // 匹配http://或https
 func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter) app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 
-		rateCheck(cfg, c, limiter, iplimiter)
+		var shoudBreak bool
+		shoudBreak = rateCheck(cfg, c, limiter, iplimiter)
+		if shoudBreak {
+			return
+		}
 
 		var (
 			rawPath string
@@ -30,7 +34,6 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		// 匹配路径错误处理
 		if len(matches) < 3 {
 			logWarning("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
-			//c.String(http.StatusForbidden, "Invalid URL Format. Path: %s", rawPath)
 			c.JSON(http.StatusForbidden, map[string]string{"error": "Invalid URL Format"})
 			return
 		}
@@ -42,7 +45,6 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 			user    string
 			repo    string
 			matcher string
-			//err     error
 		)
 
 		var matcherErr *GHProxyErrors
@@ -50,31 +52,20 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		if matcherErr != nil {
 			ErrorPage(c, matcherErr)
 			return
-			/*
-				if errors.Is(err, ErrInvalidURL) {
-					c.JSON(ErrInvalidURL.Code, map[string]string{"error": "Invalid URL Format, Path: " + rawPath})
-					logWarning(err.Error())
-					return
-				}
-				if errors.Is(err, ErrAuthHeaderUnavailable) {
-					c.JSON(ErrAuthHeaderUnavailable.Code, map[string]string{"error": "AuthHeader Unavailable"})
-					logWarning(err.Error())
-					return
-				}
-				if errors.Is(err, ErrNotFound) {
-					//c.JSON(ErrNotFound.Code, map[string]string{"error": "Not Found"})
-					NotFoundPage(c)
-					logWarning(err.Error())
-					return
-				}
-			*/
 		}
 
 		logInfo("%s %s %s %s %s Matched-Username: %s, Matched-Repo: %s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), user, repo)
 		logDump("%s", c.Request.Header.Header())
 
-		listCheck(cfg, c, user, repo, rawPath)
-		authCheck(c, cfg, matcher, rawPath)
+		shoudBreak = listCheck(cfg, c, user, repo, rawPath)
+		if shoudBreak {
+			return
+		}
+
+		shoudBreak = authCheck(c, cfg, matcher, rawPath)
+		if shoudBreak {
+			return
+		}
 
 		// 处理blob/raw路径
 		if matcher == "blob" {

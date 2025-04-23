@@ -13,7 +13,12 @@ import (
 func RoutingHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter) app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 
-		rateCheck(cfg, c, limiter, iplimiter)
+		var shoudBreak bool
+
+		shoudBreak = rateCheck(cfg, c, limiter, iplimiter)
+		if shoudBreak {
+			return
+		}
 
 		var (
 			rawPath string
@@ -34,8 +39,15 @@ func RoutingHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		logInfo("%s %s %s %s %s Matched-Username: %s, Matched-Repo: %s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), user, repo)
 		logDump("%s", c.Request.Header.Header())
 
-		listCheck(cfg, c, user, repo, rawPath)
-		authCheck(c, cfg, matcher, rawPath)
+		shoudBreak = listCheck(cfg, c, user, repo, rawPath)
+		if shoudBreak {
+			return
+		}
+
+		shoudBreak = authCheck(c, cfg, matcher, rawPath)
+		if shoudBreak {
+			return
+		}
 
 		// 处理blob/raw路径
 		if matcher == "blob" {
