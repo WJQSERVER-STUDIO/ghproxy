@@ -43,7 +43,7 @@ func authCheck(c *app.RequestContext, cfg *config.Config, matcher string, rawPat
 	if matcher == "api" && !cfg.Auth.ForceAllowApi {
 		if cfg.Auth.Method != "header" || !cfg.Auth.Enabled {
 			ErrorPage(c, NewErrorWithStatusLookup(403, "Github API Req without AuthHeader is Not Allowed"))
-			logInfo("%s %s %s %s %s AuthHeader Unavailable", c.ClientIP(), c.Method(), rawPath)
+			logInfo("%s %s %s AuthHeader Unavailable", c.ClientIP(), c.Method(), rawPath)
 			return true
 		}
 	}
