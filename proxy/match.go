@@ -11,36 +11,7 @@ import (
 	"strings"
 )
 
-// 定义错误类型, error承载描述, 便于处理
-type MatcherErrors struct {
-	Code int
-	Msg  string
-	Err  error
-}
-
-var (
-	ErrInvalidURL = &MatcherErrors{
-		Code: 403,
-		Msg:  "Invalid URL Format",
-	}
-	ErrAuthHeaderUnavailable = &MatcherErrors{
-		Code: 403,
-		Msg:  "AuthHeader Unavailable",
-	}
-)
-
-func (e *MatcherErrors) Error() string {
-	if e.Err != nil {
-		return fmt.Sprintf("Code: %d, Msg: %s, Err: %s", e.Code, e.Msg, e.Err.Error())
-	}
-	return fmt.Sprintf("Code: %d, Msg: %s", e.Code, e.Msg)
-}
-
-func (e *MatcherErrors) Unwrap() error {
-	return e.Err
-}
-
-func Matcher(rawPath string, cfg *config.Config) (string, string, string, error) {
+func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHProxyErrors) {
 	var (
 		user    string
 		repo    string
@@ -56,7 +27,8 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, error)
 		// 取出user和repo和最后部分
 		parts := strings.Split(remainingPath, "/")
 		if len(parts) <= 2 {
-			return "", "", "", ErrInvalidURL
+			errMsg := "Not enough parts in path after matching 'https://github.com*'"
+			return "", "", "", NewErrorWithStatusLookup(400, errMsg)
 		}
 		user = parts[0]
 		repo = parts[1]
@@ -65,12 +37,15 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, error)
 			switch parts[2] {
 			case "releases", "archive":
 				matcher = "releases"
-			case "blob", "raw":
+			case "blob":
 				matcher = "blob"
+			case "raw":
+				matcher = "raw"
 			case "info", "git-upload-pack":
 				matcher = "clone"
 			default:
-				return "", "", "", ErrInvalidURL
+				errMsg := "Url Matched 'https://github.com*', but didn't match the next matcher"
+				return "", "", "", NewErrorWithStatusLookup(400, errMsg)
 			}
 		}
 		return user, repo, matcher, nil
@@ -80,7 +55,8 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, error)
 		remainingPath := strings.TrimPrefix(rawPath, "https://")
 		parts := strings.Split(remainingPath, "/")
 		if len(parts) <= 3 {
-			return "", "", "", ErrInvalidURL
+			errMsg := "URL after matched 'https://raw*' should have at least 4 parts (user/repo/branch/file)."
+			return "", "", "", NewErrorWithStatusLookup(400, errMsg)
 		}
 		user = parts[1]
 		repo = parts[2]
@@ -93,7 +69,8 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, error)
 		remainingPath := strings.TrimPrefix(rawPath, "https://")
 		parts := strings.Split(remainingPath, "/")
 		if len(parts) <= 3 {
-			return "", "", "", ErrInvalidURL
+			errMsg := "URL after matched 'https://gist*' should have at least 4 parts (user/gist_id)."
+			return "", "", "", NewErrorWithStatusLookup(400, errMsg)
 		}
 		user = parts[1]
 		repo = ""
@@ -115,12 +92,16 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, error)
 		}
 		if !cfg.Auth.ForceAllowApi {
 			if cfg.Auth.Method != "header" || !cfg.Auth.Enabled {
-				return "", "", "", ErrAuthHeaderUnavailable
+				//return "", "", "", ErrAuthHeaderUnavailable
+				errMsg := "AuthHeader Unavailable, Need to open header auth to enable api proxy"
+				return "", "", "", NewErrorWithStatusLookup(403, errMsg)
 			}
 		}
 		return user, repo, matcher, nil
 	}
-	return "", "", "", ErrInvalidURL
+	//return "", "", "", ErrNotFound
+	errMsg := "Didn't match any matcher"
+	return "", "", "", NewErrorWithStatusLookup(404, errMsg)
 }
 
 func EditorMatcher(rawPath string, cfg *config.Config) (bool, string, error) {
@@ -158,17 +139,11 @@ func EditorMatcher(rawPath string, cfg *config.Config) (bool, string, error) {
 			return true, matcher, nil
 		}
 	}
-	return false, "", ErrInvalidURL
+	return false, "", nil
 }
 
 // 匹配文件扩展名是sh的rawPath
 func MatcherShell(rawPath string) bool {
-	/*
-		if strings.HasSuffix(rawPath, ".sh") {
-			return true
-		}
-		return false
-	*/
 	return strings.HasSuffix(rawPath, ".sh")
 }
 

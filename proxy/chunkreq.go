@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"ghproxy/config"
@@ -38,17 +37,15 @@ var (
 func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, cfg *config.Config, matcher string) {
 
 	var (
-		method     []byte
-		bodyReader *bytes.Buffer
-		req        *http.Request
-		resp       *http.Response
-		err        error
+		method []byte
+		req    *http.Request
+		resp   *http.Response
+		err    error
 	)
 
 	method = c.Request.Method()
-	bodyReader = bytes.NewBuffer(c.Request.Body())
 
-	req, err = client.NewRequest(string(method), u, bodyReader)
+	req, err = client.NewRequest(string(method), u, c.Request.BodyStream())
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
@@ -66,8 +63,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 
 	// 错误处理(404)
 	if resp.StatusCode == 404 {
-		//c.String(http.StatusNotFound, "File Not Found")
-		c.Status(http.StatusNotFound)
+		ErrorPage(c, NewErrorWithStatusLookup(404, "Page Not Found (From Github)"))
 		return
 	}
 
@@ -92,24 +88,11 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 			if err != nil {
 				logError("Failed to close response body: %v", err)
 			}
-			c.Redirect(http.StatusMovedPermanently, []byte(finalURL))
+			c.Redirect(301, []byte(finalURL))
 			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Method(), c.Path(), c.UserAgent(), c.Request.Header.GetProtocol(), finalURL, bodySize)
 			return
 		}
 	}
-
-	/*
-		for header := range headersToRemove {
-			resp.Header.Del(header)
-		}
-
-		for key := range resp.Header {
-			var values []string = resp.Header.Values(key)
-			for _, value := range values {
-				c.Header(key, value)
-			}
-		}
-	*/
 
 	// 复制响应头，排除需要移除的 header
 	for key, values := range resp.Header {
@@ -140,16 +123,16 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 			compress = "gzip"
 		}
 
-		logInfo("Is Shell: %s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol())
+		logDebug("Use Shell Editor: %s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol())
 		c.Header("Content-Length", "")
 
 		var reader io.Reader
 
 		reader, _, err = processLinks(resp.Body, compress, string(c.Request.Host()), cfg)
 		c.SetBodyStream(reader, -1)
-
 		if err != nil {
 			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
+			ErrorPage(c, NewErrorWithStatusLookup(500, fmt.Sprintf("Failed to copy response body: %v", err)))
 			return
 		}
 	} else {

@@ -2,21 +2,18 @@ package proxy
 
 import (
 	"context"
-	"fmt"
 	"ghproxy/config"
 	"ghproxy/rate"
-	"regexp"
 	"strings"
 
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
-var re = regexp.MustCompile(`^(http:|https:)?/?/?(.*)`) // 匹配http://或https://开头的路径
-
-func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter) app.HandlerFunc {
+func RoutingHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter) app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 
 		var shoudBreak bool
+
 		shoudBreak = rateCheck(cfg, c, limiter, iplimiter)
 		if shoudBreak {
 			return
@@ -24,21 +21,9 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 
 		var (
 			rawPath string
-			matches []string
 		)
 
 		rawPath = strings.TrimPrefix(string(c.Request.RequestURI()), "/") // 去掉前缀/
-		matches = re.FindStringSubmatch(rawPath)                          // 匹配路径
-
-		// 匹配路径错误处理
-		if len(matches) < 3 {
-			logWarning("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Method(), c.Path(), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
-			ErrorPage(c, NewErrorWithStatusLookup(400, fmt.Sprintf("Invalid URL Format: %s", c.Path())))
-			return
-		}
-
-		// 制作url
-		rawPath = "https://" + matches[2]
 
 		var (
 			user    string
@@ -46,12 +31,9 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 			matcher string
 		)
 
-		var matcherErr *GHProxyErrors
-		user, repo, matcher, matcherErr = Matcher(rawPath, cfg)
-		if matcherErr != nil {
-			ErrorPage(c, matcherErr)
-			return
-		}
+		user = c.Param("user")
+		repo = c.Param("repo")
+		matcher = c.GetString("matcher")
 
 		logDump("%s %s %s %s %s Matched-Username: %s, Matched-Repo: %s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), user, repo)
 		logDump("%s", c.Request.Header.Header())
@@ -70,6 +52,9 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		if matcher == "blob" {
 			rawPath = strings.Replace(rawPath, "/blob/", "/raw/", 1)
 		}
+
+		// 为rawpath加入https:// 头
+		rawPath = "https://" + rawPath
 
 		logDebug("Matched: %v", matcher)
 

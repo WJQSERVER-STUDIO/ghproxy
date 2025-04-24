@@ -210,6 +210,12 @@ func loadEmbeddedPages(cfg *config.Config) (fs.FS, fs.FS, error) {
 		return nil, nil, fmt.Errorf("failed to load embedded pages: %w", err)
 	}
 
+	// 初始化errPagesFs
+	errPagesInitErr := proxy.InitErrPagesFS(pagesFS)
+	if errPagesInitErr != nil {
+		logWarning("errPagesInitErr: %s", errPagesInitErr)
+	}
+
 	var assets fs.FS
 	assets, err = fs.Sub(pagesFS, "pages/assets")
 	return pages, assets, nil
@@ -404,56 +410,54 @@ func main() {
 		os.Exit(1)
 	}
 
-	// 添加Recovery中间件
-	r.Use(recovery.Recovery())
-	// 添加log中间件
-	r.Use(loggin.Middleware())
-
+	r.Use(recovery.Recovery()) // Recovery中间件
+	r.Use(loggin.Middleware()) // log中间件
 	setupApi(cfg, r, version)
-
 	setupPages(cfg, r)
 
-	/*
-		// 1. GitHub Releases/Archive - Use distinct path segments for type
-		r.GET("/github.com/:username/:repo/releases/*filepath", func(ctx context.Context, c *app.RequestContext) { // Distinct path for releases
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
+	r.GET("/github.com/:username/:repo/releases/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "release")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
 
-		r.GET("/github.com/:username/:repo/archive/*filepath", func(ctx context.Context, c *app.RequestContext) { // Distinct path for archive
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
+	r.GET("/github.com/:username/:repo/archive/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "release")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
 
-		// 2. GitHub Blob/Raw - Use distinct path segments for type
-		r.GET("/github.com/:username/:repo/blob/*filepath", func(ctx context.Context, c *app.RequestContext) { // Distinct path for blob
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
+	r.GET("/github.com/:username/:repo/blob/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "blob")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
 
-		r.GET("/github.com/:username/:repo/raw/*filepath", func(ctx context.Context, c *app.RequestContext) { // Distinct path for raw
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
+	r.GET("/github.com/:username/:repo/raw/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "raw")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
 
-		r.GET("/github.com/:username/:repo/info/*filepath", func(ctx context.Context, c *app.RequestContext) { // Distinct path for info
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
-		r.GET("/github.com/:username/:repo/git-upload-pack", func(ctx context.Context, c *app.RequestContext) {
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
+	r.GET("/github.com/:username/:repo/info/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "gitclone")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
+	r.GET("/github.com/:username/:repo/git-upload-pack", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "gitclone")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
 
-		// 4. Raw GitHubusercontent - Keep as is (assuming it's distinct enough)
-		r.GET("/raw.githubusercontent.com/:username/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
+	r.GET("/raw.githubusercontent.com/:username/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "raw")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
 
-		// 5. Gist GitHubusercontent - Keep as is (assuming it's distinct enough)
-		r.GET("/gist.githubusercontent.com/:username/*filepath", func(ctx context.Context, c *app.RequestContext) {
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
+	r.GET("/gist.githubusercontent.com/:username/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "gist")
+		proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
 
-		// 6. GitHub API Repos - Keep as is (assuming it's distinct enough)
-		r.GET("/api.github.com/repos/:username/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
-	*/
+	r.GET("/api.github.com/repos/:username/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "api")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
 
 	r.NoRoute(func(ctx context.Context, c *app.RequestContext) {
 		proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)

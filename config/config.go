@@ -228,11 +228,11 @@ func DefaultConfig() *Config {
 		},
 		Blacklist: BlacklistConfig{
 			Enabled:       false,
-			BlacklistFile: "/data/ghproxy/config/blacklist.txt",
+			BlacklistFile: "/data/ghproxy/config/blacklist.json",
 		},
 		Whitelist: WhitelistConfig{
 			Enabled:       false,
-			WhitelistFile: "/data/ghproxy/config/whitelist.txt",
+			WhitelistFile: "/data/ghproxy/config/whitelist.json",
 		},
 		RateLimit: RateLimitConfig{
 			Enabled:       false,

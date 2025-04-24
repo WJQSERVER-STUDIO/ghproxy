@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"ghproxy/config"
@@ -28,16 +27,10 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 
 	var (
 		resp *http.Response
-		//err  error
 	)
 
-	body := c.Request.Body()
-
-	bodyReader := bytes.NewBuffer(body)
-	// 创建请求
-
 	if cfg.GitClone.Mode == "cache" {
-		req, err := gitclient.NewRequest(method, u, bodyReader)
+		req, err := gitclient.NewRequest(method, u, c.Request.BodyStream())
 		if err != nil {
 			HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 			return
@@ -52,7 +45,7 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 			return
 		}
 	} else {
-		req, err := client.NewRequest(method, u, bodyReader)
+		req, err := client.NewRequest(method, u, c.Request.BodyStream())
 		if err != nil {
 			HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 			return

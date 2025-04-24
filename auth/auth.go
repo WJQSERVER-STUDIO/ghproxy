@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"context"
 	"fmt"
 	"ghproxy/config"
 
@@ -36,7 +35,7 @@ func Init(cfg *config.Config) {
 	logDebug("Auth Init")
 }
 
-func AuthHandler(ctx context.Context, c *app.RequestContext, cfg *config.Config) (isValid bool, err error) {
+func AuthHandler(c *app.RequestContext, cfg *config.Config) (isValid bool, err error) {
 	if cfg.Auth.Method == "parameters" {
 		isValid, err = AuthParametersHandler(c, cfg)
 		return isValid, err
@@ -47,7 +46,7 @@ func AuthHandler(ctx context.Context, c *app.RequestContext, cfg *config.Config)
 		logError("Auth method not set")
 		return true, nil
 	} else {
-		logError("Auth method not supported")
-		return false, fmt.Errorf(fmt.Sprintf("Auth method %s not supported", cfg.Auth.Method))
+		logError("Auth method not supported %s", cfg.Auth.Method)
+		return false, fmt.Errorf("%s", fmt.Sprintf("Auth method %s not supported", cfg.Auth.Method))
 	}
 }
