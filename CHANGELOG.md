@@ -1,5 +1,19 @@
 # 更新日志
 
+3.1.0 - 2025-04-24
+---
+- CHANGE: 对标准url使用`HertZ`路由匹配器, 而不是自制匹配器, 以提升效率
+- CHANGE: 使用`bodystream`进行req方向的body复制, 而不是使用额外的`buffer reader`
+- CHANGE: 使用`HertZ`的`requestContext`传递matcher参数, 而不是`25w30a`中的ctx
+- CHANGE: 改进`rate`模块, 避免并发竞争问题
+- CHANGE: 将大部分状态码返回改为新的`html/tmpl`方式处理
+- CHANGE: 修改部分log等级
+- FIX:    修正默认配置的填充错误
+- CHANGE: 使用go `html/tmpl`处理状态码页面, 同时实现错误信息显示
+- CHANGE: 改进handle, 复用共同部分
+- CHANGE: 细化url匹配的返回码处理
+- CHANGE: 增加404界面
+
 25w30e - 2025-04-24
 ---
 - PRE-RELEASE: 此版本是v3.1.0预发布版本,请勿在生产环境中使用;
