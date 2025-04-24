@@ -4,7 +4,6 @@ import (
 	"context"
 	"ghproxy/config"
 	"ghproxy/rate"
-	"net/http"
 	"strings"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -57,8 +56,7 @@ func RoutingHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		// 为rawpath加入https:// 头
 		rawPath = "https://" + rawPath
 
-		// IP METHOD URL USERAGENT PROTO MATCHES
-		logDebug("%s %s %s %s %s Matched: %v", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), matcher)
+		logDebug("Matched: %v", matcher)
 
 		switch matcher {
 		case "releases", "blob", "raw", "gist", "api":
@@ -66,8 +64,8 @@ func RoutingHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		case "clone":
 			GitReq(ctx, c, rawPath, cfg, "git")
 		default:
-			c.JSON(http.StatusForbidden, map[string]string{"error": "Invalid input."})
-			logError("Invalid input")
+			ErrorPage(c, NewErrorWithStatusLookup(500, "Matched But Not Matched"))
+			logError("Matched But Not Matched Path: %s rawPath: %s matcher: %s", c.Path(), rawPath, matcher)
 			return
 		}
 	}

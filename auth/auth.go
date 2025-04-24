@@ -46,7 +46,7 @@ func AuthHandler(c *app.RequestContext, cfg *config.Config) (isValid bool, err e
 		logError("Auth method not set")
 		return true, nil
 	} else {
-		logError("Auth method not supported")
-		return false, fmt.Errorf(fmt.Sprintf("Auth method %s not supported", cfg.Auth.Method))
+		logError("Auth method not supported %s", cfg.Auth.Method)
+		return false, fmt.Errorf("%s", fmt.Sprintf("Auth method %s not supported", cfg.Auth.Method))
 	}
 }

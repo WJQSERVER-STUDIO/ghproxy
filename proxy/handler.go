@@ -2,9 +2,9 @@ package proxy
 
 import (
 	"context"
+	"fmt"
 	"ghproxy/config"
 	"ghproxy/rate"
-	"net/http"
 	"regexp"
 	"strings"
 
@@ -29,12 +29,11 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 
 		rawPath = strings.TrimPrefix(string(c.Request.RequestURI()), "/") // 去掉前缀/
 		matches = re.FindStringSubmatch(rawPath)                          // 匹配路径
-		logDebug("URL: %v", matches)
 
 		// 匹配路径错误处理
 		if len(matches) < 3 {
-			logWarning("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
-			c.JSON(http.StatusForbidden, map[string]string{"error": "Invalid URL Format"})
+			logWarning("%s %s %s %s %s Invalid URL", c.ClientIP(), c.Method(), c.Path(), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol())
+			ErrorPage(c, NewErrorWithStatusLookup(400, fmt.Sprintf("Invalid URL Format: %s", c.Path())))
 			return
 		}
 
@@ -80,8 +79,8 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		case "clone":
 			GitReq(ctx, c, rawPath, cfg, "git")
 		default:
-			c.JSON(http.StatusForbidden, map[string]string{"error": "Invalid input."})
-			logError("Invalid input")
+			ErrorPage(c, NewErrorWithStatusLookup(500, "Matched But Not Matched"))
+			logError("Matched But Not Matched Path: %s rawPath: %s matcher: %s", c.Path(), rawPath, matcher)
 			return
 		}
 	}
