@@ -459,6 +459,10 @@ func main() {
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 
+	r.Any("/v2/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		proxy.GhcrRouting(cfg)(ctx, c)
+	})
+
 	r.NoRoute(func(ctx context.Context, c *app.RequestContext) {
 		proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
