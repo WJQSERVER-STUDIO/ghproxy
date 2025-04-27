@@ -12,7 +12,19 @@ import (
 
 func GhcrRouting(cfg *config.Config) app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
-		GhcrRequest(ctx, c, "https://ghcr.io"+string(c.Request.RequestURI()), cfg, "ghcr")
+		if cfg.Docker.Enabled {
+			if cfg.Docker.Target == "ghcr" {
+				GhcrRequest(ctx, c, "https://ghcr.io"+string(c.Request.RequestURI()), cfg, "ghcr")
+			} else if cfg.Docker.Target == "dockerhub" {
+				GhcrRequest(ctx, c, "https://registry-1.docker.io"+string(c.Request.RequestURI()), cfg, "dockerhub")
+			} else {
+				ErrorPage(c, NewErrorWithStatusLookup(403, "Docker Target is not Allowed"))
+				return
+			}
+		} else {
+			ErrorPage(c, NewErrorWithStatusLookup(403, "Docker is not Allowed"))
+			return
+		}
 	}
 }
 
