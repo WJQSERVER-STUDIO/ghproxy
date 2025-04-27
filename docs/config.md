@@ -70,6 +70,10 @@ burst = 5
 [outbound]
 enabled = false
 url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
+
+[docker]
+enabled = false
+target = "ghcr" # ghcr/dockerhub
 ```
 
 ### 配置项详细说明
@@ -294,6 +298,21 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
         *   默认值: `"socks5://127.0.0.1:1080"`
         *   支持协议: `socks5://` 和 `http://`
         *   说明:  设置出站代理服务器的 URL。支持 SOCKS5 和 HTTP 代理协议。
+
+*   **`[docker]` - Docker 镜像代理配置**
+
+    *   `enabled`: 是否启用 Docker 镜像代理功能。
+        *   类型: 布尔值 (`bool`)
+        *   默认值: `false` (禁用)
+        *   说明: 当设置为 `true` 时，`ghproxy` 将尝试代理 Docker 镜像的下载请求，以加速从 GitHub Container Registry (GHCR) 或 Docker Hub 下载镜像。
+
+    *   `target`: 代理的目标 Docker 注册表。
+        *   类型: 字符串 (`string`)
+        *   默认值: `"ghcr"` (代理 GHCR)
+        *   可选值: `"ghcr"` 或 `"dockerhub"`
+        *   说明: 指定要代理的 Docker 注册表。
+            *   `"ghcr"`: 代理 GitHub Container Registry (ghcr.io)。
+            *   `"dockerhub"`: 代理 Docker Hub (docker.io)。
 
 ## `blacklist.json` - 黑名单配置
 

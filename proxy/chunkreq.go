@@ -52,7 +52,6 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 	}
 
 	setRequestHeaders(c, req)
-	//removeWSHeader(req) // 删除Conection Upgrade头, 避免与HTTP/2冲突(检查是否存在Upgrade头)
 	AuthPassThrough(c, cfg, req)
 
 	resp, err = client.Do(req)

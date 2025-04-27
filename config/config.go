@@ -18,6 +18,7 @@ type Config struct {
 	Whitelist WhitelistConfig
 	RateLimit RateLimitConfig
 	Outbound  OutboundConfig
+	Docker    DockerConfig
 }
 
 /*
@@ -143,6 +144,16 @@ type OutboundConfig struct {
 	Url     string `toml:"url"`
 }
 
+/*
+[docker]
+enabled = false
+target = "ghcr" # ghcr/dockerhub
+*/
+type DockerConfig struct {
+	Enabled bool   `toml:"enabled"`
+	Target  string `toml:"target"`
+}
+
 // LoadConfig 从 TOML 配置文件加载配置
 func LoadConfig(filePath string) (*Config, error) {
 	if !FileExists(filePath) {
@@ -243,6 +254,10 @@ func DefaultConfig() *Config {
 		Outbound: OutboundConfig{
 			Enabled: false,
 			Url:     "socks5://127.0.0.1:1080",
+		},
+		Docker: DockerConfig{
+			Enabled: false,
+			Target:  "ghcr",
 		},
 	}
 }
