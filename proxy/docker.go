@@ -41,6 +41,7 @@ func GhcrRequest(ctx context.Context, c *app.RequestContext, u string, cfg *conf
 
 	rb := client.NewRequestBuilder(string(method), u)
 	rb.NoDefaultHeaders()
+	rb.SetBody(c.Request.BodyStream())
 
 	//req, err = client.NewRequest(string(method), u, c.Request.BodyStream())
 	req, err = rb.Build()
