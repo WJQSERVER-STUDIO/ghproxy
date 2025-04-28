@@ -416,12 +416,12 @@ func main() {
 	setupPages(cfg, r)
 
 	r.GET("/github.com/:user/:repo/releases/*filepath", func(ctx context.Context, c *app.RequestContext) {
-		c.Set("matcher", "release")
+		c.Set("matcher", "releases")
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 
 	r.GET("/github.com/:user/:repo/archive/*filepath", func(ctx context.Context, c *app.RequestContext) {
-		c.Set("matcher", "release")
+		c.Set("matcher", "releases")
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 
@@ -436,11 +436,11 @@ func main() {
 	})
 
 	r.GET("/github.com/:user/:repo/info/*filepath", func(ctx context.Context, c *app.RequestContext) {
-		c.Set("matcher", "gitclone")
+		c.Set("matcher", "clone")
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 	r.GET("/github.com/:user/:repo/git-upload-pack", func(ctx context.Context, c *app.RequestContext) {
-		c.Set("matcher", "gitclone")
+		c.Set("matcher", "clone")
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 
