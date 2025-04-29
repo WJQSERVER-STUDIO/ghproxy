@@ -24,6 +24,7 @@ mode = "auto" # "auto" or "advanced"
 maxIdleConns = 100 # only for advanced mode
 maxIdleConnsPerHost = 60 # only for advanced mode
 maxConnsPerHost = 0 # only for advanced mode
+useCustomRawHeaders = false
 
 [gitclone]
 mode = "bypass" # bypass / cache
@@ -138,6 +139,10 @@ target = "ghcr" # ghcr/dockerhub
         *   类型: 整数 (`int`)
         *   默认值: `0` (不限制)
         *   说明:  设置 HTTP 客户端连接池中，每个主机允许建立的最大连接数。设置为 `0` 表示不限制。
+    *   `useCustomRawHeaders`: 使用预定义header避免github waf对应zh-CN的封锁
+        *   类型: 布尔值(`bool`)
+        *   默认值: `false`(停用)
+        *   说明: 启用后, 拉取raw文件会使用程序预定义的固定headers, 而不是原先的复制行为
 
 *   **`[gitclone]` - Git 克隆配置**
 
