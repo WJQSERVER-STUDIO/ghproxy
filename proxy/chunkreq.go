@@ -11,29 +11,6 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
-var (
-	respHeadersToRemove = map[string]struct{}{
-		"Content-Security-Policy":   {},
-		"Referrer-Policy":           {},
-		"Strict-Transport-Security": {},
-		"X-Github-Request-Id":       {},
-		"X-Timer":                   {},
-		"X-Served-By":               {},
-		"X-Fastly-Request-Id":       {},
-	}
-
-	reqHeadersToRemove = map[string]struct{}{
-		"CF-IPCountry":     {},
-		"CF-RAY":           {},
-		"CF-Visitor":       {},
-		"CF-Connecting-IP": {},
-		"CF-EW-Via":        {},
-		"CDN-Loop":         {},
-		"Upgrade":          {},
-		"Connection":       {},
-	}
-)
-
 func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, cfg *config.Config, matcher string) {
 
 	var (
@@ -51,7 +28,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		return
 	}
 
-	setRequestHeaders(c, req)
+	setRequestHeaders(c, req, cfg, matcher)
 	AuthPassThrough(c, cfg, req)
 
 	resp, err = client.Do(req)
