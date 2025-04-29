@@ -1,5 +1,9 @@
 # 更新日志
 
+25w33b - 2025-04-29
+---
+- REVERT: 为`git clone`部分回滚 3.1.0中的 "使用`bodystream`进行req方向的body复制, 而不是使用额外的`buffer reader`" 修改
+
 25w33a - 2025-04-29
 ---
 - ADD: 实验性的raw Header处置, 用于应对Github对zh-CN的限制
