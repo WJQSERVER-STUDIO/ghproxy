@@ -51,7 +51,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		return
 	}
 
-	setRequestHeaders(c, req)
+	setRequestHeaders(c, req, matcher)
 	AuthPassThrough(c, cfg, req)
 
 	resp, err = client.Do(req)

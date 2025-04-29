@@ -35,7 +35,7 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 			HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 			return
 		}
-		setRequestHeaders(c, req)
+		setRequestHeaders(c, req, "clone")
 		//removeWSHeader(req)
 		AuthPassThrough(c, cfg, req)
 
@@ -50,7 +50,7 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 			HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 			return
 		}
-		setRequestHeaders(c, req)
+		setRequestHeaders(c, req, "clone")
 		//removeWSHeader(req)
 		AuthPassThrough(c, cfg, req)
 
