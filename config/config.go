@@ -50,12 +50,14 @@ mode = "auto" # "auto" or "advanced"
 maxIdleConns = 100 # only for advanced mode
 maxIdleConnsPerHost = 60 # only for advanced mode
 maxConnsPerHost = 0 # only for advanced mode
+useCustomRawHeaders = false
 */
 type HttpcConfig struct {
 	Mode                string `toml:"mode"`
 	MaxIdleConns        int    `toml:"maxIdleConns"`
 	MaxIdleConnsPerHost int    `toml:"maxIdleConnsPerHost"`
 	MaxConnsPerHost     int    `toml:"maxConnsPerHost"`
+	UseCustomRawHeaders bool   `toml:"useCustomRawHeaders"`
 }
 
 /*

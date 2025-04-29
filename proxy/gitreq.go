@@ -13,7 +13,6 @@ import (
 func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Config, mode string) {
 	method := string(c.Request.Method())
 
-	logDump("Url Before FMT:%s", u)
 	if cfg.GitClone.Mode == "cache" {
 		userPath, repoPath, remainingPath, queryParams, err := extractParts(u)
 		if err != nil {
@@ -22,7 +21,6 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 		}
 		// 构建新url
 		u = cfg.GitClone.SmartGitAddr + userPath + repoPath + remainingPath + "?" + queryParams.Encode()
-		logDump("New Url After FMT:%s", u)
 	}
 
 	var (
@@ -35,8 +33,7 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 			HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 			return
 		}
-		setRequestHeaders(c, req, "clone")
-		//removeWSHeader(req)
+		setRequestHeaders(c, req, cfg, "clone")
 		AuthPassThrough(c, cfg, req)
 
 		resp, err = gitclient.Do(req)
@@ -50,8 +47,7 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 			HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 			return
 		}
-		setRequestHeaders(c, req, "clone")
-		//removeWSHeader(req)
+		setRequestHeaders(c, req, cfg, "clone")
 		AuthPassThrough(c, cfg, req)
 
 		resp, err = client.Do(req)
