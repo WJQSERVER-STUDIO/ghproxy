@@ -122,11 +122,5 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 		c.Response.Header.Set("Expires", "0")
 	}
 
-	bodySize, _ := strconv.Atoi(contentLength)
-
-	if contentLength != "" {
-		c.SetBodyStream(resp.Body, bodySize)
-		return
-	}
 	c.SetBodyStream(resp.Body, -1)
 }
