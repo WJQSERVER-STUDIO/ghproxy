@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"ghproxy/config"
 
-	"github.com/WJQSERVER-STUDIO/go-utils/logger"
+	"github.com/WJQSERVER-STUDIO/logger"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 

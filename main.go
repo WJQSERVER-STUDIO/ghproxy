@@ -18,7 +18,7 @@ import (
 	"ghproxy/proxy"
 	"ghproxy/rate"
 
-	"github.com/WJQSERVER-STUDIO/go-utils/logger"
+	"github.com/WJQSERVER-STUDIO/logger"
 	"github.com/hertz-contrib/http2/factory"
 
 	"github.com/cloudwego/hertz/pkg/app"

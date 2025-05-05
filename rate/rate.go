@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/WJQSERVER-STUDIO/go-utils/logger"
+	"github.com/WJQSERVER-STUDIO/logger"
 	"golang.org/x/time/rate"
 )
 
