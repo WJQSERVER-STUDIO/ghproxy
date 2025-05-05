@@ -5,9 +5,9 @@ go 1.24.2
 require (
 	github.com/BurntSushi/toml v1.5.0
 	github.com/WJQSERVER-STUDIO/go-utils/logger v1.5.0
+	github.com/WJQSERVER-STUDIO/httpc v0.5.0
 	github.com/cloudwego/hertz v0.9.7
 	github.com/hertz-contrib/http2 v0.1.8
-	github.com/satomitouka/touka-httpc v0.4.1
 	golang.org/x/net v0.39.0
 	golang.org/x/time v0.11.0
 )
@@ -36,5 +36,3 @@ require (
 	golang.org/x/text v0.24.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 )
-
-//replace github.com/satomitouka/touka-httpc v0.4.1 => /data/github/satomitoka/touka-httpc

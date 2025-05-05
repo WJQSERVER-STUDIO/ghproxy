@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	httpc "github.com/satomitouka/touka-httpc"
+	"github.com/WJQSERVER-STUDIO/httpc"
 )
 
 var BufferSize int = 32 * 1024 // 32KB
