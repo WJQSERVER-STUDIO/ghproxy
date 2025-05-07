@@ -1,5 +1,22 @@
 # 更新日志
 
+3.2.3 - 2025-05-07
+---
+- CHANGE: 迁移logger库到新的仓库, 开启异步日志记录
+- CHANGE: 更新Go版本到go1.24.3
+- CHANGE: 迁移httpc到新的仓库
+
+25w34b - 2025-05-07
+---
+- PRE-RELEASE: 此版本是v3.2.3预发布版本,请勿在生产环境中使用;
+- CHANGE: 更新Go版本到go1.24.3
+
+25w34a - 2025-05-05
+---
+- PRE-RELEASE: 此版本是v3.2.3预发布版本,请勿在生产环境中使用;
+- CHANGE: 迁移logger库到新的仓库, 开启异步日志记录
+- CHANGE: 迁移httpc到新的仓库
+
 3.2.2 - 2025-04-29
 ---
 - ADD: 实验性的raw Header处置, 用于应对Github对zh-CN的限制
@@ -8,10 +25,12 @@
 
 25w33b - 2025-04-29
 ---
+- PRE-RELEASE: 此版本是v3.2.2预发布版本,请勿在生产环境中使用;
 - REVERT: 为`git clone`部分回滚 3.1.0中的 "使用`bodystream`进行req方向的body复制, 而不是使用额外的`buffer reader`" 修改
 
 25w33a - 2025-04-29
 ---
+- PRE-RELEASE: 此版本是v3.2.2预发布版本,请勿在生产环境中使用;
 - ADD: 实验性的raw Header处置, 用于应对Github对zh-CN的限制
 - FIX: 修正Header部分的一些处理问题
 
