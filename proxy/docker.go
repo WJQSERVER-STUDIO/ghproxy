@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/WJQSERVER-STUDIO/go-utils/limitreader"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
@@ -107,10 +108,16 @@ func GhcrRequest(ctx context.Context, c *app.RequestContext, u string, cfg *conf
 
 	c.Status(resp.StatusCode)
 
+	bodyReader := resp.Body
+
+	if cfg.RateLimit.BandwidthLimit.Enabled {
+		bodyReader = limitreader.NewRateLimitedReader(bodyReader, bandwidthLimit, int(bandwidthBurst), ctx)
+	}
+
 	if contentLength != "" {
-		c.SetBodyStream(resp.Body, bodySize)
+		c.SetBodyStream(bodyReader, bodySize)
 		return
 	}
-	c.SetBodyStream(resp.Body, -1)
+	c.SetBodyStream(bodyReader, -1)
 
 }

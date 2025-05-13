@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/WJQSERVER-STUDIO/go-utils/limitreader"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
@@ -94,6 +95,12 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 
 	c.Status(resp.StatusCode)
 
+	bodyReader := resp.Body
+
+	if cfg.RateLimit.BandwidthLimit.Enabled {
+		bodyReader = limitreader.NewRateLimitedReader(bodyReader, bandwidthLimit, int(bandwidthBurst), ctx)
+	}
+
 	if MatcherShell(u) && matchString(matcher, matchedMatchers) && cfg.Shell.Editor {
 		// 判断body是不是gzip
 		var compress string
@@ -106,7 +113,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 
 		var reader io.Reader
 
-		reader, _, err = processLinks(resp.Body, compress, string(c.Request.Host()), cfg)
+		reader, _, err = processLinks(bodyReader, compress, string(c.Request.Host()), cfg)
 		c.SetBodyStream(reader, -1)
 		if err != nil {
 			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), c.Request.Method(), u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
@@ -114,11 +121,12 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 			return
 		}
 	} else {
+
 		if contentLength != "" {
-			c.SetBodyStream(resp.Body, bodySize)
+			c.SetBodyStream(bodyReader, bodySize)
 			return
 		}
-		c.SetBodyStream(resp.Body, -1)
+		c.SetBodyStream(bodyReader, -1)
 	}
 
 }

@@ -181,7 +181,11 @@ func setupRateLimit(cfg *config.Config) {
 }
 
 func InitReq(cfg *config.Config) {
-	proxy.InitReq(cfg)
+	err := proxy.InitReq(cfg)
+	if err != nil {
+		fmt.Printf("Failed to initialize request: %v\n", err)
+		os.Exit(1)
+	}
 }
 
 // loadEmbeddedPages 加载嵌入式页面资源
