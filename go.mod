@@ -4,7 +4,8 @@ go 1.24.3
 
 require (
 	github.com/BurntSushi/toml v1.5.0
-	github.com/WJQSERVER-STUDIO/httpc v0.5.0
+	//github.com/WJQSERVER-STUDIO/httpc v0.5.0
+	github.com/WJQSERVER-STUDIO/httpc v0.5.1-0.20250513102952-d961182b2489
 	github.com/WJQSERVER-STUDIO/logger v1.6.0
 	github.com/cloudwego/hertz v0.9.7
 	github.com/hertz-contrib/http2 v0.1.8

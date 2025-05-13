@@ -4,8 +4,8 @@ github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.4 h1:JLtFd00AdFg/TP+dtvIzLkdHwKU
 github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.4/go.mod h1:FZ6XE+4TKy4MOfX1xWKe6Rwsg0ucYFCdNh1KLvyKTfc=
 github.com/WJQSERVER-STUDIO/go-utils/log v0.0.2 h1:9CSf+V0ZQPl2ijC/g6v/ObemmhpKcikKVIodsaLExTA=
 github.com/WJQSERVER-STUDIO/go-utils/log v0.0.2/go.mod h1:j9Q+xnwpOfve7/uJnZ2izRQw6NNoXjvJHz7vUQAaLZE=
-github.com/WJQSERVER-STUDIO/httpc v0.5.0 h1:0yJA+dOgbnO3R/mAWPjlbUq5lIqaxRV38XfiX3jt6pg=
-github.com/WJQSERVER-STUDIO/httpc v0.5.0/go.mod h1:M7KNUZjjhCkzzcg9lBPs9YfkImI+7vqjAyjdA19+joE=
+github.com/WJQSERVER-STUDIO/httpc v0.5.1-0.20250513102952-d961182b2489 h1:BScWEkOFYMDaSB4SNhBa6XeBoBjg1IHxmGE3NSNW6zw=
+github.com/WJQSERVER-STUDIO/httpc v0.5.1-0.20250513102952-d961182b2489/go.mod h1:M7KNUZjjhCkzzcg9lBPs9YfkImI+7vqjAyjdA19+joE=
 github.com/WJQSERVER-STUDIO/logger v1.6.0 h1:xK2xV7hlkMXaWzvj4+cNoNWA+JfnJaHX6VU+RrPnr7Q=
 github.com/WJQSERVER-STUDIO/logger v1.6.0/go.mod h1:TICMsR7geROHBg6rxwkqUNGydo34XVsX93yeoxyfuyY=
 github.com/bytedance/gopkg v0.1.1/go.mod h1:576VvJ+eJgyCzdjS+c4+77QF3p7ubbtiKARP3TxducM=
