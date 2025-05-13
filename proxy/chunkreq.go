@@ -14,15 +14,18 @@ import (
 func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, cfg *config.Config, matcher string) {
 
 	var (
-		method []byte
-		req    *http.Request
-		resp   *http.Response
-		err    error
+		req  *http.Request
+		resp *http.Response
+		err  error
 	)
 
-	method = c.Request.Method()
+	rb := client.NewRequestBuilder(string(c.Request.Method()), u)
+	rb.NoDefaultHeaders()
+	rb.SetBody(c.Request.BodyStream())
+	rb.WithContext(ctx)
 
-	req, err = client.NewRequest(string(method), u, c.Request.BodyStream())
+	req, err = rb.Build()
+	//req, err = client.NewRequest(string(method), u, c.Request.BodyStream())
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
@@ -58,8 +61,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 			bodySize = -1
 		}
 		if err == nil && bodySize > sizelimit {
-			var finalURL string
-			finalURL = resp.Request.URL.String()
+			finalURL := resp.Request.URL.String()
 			err = resp.Body.Close()
 			if err != nil {
 				logError("Failed to close response body: %v", err)
@@ -99,7 +101,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 			compress = "gzip"
 		}
 
-		logDebug("Use Shell Editor: %s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol())
+		logDebug("Use Shell Editor: %s %s %s %s %s", c.ClientIP(), c.Request.Method(), u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol())
 		c.Header("Content-Length", "")
 
 		var reader io.Reader
@@ -107,7 +109,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		reader, _, err = processLinks(resp.Body, compress, string(c.Request.Host()), cfg)
 		c.SetBodyStream(reader, -1)
 		if err != nil {
-			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
+			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), c.Request.Method(), u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
 			ErrorPage(c, NewErrorWithStatusLookup(500, fmt.Sprintf("Failed to copy response body: %v", err)))
 			return
 		}

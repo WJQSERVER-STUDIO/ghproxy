@@ -36,3 +36,5 @@ require (
 	golang.org/x/text v0.25.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 )
+
+//replace github.com/WJQSERVER-STUDIO/httpc v0.5.0 => /data/github/WJQSERVER-STUDIO/httpc

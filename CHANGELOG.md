@@ -1,5 +1,10 @@
 # 更新日志
 
+25w36a - 2025-05-13
+---
+- PRE-RELEASE: 此版本是v3.3.0预发布版本,请勿在生产环境中使用;
+- CHANGE: 为`httpc`加入`request builder`的`withcontext`选项
+
 3.2.4 - 2025-05-13
 ---
 - CHANGE: 移除未使用的变量与相关计算

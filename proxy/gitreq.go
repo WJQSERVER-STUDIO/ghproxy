@@ -36,6 +36,7 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 		rb := gitclient.NewRequestBuilder(method, u)
 		rb.NoDefaultHeaders()
 		rb.SetBody(bodyReader)
+		rb.WithContext(ctx)
 
 		req, err := rb.Build()
 		if err != nil {
@@ -55,6 +56,7 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 		rb := client.NewRequestBuilder(string(c.Request.Method()), u)
 		rb.NoDefaultHeaders()
 		rb.SetBody(bodyReader)
+		rb.WithContext(ctx)
 
 		req, err := rb.Build()
 		if err != nil {
