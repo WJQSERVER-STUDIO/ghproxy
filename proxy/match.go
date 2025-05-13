@@ -104,42 +104,34 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 	return "", "", "", NewErrorWithStatusLookup(404, errMsg)
 }
 
-func EditorMatcher(rawPath string, cfg *config.Config) (bool, string, error) {
-	var (
-		matcher string
-	)
+func EditorMatcher(rawPath string, cfg *config.Config) (bool, error) {
 	// 匹配 "https://github.com"开头的链接
 	if strings.HasPrefix(rawPath, "https://github.com") {
-		remainingPath := strings.TrimPrefix(rawPath, "https://github.com")
-		if strings.HasPrefix(remainingPath, "/") {
-			remainingPath = strings.TrimPrefix(remainingPath, "/")
-		}
-		return true, "", nil
+		return true, nil
 	}
 	// 匹配 "https://raw.githubusercontent.com"开头的链接
 	if strings.HasPrefix(rawPath, "https://raw.githubusercontent.com") {
-		return true, matcher, nil
+		return true, nil
 	}
 	// 匹配 "https://raw.github.com"开头的链接
 	if strings.HasPrefix(rawPath, "https://raw.github.com") {
-		return true, matcher, nil
+		return true, nil
 	}
 	// 匹配 "https://gist.githubusercontent.com"开头的链接
 	if strings.HasPrefix(rawPath, "https://gist.githubusercontent.com") {
-		return true, matcher, nil
+		return true, nil
 	}
 	// 匹配 "https://gist.github.com"开头的链接
 	if strings.HasPrefix(rawPath, "https://gist.github.com") {
-		return true, matcher, nil
+		return true, nil
 	}
 	if cfg.Shell.RewriteAPI {
 		// 匹配 "https://api.github.com/"开头的链接
 		if strings.HasPrefix(rawPath, "https://api.github.com") {
-			matcher = "api"
-			return true, matcher, nil
+			return true, nil
 		}
 	}
-	return false, "", nil
+	return false, nil
 }
 
 // 匹配文件扩展名是sh的rawPath
@@ -153,7 +145,7 @@ type LinkProcessor func(string) string
 // 自定义 URL 修改函数
 func modifyURL(url string, host string, cfg *config.Config) string {
 	// 去除url内的https://或http://
-	matched, _, err := EditorMatcher(url, cfg)
+	matched, err := EditorMatcher(url, cfg)
 	if err != nil {
 		logDump("Invalid URL: %s", url)
 		return url
