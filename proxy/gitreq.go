@@ -13,6 +13,22 @@ import (
 )
 
 func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Config, mode string) {
+
+	var (
+		req  *http.Request
+		resp *http.Response
+	)
+
+	go func() {
+		<-ctx.Done()
+		if resp != nil && resp.Body != nil {
+			resp.Body.Close()
+		}
+		if req != nil {
+			req.Body.Close()
+		}
+	}()
+
 	method := string(c.Request.Method())
 
 	reqBodyReader := bytes.NewBuffer(c.Request.Body())
@@ -28,10 +44,6 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 		// 构建新url
 		u = cfg.GitClone.SmartGitAddr + userPath + repoPath + remainingPath + "?" + queryParams.Encode()
 	}
-
-	var (
-		resp *http.Response
-	)
 
 	if cfg.GitClone.Mode == "cache" {
 		rb := gitclient.NewRequestBuilder(method, u)

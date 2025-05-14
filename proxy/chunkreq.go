@@ -20,13 +20,22 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		err  error
 	)
 
+	go func() {
+		<-ctx.Done()
+		if resp != nil && resp.Body != nil {
+			resp.Body.Close()
+		}
+		if req != nil {
+			req.Body.Close()
+		}
+	}()
+
 	rb := client.NewRequestBuilder(string(c.Request.Method()), u)
 	rb.NoDefaultHeaders()
 	rb.SetBody(c.Request.BodyStream())
 	rb.WithContext(ctx)
 
 	req, err = rb.Build()
-	//req, err = client.NewRequest(string(method), u, c.Request.BodyStream())
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return

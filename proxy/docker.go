@@ -38,6 +38,16 @@ func GhcrRequest(ctx context.Context, c *app.RequestContext, u string, cfg *conf
 		err    error
 	)
 
+	go func() {
+		<-ctx.Done()
+		if resp != nil && resp.Body != nil {
+			resp.Body.Close()
+		}
+		if req != nil {
+			req.Body.Close()
+		}
+	}()
+
 	method = c.Request.Method()
 
 	rb := client.NewRequestBuilder(string(method), u)
