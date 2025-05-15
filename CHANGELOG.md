@@ -1,5 +1,32 @@
 # 更新日志
 
+3.3.0 - 2025-05-15
+---
+- CHANGE: 为`httpc`加入`request builder`的`withcontext`选项
+- ADD: 加入带宽限制功能
+- ADD: 为`netpoll`模式开启探测客户端是否断开功能
+
+25w36d - 2025-05-14
+---
+- PRE-RELEASE: 此版本是v3.3.0预发布版本,请勿在生产环境中使用;
+- ADD: 为`netpoll`模式开启探测客户端是否断开功能
+
+25w36c - 2025-05-14
+---
+- PRE-RELEASE: 此版本是v3.3.0预发布版本,请勿在生产环境中使用;
+- ADD: 加入带宽限制功能
+- CHANGE: 将`httpc`切换回主分支, `25w36b`测试的部分已被合入`httpc`主线
+
+25w36b - 2025-05-13
+---
+- PRE-RELEASE: 此版本是v3.3.0预发布版本,请勿在生产环境中使用;
+- CHANGE: `httpc`切换到`dev`, 测试在retry前检查ctx状态
+
+25w36a - 2025-05-13
+---
+- PRE-RELEASE: 此版本是v3.3.0预发布版本,请勿在生产环境中使用;
+- CHANGE: 为`httpc`加入`request builder`的`withcontext`选项
+
 3.2.4 - 2025-05-13
 ---
 - CHANGE: 移除未使用的变量与相关计算

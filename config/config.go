@@ -129,11 +129,35 @@ type WhitelistConfig struct {
 	WhitelistFile string `toml:"whitelistFile"`
 }
 
+/*
+[rateLimit]
+enabled = false
+rateMethod = "total" # "total" or "ip"
+ratePerMinute = 100
+burst = 10
+
+	[rateLimit.bandwidthLimit]
+	enabled = false
+	totalLimit = "100mbps"
+	totalBurst = "100mbps"
+	singleLimit = "10mbps"
+	singleBurst = "10mbps"
+*/
+
 type RateLimitConfig struct {
-	Enabled       bool   `toml:"enabled"`
-	RateMethod    string `toml:"rateMethod"`
-	RatePerMinute int    `toml:"ratePerMinute"`
-	Burst         int    `toml:"burst"`
+	Enabled        bool   `toml:"enabled"`
+	RateMethod     string `toml:"rateMethod"`
+	RatePerMinute  int    `toml:"ratePerMinute"`
+	Burst          int    `toml:"burst"`
+	BandwidthLimit BandwidthLimitConfig
+}
+
+type BandwidthLimitConfig struct {
+	Enabled     bool   `toml:"enabled"`
+	TotalLimit  string `toml:"totalLimit"`
+	TotalBurst  string `toml:"totalBurst"`
+	SingleLimit string `toml:"singleLimit"`
+	SingleBurst string `toml:"singleBurst"`
 }
 
 /*
@@ -252,6 +276,13 @@ func DefaultConfig() *Config {
 			RateMethod:    "total",
 			RatePerMinute: 100,
 			Burst:         10,
+			BandwidthLimit: BandwidthLimitConfig{
+				Enabled:     false,
+				TotalLimit:  "100mbps",
+				TotalBurst:  "100mbps",
+				SingleLimit: "10mbps",
+				SingleBurst: "10mbps",
+			},
 		},
 		Outbound: OutboundConfig{
 			Enabled: false,

@@ -8,21 +8,34 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/WJQSERVER-STUDIO/go-utils/limitreader"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
 func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, cfg *config.Config, matcher string) {
 
 	var (
-		method []byte
-		req    *http.Request
-		resp   *http.Response
-		err    error
+		req  *http.Request
+		resp *http.Response
+		err  error
 	)
 
-	method = c.Request.Method()
+	go func() {
+		<-ctx.Done()
+		if resp != nil && resp.Body != nil {
+			resp.Body.Close()
+		}
+		if req != nil {
+			req.Body.Close()
+		}
+	}()
 
-	req, err = client.NewRequest(string(method), u, c.Request.BodyStream())
+	rb := client.NewRequestBuilder(string(c.Request.Method()), u)
+	rb.NoDefaultHeaders()
+	rb.SetBody(c.Request.BodyStream())
+	rb.WithContext(ctx)
+
+	req, err = rb.Build()
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 		return
@@ -58,8 +71,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 			bodySize = -1
 		}
 		if err == nil && bodySize > sizelimit {
-			var finalURL string
-			finalURL = resp.Request.URL.String()
+			finalURL := resp.Request.URL.String()
 			err = resp.Body.Close()
 			if err != nil {
 				logError("Failed to close response body: %v", err)
@@ -92,6 +104,12 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 
 	c.Status(resp.StatusCode)
 
+	bodyReader := resp.Body
+
+	if cfg.RateLimit.BandwidthLimit.Enabled {
+		bodyReader = limitreader.NewRateLimitedReader(bodyReader, bandwidthLimit, int(bandwidthBurst), ctx)
+	}
+
 	if MatcherShell(u) && matchString(matcher, matchedMatchers) && cfg.Shell.Editor {
 		// 判断body是不是gzip
 		var compress string
@@ -99,24 +117,25 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 			compress = "gzip"
 		}
 
-		logDebug("Use Shell Editor: %s %s %s %s %s", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol())
+		logDebug("Use Shell Editor: %s %s %s %s %s", c.ClientIP(), c.Request.Method(), u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol())
 		c.Header("Content-Length", "")
 
 		var reader io.Reader
 
-		reader, _, err = processLinks(resp.Body, compress, string(c.Request.Host()), cfg)
+		reader, _, err = processLinks(bodyReader, compress, string(c.Request.Host()), cfg)
 		c.SetBodyStream(reader, -1)
 		if err != nil {
-			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), method, u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
+			logError("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), c.Request.Method(), u, c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), err)
 			ErrorPage(c, NewErrorWithStatusLookup(500, fmt.Sprintf("Failed to copy response body: %v", err)))
 			return
 		}
 	} else {
+
 		if contentLength != "" {
-			c.SetBodyStream(resp.Body, bodySize)
+			c.SetBodyStream(bodyReader, bodySize)
 			return
 		}
-		c.SetBodyStream(resp.Body, -1)
+		c.SetBodyStream(bodyReader, -1)
 	}
 
 }

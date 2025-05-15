@@ -181,7 +181,11 @@ func setupRateLimit(cfg *config.Config) {
 }
 
 func InitReq(cfg *config.Config) {
-	proxy.InitReq(cfg)
+	err := proxy.InitReq(cfg)
+	if err != nil {
+		fmt.Printf("Failed to initialize request: %v\n", err)
+		os.Exit(1)
+	}
 }
 
 // loadEmbeddedPages 加载嵌入式页面资源
@@ -397,11 +401,13 @@ func main() {
 			r = server.New(
 				server.WithH2C(true),
 				server.WithHostPorts(addr),
+				server.WithSenseClientDisconnection(true),
 			)
 			r.AddProtocol("h2", factory.NewServerFactory())
 		} else {
 			r = server.New(
 				server.WithHostPorts(addr),
+				server.WithSenseClientDisconnection(true),
 			)
 		}
 	} else {
@@ -481,8 +487,7 @@ func main() {
 	defer logger.Close()
 	defer func() {
 		if hertZfile != nil {
-			var err error
-			err = hertZfile.Close()
+			err := hertZfile.Close()
 			if err != nil {
 				logError("Failed to close hertz log file: %v", err)
 			}

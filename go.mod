@@ -4,13 +4,15 @@ go 1.24.3
 
 require (
 	github.com/BurntSushi/toml v1.5.0
-	github.com/WJQSERVER-STUDIO/httpc v0.5.0
+	github.com/WJQSERVER-STUDIO/httpc v0.5.1
 	github.com/WJQSERVER-STUDIO/logger v1.6.0
 	github.com/cloudwego/hertz v0.9.7
 	github.com/hertz-contrib/http2 v0.1.8
 	golang.org/x/net v0.40.0
 	golang.org/x/time v0.11.0
 )
+
+require github.com/WJQSERVER-STUDIO/go-utils/limitreader v0.0.2
 
 require (
 	github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.4 // indirect
@@ -36,3 +38,5 @@ require (
 	golang.org/x/text v0.25.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 )
+
+//replace github.com/WJQSERVER-STUDIO/httpc v0.5.1 => /data/github/WJQSERVER-STUDIO/httpc

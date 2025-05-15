@@ -18,11 +18,16 @@ var (
 	gitclient *httpc.Client
 )
 
-func InitReq(cfg *config.Config) {
+func InitReq(cfg *config.Config) error {
 	initHTTPClient(cfg)
 	if cfg.GitClone.Mode == "cache" {
 		initGitHTTPClient(cfg)
 	}
+	err := SetGlobalRateLimit(cfg)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func initHTTPClient(cfg *config.Config) {
