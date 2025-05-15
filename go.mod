@@ -6,7 +6,7 @@ require (
 	github.com/BurntSushi/toml v1.5.0
 	github.com/WJQSERVER-STUDIO/httpc v0.5.1
 	github.com/WJQSERVER-STUDIO/logger v1.6.0
-	github.com/cloudwego/hertz v0.9.7
+	github.com/cloudwego/hertz v0.10.0
 	github.com/hertz-contrib/http2 v0.1.8
 	golang.org/x/net v0.40.0
 	golang.org/x/time v0.11.0
