@@ -1,5 +1,11 @@
 # 更新日志
 
+3.3.0 - 2025-05-15
+---
+- CHANGE: 为`httpc`加入`request builder`的`withcontext`选项
+- ADD: 加入带宽限制功能
+- ADD: 为`netpoll`模式开启探测客户端是否断开功能
+
 25w36d - 2025-05-14
 ---
 - PRE-RELEASE: 此版本是v3.3.0预发布版本,请勿在生产环境中使用;
