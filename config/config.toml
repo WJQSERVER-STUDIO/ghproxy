@@ -71,4 +71,3 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
 [docker]
 enabled = false
 target = "ghcr" # ghcr/dockerhub
-customTarget = "" # 自定义host(不带协议头)

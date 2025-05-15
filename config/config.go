@@ -174,12 +174,10 @@ type OutboundConfig struct {
 [docker]
 enabled = false
 target = "ghcr" # ghcr/dockerhub
-customTarget = "" # 自定义host(不带协议头)
 */
 type DockerConfig struct {
-	Enabled      bool   `toml:"enabled"`
-	Target       string `toml:"target"`
-	CustomTarget string `toml:"customTarget"`
+	Enabled bool   `toml:"enabled"`
+	Target  string `toml:"target"`
 }
 
 // LoadConfig 从 TOML 配置文件加载配置

@@ -14,17 +14,17 @@ import (
 func GhcrRouting(cfg *config.Config) app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 		if cfg.Docker.Enabled {
-			if cfg.Docker.CustomTarget == "" {
-				if cfg.Docker.Target == "ghcr" {
-					GhcrRequest(ctx, c, "https://ghcr.io"+string(c.Request.RequestURI()), cfg, "ghcr")
-				} else if cfg.Docker.Target == "dockerhub" {
-					GhcrRequest(ctx, c, "https://registry-1.docker.io"+string(c.Request.RequestURI()), cfg, "dockerhub")
-				} else {
-					ErrorPage(c, NewErrorWithStatusLookup(403, "Docker Target is not Allowed"))
-					return
-				}
+			if cfg.Docker.Target == "ghcr" {
+				GhcrRequest(ctx, c, "https://ghcr.io"+string(c.Request.RequestURI()), cfg, "ghcr")
+			} else if cfg.Docker.Target == "dockerhub" {
+				GhcrRequest(ctx, c, "https://registry-1.docker.io"+string(c.Request.RequestURI()), cfg, "dockerhub")
+			} else if cfg.Docker.Target != "" {
+				// 自定义taget
+				GhcrRequest(ctx, c, "https://"+cfg.Docker.Target+string(c.Request.RequestURI()), cfg, "custom")
 			} else {
-				GhcrRequest(ctx, c, "https://"+cfg.Docker.CustomTarget+string(c.Request.RequestURI()), cfg, "custom")
+				// 配置为空
+				ErrorPage(c, NewErrorWithStatusLookup(403, "Docker Target is not set"))
+				return
 			}
 
 		} else {
