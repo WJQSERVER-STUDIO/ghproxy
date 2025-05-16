@@ -18,10 +18,15 @@ func GhcrRouting(cfg *config.Config) app.HandlerFunc {
 				GhcrRequest(ctx, c, "https://ghcr.io"+string(c.Request.RequestURI()), cfg, "ghcr")
 			} else if cfg.Docker.Target == "dockerhub" {
 				GhcrRequest(ctx, c, "https://registry-1.docker.io"+string(c.Request.RequestURI()), cfg, "dockerhub")
+			} else if cfg.Docker.Target != "" {
+				// 自定义taget
+				GhcrRequest(ctx, c, "https://"+cfg.Docker.Target+string(c.Request.RequestURI()), cfg, "custom")
 			} else {
-				ErrorPage(c, NewErrorWithStatusLookup(403, "Docker Target is not Allowed"))
+				// 配置为空
+				ErrorPage(c, NewErrorWithStatusLookup(403, "Docker Target is not set"))
 				return
 			}
+
 		} else {
 			ErrorPage(c, NewErrorWithStatusLookup(403, "Docker is not Allowed"))
 			return

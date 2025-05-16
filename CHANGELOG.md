@@ -1,5 +1,15 @@
 # 更新日志
 
+3.3.1 - 2025-05-16
+- CHANGE: 为`target`放宽限制, 支持自定义
+- CHANGE: 更新`hertz`, `0.9.7`=>`0.10.0`
+
+25w37a - 2025-05-16
+---
+- PRE-RELEASE: 此版本是v3.3.1预发布版本,请勿在生产环境中使用;
+- CHANGE: 为`target`放宽限制, 支持自定义
+- CHANGE: 更新`hertz`, `0.9.7`=>`0.10.0`
+
 3.3.0 - 2025-05-15
 ---
 - CHANGE: 为`httpc`加入`request builder`的`withcontext`选项
