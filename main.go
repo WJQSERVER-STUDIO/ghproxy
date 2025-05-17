@@ -206,8 +206,8 @@ func loadEmbeddedPages(cfg *config.Config) (fs.FS, fs.FS, error) {
 	case "mino":
 		pages, err = fs.Sub(pagesFS, "pages/mino")
 	default:
-		pages, err = fs.Sub(pagesFS, "pages/bootstrap") // 默认主题
-		logWarning("Invalid Pages Theme: %s, using default theme 'bootstrap'", cfg.Pages.Theme)
+		pages, err = fs.Sub(pagesFS, "pages/design") // 默认主题
+		logWarning("Invalid Pages Theme: %s, using default theme 'design'", cfg.Pages.Theme)
 	}
 
 	if err != nil {

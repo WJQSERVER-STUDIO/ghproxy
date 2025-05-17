@@ -68,13 +68,20 @@ rateMethod = "total" # "ip" or "total"
 ratePerMinute = 180
 burst = 5
 
+[rateLimit.bandwidthLimit]
+	enabled = false
+	totalLimit = "100mbps"
+	totalBurst = "100mbps"
+	singleLimit = "10mbps"
+	singleBurst = "10mbps"
+
 [outbound]
 enabled = false
 url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
 
 [docker]
 enabled = false
-target = "ghcr" # ghcr/dockerhub
+target = "ghcr" # ghcr/dockerhub or "xx.example.com"
 ```
 
 ### 配置项详细说明
@@ -291,6 +298,27 @@ target = "ghcr" # ghcr/dockerhub
         *   类型: 整数 (`int`)
         *   默认值: `5`
         *   说明:  允许在短时间内超过 `ratePerMinute` 的突发请求数。
+    *   **`[rateLimit.bandwidthLimit]` 带宽速率限制**
+        *   `enabled`: 是否启用带宽速率限制。
+            *   类型: 布尔值 (`bool`)
+            *   默认值: `false` (禁用)
+            *   说明: 启用后，`ghproxy` 将根据配置的策略限制带宽使用，防止服务被滥用。
+        *   `totalLimit`: 全局带宽限制。
+            *   类型: 字符串 (`string`)
+            *   默认值: `"100mbps"`
+            *   说明: 设置全局最大带宽使用量。支持的单位有 "kbps", "mbps", "gbps"。
+        *   `totalBurst`: 全局突发带宽。
+            *   类型: 字符串 (`string`)
+            *   默认值: `"100mbps"`
+            *   说明: 设置全局突发带宽使用量。支持的单位有 "kbps", "mbps", "gbps"。
+        *   `singleLimit`: 单个连接带宽限制。
+            *   类型: 字符串 (`string`)
+            *   默认值: `"10mbps"`
+            *   说明: 设置单个连接的最大带宽使用量。支持的单位有 "kbps", "mbps", "gbps"。
+        *   `singleBurst`: 单个连接突发带宽。
+            *   类型: 字符串 (`string`)
+            *   默认值: `"10mbps"`
+            *   说明: 设置单个连接的突发带宽使用量。支持的单位有 "kbps", "mbps", "gbps"。
 
 *   **`[outbound]` - 出站代理配置**
 
@@ -318,6 +346,7 @@ target = "ghcr" # ghcr/dockerhub
         *   说明: 指定要代理的 Docker 注册表。
             *   `"ghcr"`: 代理 GitHub Container Registry (ghcr.io)。
             *   `"dockerhub"`: 代理 Docker Hub (docker.io)。
+            *   自定义, 支持传入自定义target, 例如`"docker.example.com"`
 
 ## `blacklist.json` - 黑名单配置
 
