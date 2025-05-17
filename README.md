@@ -17,12 +17,13 @@
 - 🌐 **使用字节旗下的 [HertZ](https://github.com/cloudwego/hertz) 作为 Web 框架**
 - 📡 **使用 [Touka-HTTPC](https://github.com/satomitouka/touka-httpc) 作为 HTTP 客户端**
 - 📥 **支持 Git clone、raw、releases 等文件拉取**
+- 🐳 **支持反代Docker, GHCR等镜像仓库**
 - 🎨 **支持多个前端主题**
 - 🚫 **支持自定义黑名单/白名单**
 - 🗄️ **支持 Git Clone 缓存（配合 [Smart-Git](https://github.com/WJQSERVER-STUDIO/smart-git)）**
-- 🐳 **支持 Docker 部署**
-- 🐳 **支持自托管**
+- 🐳 **支持自托管与Docker容器化部署**
 - ⚡ **支持速率限制**
+- ⚡ **支持带宽速率限制**
 - 🔒 **支持用户鉴权**
 - 🐚 **支持 shell 脚本多层嵌套加速**
 
@@ -34,7 +35,9 @@
 
 [相关文章](https://blog.wjqserver.com/categories/my-program/)
 
-[项目文档](https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/docs/menu.md)
+[GHProxy项目文档](https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/docs/menu.md)
+
+[GHProxy项目文档Next(仍在建设中)](https://ghproxy-docs.pages.dev/)
 
 ### 使用示例
 
