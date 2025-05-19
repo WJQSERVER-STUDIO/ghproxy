@@ -2,6 +2,7 @@
 host = "0.0.0.0" 
 port = 8080 
 netlib = "netpoll" # "netpoll" / "std" "standard" "net/http" "net"
+senseClientDisconnection = false
 sizeLimit = 125 # MB
 memLimit = 0 # MB
 H2C = true
@@ -33,6 +34,7 @@ staticDir = "/data/www"
 logFilePath = "/data/ghproxy/log/ghproxy.log" 
 maxLogSize = 5 # MB
 level = "info" # dump, debug, info, warn, error, none
+async = false
 hertzLogPath = "/data/ghproxy/log/hertz.log"
 
 [auth]

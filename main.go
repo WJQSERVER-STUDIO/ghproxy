@@ -121,6 +121,7 @@ func loadConfig() {
 
 func setupLogger(cfg *config.Config) {
 	var err error
+
 	err = logger.Init(cfg.Log.LogFilePath, cfg.Log.MaxLogSize)
 	if err != nil {
 		fmt.Printf("Failed to initialize logger: %v\n", err)
@@ -131,6 +132,8 @@ func setupLogger(cfg *config.Config) {
 		fmt.Printf("Logger Level Error: %v\n", err)
 		os.Exit(1)
 	}
+	logger.SetAsync(cfg.Log.Async)
+
 	fmt.Printf("Log Level: %s\n", cfg.Log.Level)
 	logDebug("Config File Path: ", cfgfile)
 	logDebug("Loaded config: %v\n", cfg)
@@ -401,13 +404,13 @@ func main() {
 			r = server.New(
 				server.WithH2C(true),
 				server.WithHostPorts(addr),
-				server.WithSenseClientDisconnection(true),
+				server.WithSenseClientDisconnection(cfg.Server.SenseClientDisconnection),
 			)
 			r.AddProtocol("h2", factory.NewServerFactory())
 		} else {
 			r = server.New(
 				server.WithHostPorts(addr),
-				server.WithSenseClientDisconnection(true),
+				server.WithSenseClientDisconnection(cfg.Server.SenseClientDisconnection),
 			)
 		}
 	} else {
@@ -465,7 +468,44 @@ func main() {
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 
-	r.Any("/v2/*filepath", func(ctx context.Context, c *app.RequestContext) {
+	r.GET("/v2/", func(ctx context.Context, c *app.RequestContext) {
+		proxy.GhcrRouting(cfg)(ctx, c)
+
+		/*
+			//proxy.GhcrRouting(cfg)(ctx, c)
+			// 返回200与空json
+			//c.JSON(200, map[string]interface{}{})
+			emptyJSON := "{}"
+			//emptyJSON := `{"name":"disable-list-tags","tags":[]}`
+			c.Header("Content-Type", "application/json")
+			c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
+			c.String(200, emptyJSON)
+		*/
+		/*
+			emptyJSON := "{}"
+			c.Header("Content-Type", "application/json")
+			c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
+
+			c.Header("Docker-Distribution-API-Version", "registry/2.0")
+
+			c.Status(200)
+			c.Write([]byte(emptyJSON))
+		*/
+
+		/*
+			w := adaptor.GetCompatResponseWriter(&c.Response)
+
+			const emptyJSON = "{}"
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Content-Length", fmt.Sprint(len(emptyJSON)))
+			w.Header().Del("Server")
+
+			fmt.Fprint(w, emptyJSON)
+		*/
+
+	})
+
+	r.Any("/v2/:target/*filepath", func(ctx context.Context, c *app.RequestContext) {
 		proxy.GhcrRouting(cfg)(ctx, c)
 	})
 
