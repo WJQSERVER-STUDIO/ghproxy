@@ -468,44 +468,52 @@ func main() {
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 
-	r.GET("/v2/", func(ctx context.Context, c *app.RequestContext) {
-		proxy.GhcrRouting(cfg)(ctx, c)
+	// for 3.4.0
 
-		/*
-			//proxy.GhcrRouting(cfg)(ctx, c)
-			// 返回200与空json
-			//c.JSON(200, map[string]interface{}{})
-			emptyJSON := "{}"
-			//emptyJSON := `{"name":"disable-list-tags","tags":[]}`
-			c.Header("Content-Type", "application/json")
-			c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
-			c.String(200, emptyJSON)
-		*/
-		/*
-			emptyJSON := "{}"
-			c.Header("Content-Type", "application/json")
-			c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
+	/*
+		r.GET("/v2/", func(ctx context.Context, c *app.RequestContext) {
+			proxy.GhcrRouting(cfg)(ctx, c)
 
-			c.Header("Docker-Distribution-API-Version", "registry/2.0")
+			/*
+				//proxy.GhcrRouting(cfg)(ctx, c)
+				// 返回200与空json
+				//c.JSON(200, map[string]interface{}{})
+				emptyJSON := "{}"
+				//emptyJSON := `{"name":"disable-list-tags","tags":[]}`
+				c.Header("Content-Type", "application/json")
+				c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
+				c.String(200, emptyJSON)
+	*/
+	/*
+		emptyJSON := "{}"
+		c.Header("Content-Type", "application/json")
+		c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
 
-			c.Status(200)
-			c.Write([]byte(emptyJSON))
-		*/
+		c.Header("Docker-Distribution-API-Version", "registry/2.0")
 
-		/*
-			w := adaptor.GetCompatResponseWriter(&c.Response)
+		c.Status(200)
+		c.Write([]byte(emptyJSON))
+	*/
 
-			const emptyJSON = "{}"
-			w.Header().Set("Content-Type", "application/json")
-			w.Header().Set("Content-Length", fmt.Sprint(len(emptyJSON)))
-			w.Header().Del("Server")
+	/*
+		w := adaptor.GetCompatResponseWriter(&c.Response)
 
-			fmt.Fprint(w, emptyJSON)
-		*/
+		const emptyJSON = "{}"
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Length", fmt.Sprint(len(emptyJSON)))
+		w.Header().Del("Server")
 
-	})
+		fmt.Fprint(w, emptyJSON)
+	*/
+	/*
+		})
 
-	r.Any("/v2/:target/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		r.Any("/v2/:target/*filepath", func(ctx context.Context, c *app.RequestContext) {
+			proxy.GhcrRouting(cfg)(ctx, c)
+		})
+	*/
+
+	r.Any("/v2/*filepath", func(ctx context.Context, c *app.RequestContext) {
 		proxy.GhcrRouting(cfg)(ctx, c)
 	})
 
