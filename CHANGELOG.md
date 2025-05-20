@@ -1,5 +1,14 @@
 # 更新日志
 
+3.3.3 - 2025-05-20
+---
+- CHANGE: 加入`senseClientDisconnection`与`async`配置项
+
+25w39a - 2025-05-19
+---
+- PRE-RELEASE: 此版本是v3.3.3预发布版本,请勿在生产环境中使用;
+- CHANGE: 加入`senseClientDisconnection`与`async`配置项
+
 3.3.2 - 2025-05-18
 ---
 - CHANGE: 默认主题改为`design`

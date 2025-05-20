@@ -6,3 +6,4 @@ list.json
 repos
 pages
 *_test
+.*
