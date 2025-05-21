@@ -37,11 +37,11 @@
 
 [GHProxy项目文档](https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/docs/menu.md)
 
-[GHProxy项目文档Next(仍在建设中)](https://ghproxy-docs.pages.dev/)
+[GHProxy项目文档Next(仍在建设中)](https://wjqserver.pages.dev/docs/category/ghproxy) 感谢 [@redbunnys](https://github.com/redbunnys)的维护
 
 ### 使用示例
 
-```
+```bash 
 # 下载文件
 https://ghproxy.1888866.xyz/raw.githubusercontent.com/WJQSERVER-STUDIO/tools-stable/main/tools-stable-ghproxy.sh
 https://ghproxy.1888866.xyz/https://raw.githubusercontent.com/WJQSERVER-STUDIO/tools-stable/main/tools-stable-ghproxy.sh
@@ -49,6 +49,15 @@ https://ghproxy.1888866.xyz/https://raw.githubusercontent.com/WJQSERVER-STUDIO/t
 # 克隆仓库
 git clone https://ghproxy.1888866.xyz/github.com/WJQSERVER-STUDIO/ghproxy.git
 git clone https://ghproxy.1888866.xyz/https://github.com/WJQSERVER-STUDIO/ghproxy.git
+
+# Docker(OCI) 代理
+docker pull gh.example.com/wjqserver/ghproxy
+docker pull gh.example.com/adguard/adguardhome
+
+docker pull gh.example.com/docker.io/wjqserver/ghproxy
+docker pull gh.example.com/docker.io/adguard/adguardhome
+
+docker pull gh.example.com/ghcr.io/openfaas/queue-worker 
 ```
 
 ## 部署说明
