@@ -104,8 +104,7 @@ func GhcrWithImageRouting(cfg *config.Config) app.HandlerFunc {
 func GhcrToTarget(ctx context.Context, c *app.RequestContext, cfg *config.Config, target string, path string, image *imageInfo) {
 	if cfg.Docker.Enabled {
 		if target != "" {
-			GhcrRequest(ctx, c, "https://"+target+"/v2/"+path+string(c.Request.QueryString()), image, cfg, target)
-
+			GhcrRequest(ctx, c, "https://"+target+"/v2/"+path+"?"+string(c.Request.QueryString()), image, cfg, target)
 		} else {
 			if cfg.Docker.Target == "ghcr" {
 				GhcrRequest(ctx, c, "https://"+ghcrTarget+string(c.Request.RequestURI()), image, cfg, ghcrTarget)
@@ -166,10 +165,12 @@ func GhcrRequest(ctx context.Context, c *app.RequestContext, u string, image *im
 	})
 
 	req.Header.Set("Host", target)
-	token, exist := cache.Get(image.Image)
-	if exist {
-		logDebug("Use Cache Token: %s", token)
-		req.Header.Set("Authorization", "Bearer "+token)
+	if image != nil {
+		token, exist := cache.Get(image.Image)
+		if exist {
+			logDebug("Use Cache Token: %s", token)
+			req.Header.Set("Authorization", "Bearer "+token)
+		}
 	}
 
 	resp, err = ghcrclient.Do(req)
@@ -183,6 +184,10 @@ func GhcrRequest(ctx context.Context, c *app.RequestContext, u string, image *im
 		// 请求target /v2/路径
 		if string(c.Request.URI().Path()) != "/v2/" {
 			resp.Body.Close()
+			if image == nil {
+				ErrorPage(c, NewErrorWithStatusLookup(401, "Unauthorized"))
+				return
+			}
 			token := ChallengeReq(target, image, ctx, c)
 
 			// 更新kv
