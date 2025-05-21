@@ -1,5 +1,11 @@
 # 更新日志
 
+25w40a - 2025-05-21
+---
+- PRE-RELEASE: 此版本是v3.4.0预发布版本,请勿在生产环境中使用;
+- ADD: 初步实现多`target` Docker代理
+- ADD: 加入`weakcache`用于处理短期令牌
+
 3.3.3 - 2025-05-20
 ---
 - CHANGE: 加入`senseClientDisconnection`与`async`配置项
