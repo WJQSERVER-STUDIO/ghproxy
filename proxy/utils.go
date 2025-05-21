@@ -13,8 +13,7 @@ func listCheck(cfg *config.Config, c *app.RequestContext, user string, repo stri
 
 	// 白名单检查
 	if cfg.Whitelist.Enabled {
-		var whitelist bool
-		whitelist = auth.CheckWhitelist(user, repo)
+		whitelist := auth.CheckWhitelist(user, repo)
 		if !whitelist {
 			ErrorPage(c, NewErrorWithStatusLookup(403, fmt.Sprintf("Whitelist Blocked repo: %s/%s", user, repo)))
 			logInfo("%s %s %s %s %s Whitelist Blocked repo: %s/%s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), user, repo)
@@ -24,8 +23,7 @@ func listCheck(cfg *config.Config, c *app.RequestContext, user string, repo stri
 
 	// 黑名单检查
 	if cfg.Blacklist.Enabled {
-		var blacklist bool
-		blacklist = auth.CheckBlacklist(user, repo)
+		blacklist := auth.CheckBlacklist(user, repo)
 		if blacklist {
 			ErrorPage(c, NewErrorWithStatusLookup(403, fmt.Sprintf("Blacklist Blocked repo: %s/%s", user, repo)))
 			logInfo("%s %s %s %s %s Blacklist Blocked repo: %s/%s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), user, repo)

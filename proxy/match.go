@@ -17,9 +17,12 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 	// 匹配 "https://github.com"开头的链接
 	if strings.HasPrefix(rawPath, "https://github.com") {
 		remainingPath := strings.TrimPrefix(rawPath, "https://github.com")
-		if strings.HasPrefix(remainingPath, "/") {
-			remainingPath = strings.TrimPrefix(remainingPath, "/")
-		}
+		/*
+			if strings.HasPrefix(remainingPath, "/") {
+				remainingPath = strings.TrimPrefix(remainingPath, "/")
+			}
+		*/
+		remainingPath = strings.TrimPrefix(remainingPath, "/")
 		// 预期格式/user/repo/more...
 		// 取出user和repo和最后部分
 		parts := strings.Split(remainingPath, "/")
