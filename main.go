@@ -213,6 +213,8 @@ func loadEmbeddedPages(cfg *config.Config) (fs.FS, fs.FS, error) {
 		pages, err = fs.Sub(pagesFS, "pages/classic")
 	case "mino":
 		pages, err = fs.Sub(pagesFS, "pages/mino")
+	case "hub":
+		pages, err = fs.Sub(pagesFS, "pages/hub")
 	default:
 		pages, err = fs.Sub(pagesFS, "pages/design") // 默认主题
 		logWarning("Invalid Pages Theme: %s, using default theme 'design'", cfg.Pages.Theme)
@@ -294,7 +296,7 @@ func setInternalRoute(cfg *config.Config, r *server.Hertz) error {
 		staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
 	})
 	r.GET("/favicon.ico", func(ctx context.Context, c *app.RequestContext) {
-		staticServer := http.FileServer(http.FS(pages))
+		staticServer := http.FileServer(http.FS(assets))
 		req, err := adaptor.GetCompatRequest(&c.Request)
 		if err != nil {
 			logError("%s", err)
@@ -510,8 +512,9 @@ func main() {
 			http.ListenAndServe("localhost:6060", nil)
 		}()
 	}
-
-	defer wcache.StopCleanup()
+	if wcache != nil {
+		defer wcache.StopCleanup()
+	}
 	defer logger.Close()
 	defer func() {
 		if hertZfile != nil {
