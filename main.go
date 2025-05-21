@@ -515,6 +515,7 @@ func main() {
 	if wcache != nil {
 		defer wcache.StopCleanup()
 	}
+
 	defer logger.Close()
 	defer func() {
 		if hertZfile != nil {

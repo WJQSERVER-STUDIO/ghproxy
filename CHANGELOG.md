@@ -1,5 +1,19 @@
 # 更新日志
 
+3.4.0 - 2025-05-21
+---
+- ADD: 初步实现多`target` Docker代理
+- ADD: 加入`weakcache`用于处理短期令牌
+- ADD: 新增`hub`主题
+- ADD: 新增`/api/shell_nest/status`与`/api/oci_proxy/status` API
+
+25w40b - 2025-05-21
+---
+- PRE-RELEASE: 此版本是v3.4.0预发布版本,请勿在生产环境中使用;
+- ADD: 新增`hub`主题
+- ADD: 新增`/api/shell_nest/status`与`/api/oci_proxy/status` API
+- CHANGE: 对细节进行优化
+
 25w40a - 2025-05-21
 ---
 - PRE-RELEASE: 此版本是v3.4.0预发布版本,请勿在生产环境中使用;
