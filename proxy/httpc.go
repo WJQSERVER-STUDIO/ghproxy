@@ -12,10 +12,12 @@ import (
 var BufferSize int = 32 * 1024 // 32KB
 
 var (
-	tr        *http.Transport
-	gittr     *http.Transport
-	client    *httpc.Client
-	gitclient *httpc.Client
+	tr         *http.Transport
+	gittr      *http.Transport
+	client     *httpc.Client
+	gitclient  *httpc.Client
+	ghcrtr     *http.Transport
+	ghcrclient *httpc.Client
 )
 
 func InitReq(cfg *config.Config) error {
@@ -23,11 +25,13 @@ func InitReq(cfg *config.Config) error {
 	if cfg.GitClone.Mode == "cache" {
 		initGitHTTPClient(cfg)
 	}
+	initGhcrHTTPClient(cfg)
 	err := SetGlobalRateLimit(cfg)
 	if err != nil {
 		return err
 	}
 	return nil
+
 }
 
 func initHTTPClient(cfg *config.Config) {
@@ -77,6 +81,7 @@ func initHTTPClient(cfg *config.Config) {
 			httpc.WithTransport(tr),
 		)
 	}
+
 }
 
 func initGitHTTPClient(cfg *config.Config) {
@@ -144,6 +149,54 @@ func initGitHTTPClient(cfg *config.Config) {
 				Http2:           true,
 				Http2_Cleartext: true,
 			}),
+		)
+	}
+}
+
+func initGhcrHTTPClient(cfg *config.Config) {
+	var proTolcols = new(http.Protocols)
+	proTolcols.SetHTTP1(true)
+	proTolcols.SetHTTP2(true)
+	if cfg.Httpc.Mode == "auto" {
+
+		ghcrtr = &http.Transport{
+			IdleConnTimeout: 30 * time.Second,
+			WriteBufferSize: 32 * 1024, // 32KB
+			ReadBufferSize:  32 * 1024, // 32KB
+			Protocols:       proTolcols,
+		}
+	} else if cfg.Httpc.Mode == "advanced" {
+		ghcrtr = &http.Transport{
+			MaxIdleConns:        cfg.Httpc.MaxIdleConns,
+			MaxConnsPerHost:     cfg.Httpc.MaxConnsPerHost,
+			MaxIdleConnsPerHost: cfg.Httpc.MaxIdleConnsPerHost,
+			WriteBufferSize:     32 * 1024, // 32KB
+			ReadBufferSize:      32 * 1024, // 32KB
+			Protocols:           proTolcols,
+		}
+	} else {
+		// 错误的模式
+		logError("unknown httpc mode: %s", cfg.Httpc.Mode)
+		fmt.Println("unknown httpc mode: ", cfg.Httpc.Mode)
+		logWarning("use Auto to Run HTTP Client")
+		fmt.Println("use Auto to Run HTTP Client")
+		ghcrtr = &http.Transport{
+			IdleConnTimeout: 30 * time.Second,
+			WriteBufferSize: 32 * 1024, // 32KB
+			ReadBufferSize:  32 * 1024, // 32KB
+		}
+	}
+	if cfg.Outbound.Enabled {
+		initTransport(cfg, ghcrtr)
+	}
+	if cfg.Server.Debug {
+		ghcrclient = httpc.New(
+			httpc.WithTransport(ghcrtr),
+			httpc.WithDumpLog(),
+		)
+	} else {
+		ghcrclient = httpc.New(
+			httpc.WithTransport(ghcrtr),
 		)
 	}
 }

@@ -17,6 +17,7 @@ import (
 	"ghproxy/middleware/loggin"
 	"ghproxy/proxy"
 	"ghproxy/rate"
+	"ghproxy/weakcache"
 
 	"github.com/WJQSERVER-STUDIO/logger"
 	"github.com/hertz-contrib/http2/factory"
@@ -48,6 +49,10 @@ var (
 var (
 	//go:embed pages/*
 	pagesFS embed.FS
+)
+
+var (
+	wcache *weakcache.Cache[string] // docker token缓存
 )
 
 var (
@@ -360,6 +365,9 @@ func init() {
 		setMemLimit(cfg)
 		loadlist(cfg)
 		setupRateLimit(cfg)
+		if cfg.Docker.Enabled {
+			wcache = proxy.InitWeakCache()
+		}
 
 		if cfg.Server.Debug {
 			runMode = "dev"
@@ -468,23 +476,7 @@ func main() {
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 
-	// for 3.4.0
-
-	/*
-		r.GET("/v2/", func(ctx context.Context, c *app.RequestContext) {
-			proxy.GhcrRouting(cfg)(ctx, c)
-
-			/*
-				//proxy.GhcrRouting(cfg)(ctx, c)
-				// 返回200与空json
-				//c.JSON(200, map[string]interface{}{})
-				emptyJSON := "{}"
-				//emptyJSON := `{"name":"disable-list-tags","tags":[]}`
-				c.Header("Content-Type", "application/json")
-				c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
-				c.String(200, emptyJSON)
-	*/
-	/*
+	r.GET("/v2/", func(ctx context.Context, c *app.RequestContext) {
 		emptyJSON := "{}"
 		c.Header("Content-Type", "application/json")
 		c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
@@ -493,29 +485,17 @@ func main() {
 
 		c.Status(200)
 		c.Write([]byte(emptyJSON))
-	*/
+	})
+
+	r.Any("/v2/:target/:user/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		proxy.GhcrWithImageRouting(cfg)(ctx, c)
+	})
 
 	/*
-		w := adaptor.GetCompatResponseWriter(&c.Response)
-
-		const emptyJSON = "{}"
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Content-Length", fmt.Sprint(len(emptyJSON)))
-		w.Header().Del("Server")
-
-		fmt.Fprint(w, emptyJSON)
-	*/
-	/*
-		})
-
 		r.Any("/v2/:target/*filepath", func(ctx context.Context, c *app.RequestContext) {
 			proxy.GhcrRouting(cfg)(ctx, c)
 		})
 	*/
-
-	r.Any("/v2/*filepath", func(ctx context.Context, c *app.RequestContext) {
-		proxy.GhcrRouting(cfg)(ctx, c)
-	})
 
 	r.NoRoute(func(ctx context.Context, c *app.RequestContext) {
 		proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
@@ -531,7 +511,7 @@ func main() {
 		}()
 	}
 
-	r.Spin()
+	defer wcache.StopCleanup()
 	defer logger.Close()
 	defer func() {
 		if hertZfile != nil {
@@ -541,5 +521,8 @@ func main() {
 			}
 		}
 	}()
+
+	r.Spin()
+
 	fmt.Println("Program Exit")
 }
