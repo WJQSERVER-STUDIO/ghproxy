@@ -2,8 +2,9 @@ package proxy
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+
+	"github.com/go-json-experiment/json"
 
 	"ghproxy/config"
 	"ghproxy/weakcache"

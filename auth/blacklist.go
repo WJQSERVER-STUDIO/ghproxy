@@ -1,12 +1,13 @@
 package auth
 
 import (
-	"encoding/json"
 	"fmt"
 	"ghproxy/config"
 	"os"
 	"strings"
 	"sync"
+
+	"github.com/go-json-experiment/json"
 )
 
 type Blacklist struct {
