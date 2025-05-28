@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/go-json-experiment/json"
+	json "github.com/bytedance/sonic"
 )
 
 // Whitelist 用于存储白名单信息

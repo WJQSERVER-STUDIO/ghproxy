@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-json-experiment/json"
+	json "github.com/bytedance/sonic"
 
 	"ghproxy/config"
 	"ghproxy/weakcache"

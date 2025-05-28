@@ -1,10 +1,15 @@
 # 更新日志
 
+25w41b - 2025-05-28
+---
+- PRE-RELEASE: 此版本是v3.4.1预发布版本,请勿在生产环境中使用;
+- CHANGE: 把json库替换到[sonic](github.com/bytedance/sonic)
+
 25w41a - 2025-05-28
 ---
 - PRE-RELEASE: 此版本是v3.4.1预发布版本,请勿在生产环境中使用;
 - ADD: 为`errorpage`部分增加lru缓存, 避免重复渲染
-- CHANGE: 替换到实验性的`encode/json/v2`
+- CHANGE: 替换到实验性的`encoding/json/v2`
 
 3.4.0 - 2025-05-21
 ---

@@ -14,7 +14,7 @@ require (
 
 require (
 	github.com/WJQSERVER-STUDIO/go-utils/limitreader v0.0.2
-	github.com/go-json-experiment/json v0.0.0-20250517221953-25912455fbc8
+	github.com/bytedance/sonic v1.13.2
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 )
 
@@ -22,7 +22,6 @@ require (
 	github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.4 // indirect
 	github.com/WJQSERVER-STUDIO/go-utils/log v0.0.3 // indirect
 	github.com/bytedance/gopkg v0.1.2 // indirect
-	github.com/bytedance/sonic v1.13.2 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
 	github.com/cloudwego/gopkg v0.1.4 // indirect
