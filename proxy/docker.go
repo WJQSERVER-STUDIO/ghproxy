@@ -2,8 +2,9 @@ package proxy
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+
+	json "github.com/bytedance/sonic"
 
 	"ghproxy/config"
 	"ghproxy/weakcache"

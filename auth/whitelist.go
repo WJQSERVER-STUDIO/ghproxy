@@ -1,12 +1,13 @@
 package auth
 
 import (
-	"encoding/json"
 	"fmt"
 	"ghproxy/config"
 	"os"
 	"strings"
 	"sync"
+
+	json "github.com/bytedance/sonic"
 )
 
 // Whitelist 用于存储白名单信息
