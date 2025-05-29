@@ -137,7 +137,7 @@ func (d ErrorPageData) ToCacheKey() string {
 	err := enc.Encode(d)
 	if err != nil {
 		logError("Failed to gob encode ErrorPageData for cache key: %v", err)
-		panic(fmt.Errorf("failed to gob encode ErrorPageData: %w", err))
+		return ""
 	}
 
 	hasher := sha256.New()
@@ -298,6 +298,11 @@ func ErrorPage(c *app.RequestContext, errInfo *GHProxyErrors) {
 	pageDataStruct := ErrPageUnwarper(errInfo)
 	// 使用 ErrorPageData 生成一个唯一的 SHA256 缓存键
 	cacheKey := pageDataStruct.ToCacheKey()
+	if cacheKey == "" {
+		c.JSON(errInfo.StatusCode, map[string]string{"error": errInfo.ErrorMessage})
+		logWarning("Failed to generate cache key for error page: %v", errInfo)
+		return
+	}
 
 	var pageData []byte
 	var err error
@@ -311,7 +316,7 @@ func ErrorPage(c *app.RequestContext, errInfo *GHProxyErrors) {
 		pageData, err = htmlTemplateRender(pageDataStruct)
 		if err != nil {
 			c.JSON(errInfo.StatusCode, map[string]string{"error": errInfo.ErrorMessage})
-			logDebug("Failed to render error page for status %d (Key: %s): %v", errInfo.StatusCode, cacheKey, err)
+			logWarning("Failed to render error page for status %d (Key: %s): %v", errInfo.StatusCode, cacheKey, err)
 			return
 		}
 
