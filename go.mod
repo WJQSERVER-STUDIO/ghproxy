@@ -5,7 +5,7 @@ go 1.24.3
 require (
 	github.com/BurntSushi/toml v1.5.0
 	github.com/WJQSERVER-STUDIO/httpc v0.5.1
-	github.com/WJQSERVER-STUDIO/logger v1.7.2
+	github.com/WJQSERVER-STUDIO/logger v1.7.3
 	github.com/cloudwego/hertz v0.10.0
 	github.com/hertz-contrib/http2 v0.1.8
 	golang.org/x/net v0.40.0
@@ -14,8 +14,9 @@ require (
 
 require (
 	github.com/WJQSERVER-STUDIO/go-utils/limitreader v0.0.2
-	github.com/bytedance/sonic v1.13.2
+	github.com/bytedance/sonic v1.13.3
 	github.com/hashicorp/golang-lru/v2 v2.0.7
+	github.com/wjqserver/modembed v0.0.1
 )
 
 require (
