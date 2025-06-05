@@ -62,7 +62,7 @@ jobs:
           fi
       - name: 拉取前端
         run: |
-          sudo git clone https://github.com/WJQSERVER-STUDIO/GHPrxoy-Frontend.git pages
+          sudo git clone https://github.com/WJQSERVER-STUDIO/GHProxy-Frontend.git pages
           sudo rm -rf pages/.git/
           
       - name: 安装 Go

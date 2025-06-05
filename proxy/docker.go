@@ -35,35 +35,6 @@ func InitWeakCache() *weakcache.Cache[string] {
 	return cache
 }
 
-/*
-func GhcrRouting(cfg *config.Config) app.HandlerFunc {
-	return func(ctx context.Context, c *app.RequestContext) {
-
-		charToFind := '.'
-		reqTarget := c.Param("target")
-		path := ""
-		target := ""
-
-		if strings.ContainsRune(reqTarget, charToFind) {
-
-			path = c.Param("filepath")
-			if reqTarget == "docker.io" {
-				target = dockerhubTarget
-			} else if reqTarget == "ghcr.io" {
-				target = ghcrTarget
-			} else {
-				target = reqTarget
-			}
-		} else {
-			path = string(c.Request.RequestURI())
-		}
-
-		GhcrToTarget(ctx, c, cfg, target, path, nil)
-
-	}
-}
-*/
-
 func GhcrWithImageRouting(cfg *config.Config) app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 

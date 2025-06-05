@@ -35,9 +35,7 @@
 
 [相关文章](https://blog.wjqserver.com/categories/my-program/)
 
-[GHProxy项目文档Next](https://wjqserver-docs.pages.dev/docs/ghproxy/) 感谢 [@redbunnys](https://github.com/redbunnys)的维护
-
-[GHProxy项目文档](https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/docs/menu.md)
+[GHProxy项目文档](https://wjqserver-docs.pages.dev/docs/ghproxy/) 感谢 [@redbunnys](https://github.com/redbunnys)的维护
 
 ### 使用示例
 

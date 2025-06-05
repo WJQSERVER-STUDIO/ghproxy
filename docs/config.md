@@ -1,5 +1,7 @@
 # ghproxy 用户配置文档
 
+> 弃用, 请转到 [GHProxy项目文档](https://wjqserver-docs.pages.dev/docs/ghproxy/)
+
 `ghproxy` 的配置主要通过修改 `config` 目录下的 `config.toml`、`blacklist.json` 和 `whitelist.json` 文件来实现。本文档将详细介绍这些配置文件的作用以及用户可以自定义的配置选项。
 
 ## `config.toml` - 主配置文件

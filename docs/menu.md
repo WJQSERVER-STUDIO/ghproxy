@@ -1,5 +1,7 @@
 ## GHProxy 文档
 
+> 弃用, 请转到 [GHProxy项目文档](https://wjqserver-docs.pages.dev/docs/ghproxy/)
+
 ### 配置文件
 
 https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/docs/config.md
