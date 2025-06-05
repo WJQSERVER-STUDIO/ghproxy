@@ -1,5 +1,11 @@
 # 更新日志
 
+3.4.3 - 2025-06-05
+---
+- CHANGE: 弃用`adaptor.GetCompatRequest`, 切换到`adaptor.HertzHandler`
+- CHANGE: 为`embedFS`使用包装器, 使其支持`Last-Modified`
+- CHANGE: 为静态资源增加`Cache-Control: public, max-age=3600, must-revalidate`
+
 25w43a - 2025-06-05
 ---
 - PRE-RELEASE: 此版本是v3.4.3预发布版本,请勿在生产环境中使用;
