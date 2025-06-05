@@ -1,5 +1,7 @@
 # Flag
 
+> 弃用, 请转到 [GHProxy项目文档](https://wjqserver-docs.pages.dev/docs/ghproxy/)
+
 GHProxy接受以下flag传入
 
 ```bash

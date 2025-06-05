@@ -110,15 +110,17 @@ Key = ""
 Token = "token"
 enabled = false
 passThrough = false
-ForceAllowApi = true
+ForceAllowApi = false
+ForceAllowApiPassList = false
 */
 type AuthConfig struct {
-	Enabled       bool   `toml:"enabled"`
-	Method        string `toml:"method"`
-	Key           string `toml:"key"`
-	Token         string `toml:"token"`
-	PassThrough   bool   `toml:"passThrough"`
-	ForceAllowApi bool   `toml:"ForceAllowApi"`
+	Enabled               bool   `toml:"enabled"`
+	Method                string `toml:"method"`
+	Key                   string `toml:"key"`
+	Token                 string `toml:"token"`
+	PassThrough           bool   `toml:"passThrough"`
+	ForceAllowApi         bool   `toml:"ForceAllowApi"`
+	ForceAllowApiPassList bool   `toml:"ForceAllowApiPassList"`
 }
 
 type BlacklistConfig struct {
@@ -258,12 +260,13 @@ func DefaultConfig() *Config {
 			HertZLogPath: "/data/ghproxy/log/hertz.log",
 		},
 		Auth: AuthConfig{
-			Enabled:       false,
-			Method:        "parameters",
-			Key:           "",
-			Token:         "token",
-			PassThrough:   false,
-			ForceAllowApi: false,
+			Enabled:               false,
+			Method:                "parameters",
+			Key:                   "",
+			Token:                 "token",
+			PassThrough:           false,
+			ForceAllowApi:         false,
+			ForceAllowApiPassList: false,
 		},
 		Blacklist: BlacklistConfig{
 			Enabled:       false,

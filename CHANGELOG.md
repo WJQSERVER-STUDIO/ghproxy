@@ -1,5 +1,12 @@
 # 更新日志
 
+25w44a - 2025-06-05
+---
+- PRE-RELEASE: 此版本是v3.5.0预发布版本,请勿在生产环境中使用;
+- CHANGE: 更新许可证 v2.0 => v2.1
+- CHANGE: 修正工作流的一些问题
+- ADD: 增加`ForceAllowApiPassList`, 实现 #114
+
 3.4.3 - 2025-06-05
 ---
 - CHANGE: 弃用`adaptor.GetCompatRequest`, 切换到`adaptor.HertzHandler`

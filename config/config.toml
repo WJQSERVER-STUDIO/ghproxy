@@ -44,6 +44,7 @@ key = ""
 enabled = false
 passThrough = false
 ForceAllowApi = false
+ForceAllowApiPassList = false
 
 [blacklist]
 blacklistFile = "/data/ghproxy/config/blacklist.json"

@@ -1,5 +1,5 @@
 WJQserver Studio 开源许可证
-版本 v2.0
+版本 v2.1
 
 版权所有 © WJQserver Studio 2024
 
@@ -31,8 +31,7 @@ WJQserver Studio 开源许可证
 
 *   1.2  商业使用：  您可以在商业环境中使用本软件，无需获得额外授权，但您的商业使用行为必须遵守以下条款：
 
-    *   1.2.1  保持声明：  您在进行商业使用时，不得移除或修改软件中包含的原始版权声明、许可证声明以及来源声明。
-    *   1.2.2  开源继承 (Copyleft) 与互惠共享：  如果您或您的组织希望将本软件或其衍生作品用于任何商业用途，包括但不限于：
+    *   1.2.1  开源继承 (Copyleft) 与互惠共享：  如果您或您的组织希望将本软件或其衍生作品用于任何商业用途，包括但不限于：
 
         *   盈利性分发：  销售、出租、许可分发本软件或其衍生作品。
         *   盈利性服务：  基于本软件或其衍生作品提供商业服务，例如 SaaS 服务、咨询服务、定制开发服务、收费技术支持服务等。
@@ -44,6 +43,8 @@ WJQserver Studio 开源许可证
         *   i)  继承本许可证并开源：  您必须以本许可证或兼容的开源许可证分发您的衍生作品，并公开您的衍生作品的全部源代码，使得您的衍生作品的接收者也享有与您相同的权利，包括进一步修改和商业使用的权利。 本选项旨在促进社区的共同发展和知识共享，确保基于本软件的商业创新成果也能回馈社区。
         *   ii) 获得授权方明确授权：  如果您不希望以开源方式发布您的衍生作品，或者希望使用其他许可证进行分发，或者您希望在商业运营中使用修改后的版本但不开源，您必须事先获得 WJQserver Studio 的明确书面授权。  授权的具体条款和条件将由 WJQserver Studio 另行协商确定。
 
+*   1.3  保持声明：  公开发布服务时，不得移除或修改软件中包含的原始版权声明、许可证声明以及来源声明。
+
 2. 复制与分发
 
 *   2.1  原始版本复制与分发：  您可以复制和分发本软件的原始版本，前提是必须满足以下条件：
@@ -51,13 +52,13 @@ WJQserver Studio 开源许可证
     *   保留所有声明：  完整保留所有原始版权声明、许可证声明、来源声明以及其他所有权声明。
     *   附带许可证：  在分发软件时，必须同时附带本许可证的完整文本，确保接收者知悉并理解本许可证的全部条款。
 
-*   2.2  衍生作品复制与分发：  您可以复制和分发基于本软件的衍生作品，您对衍生作品的分发行为将受到本许可证第 1.2.2 条（开源继承与互惠共享）的约束。
+*   2.2  衍生作品复制与分发：  您可以复制和分发基于本软件的衍生作品，您对衍生作品的分发行为将受到本许可证第 1.3 条（开源继承与互惠共享）的约束。
 
 3. 修改权限
 
 *   3.1  自由修改：  您被授予自由修改本软件的权限，无论修改目的是非营利性使用还是商业用途。
 
-*   3.2  修改后使用与分发约束：  当您将修改后的版本用于商业用途或分发修改后的版本时，您需要遵守本许可证第 1.2.2 条（开源继承与互惠共享）以及第 2 条（复制与分发）的规定。  即使您不分发修改后的版本，只要您将其用于商业目的，也需要遵守开源继承条款或获得授权。
+*   3.2  修改后使用与分发约束：  当您将修改后的版本用于商业用途或分发修改后的版本时，您需要遵守本许可证第 1.3 条（开源继承与互惠共享）以及第 2 条（复制与分发）的规定。  即使您不分发修改后的版本，只要您将其用于商业目的，也需要遵守开源继承条款或获得授权。
 
 *   3.3  贡献接受：  WJQserver Studio 鼓励社区贡献代码。如果您向本项目贡献代码，您需要同意您的贡献代码按照本许可证条款进行许可。
 
@@ -130,8 +131,7 @@ License Terms
 
 *   1.2  Commercial Use: You may use the Software in a commercial environment without additional authorization, but your commercial use must comply with the following terms:
 
-    *   1.2.1  Maintain Statements: When conducting commercial use, you must not remove or modify the original copyright notices, license notices, and source statements contained in the Software.
-    *   1.2.2  Open Source Inheritance (Copyleft) and Reciprocal Sharing: If you or your organization wish to use the Software or its Derivative Works for any commercial purpose, including but not limited to:
+    *   1.2.1  Open Source Inheritance (Copyleft) and Reciprocal Sharing: If you or your organization wish to use the Software or its Derivative Works for any commercial purpose, including but not limited to:
 
         *   Profit-generating Distribution: Selling, renting, licensing, or distributing the Software or its Derivative Works.
         *   Profit-generating Services: Providing commercial services based on the Software or its Derivative Works, such as SaaS services, consulting services, custom development services, and paid technical support services.
@@ -143,6 +143,8 @@ License Terms
         *   i)  Inherit this License and Open Source: You must distribute your Derivative Works under this License or a compatible open-source license and publicly disclose the entire source code of your Derivative Works, so that recipients of your Derivative Works also enjoy the same rights as you, including the right to further modify and use commercially. This option aims to promote the common development and knowledge sharing of the community, ensuring that commercial innovation achievements based on this Software can also contribute back to the community.
         *   ii) Obtain Explicit Authorization from the Licensor: If you do not wish to release your Derivative Works in an open-source manner, or wish to distribute them under another license, or you wish to use a modified version in commercial operations without open-sourcing it, you must obtain explicit written authorization from WJQserver Studio in advance. The specific terms and conditions of authorization will be determined separately by WJQserver Studio through negotiation.
 
+*    1.3  Maintain Statements: When publish services to public, you must not remove or modify the original copyright notices, license notices, and source statements contained in the Software.
+
 2. Reproduction and Distribution
 
 *   2.1  Reproduction and Distribution of Original Version: You may reproduce and distribute the original version of the Software, provided that the following conditions are met:
@@ -150,13 +152,13 @@ License Terms
     *   Retain All Statements: Completely retain all original copyright notices, license notices, source statements, and other proprietary notices.
     *   Accompany with License: When distributing the Software, you must also include the full text of this License to ensure that recipients are aware of and understand all terms of this License.
 
-*   2.2  Reproduction and Distribution of Derivative Works: You may reproduce and distribute Derivative Works based on the Software. Your distribution of Derivative Works will be subject to the constraints of Clause 1.2.2 of this License (Open Source Inheritance and Reciprocal Sharing).
+*   2.2  Reproduction and Distribution of Derivative Works: You may reproduce and distribute Derivative Works based on the Software. Your distribution of Derivative Works will be subject to the constraints of Clause 1.3 of this License (Open Source Inheritance and Reciprocal Sharing).
 
 3. Modification Permissions
 
 *   3.1  Free Modification: You are granted permission to freely modify the Software, regardless of whether the purpose of modification is for non-profit use or commercial use.
 
-*   3.2  Constraints on Use and Distribution after Modification: When you use a modified version for commercial purposes or distribute a modified version, you need to comply with the provisions of Clause 1.2.2 of this License (Open Source Inheritance and Reciprocal Sharing) and Clause 2 (Reproduction and Distribution). Even if you do not distribute the modified version, as long as you use it for commercial purposes, you also need to comply with the open-source inheritance clause or obtain authorization.
+*   3.2  Constraints on Use and Distribution after Modification: When you use a modified version for commercial purposes or distribute a modified version, you need to comply with the provisions of Clause 1.3 of this License (Open Source Inheritance and Reciprocal Sharing) and Clause 2 (Reproduction and Distribution). Even if you do not distribute the modified version, as long as you use it for commercial purposes, you also need to comply with the open-source inheritance clause or obtain authorization.
 
 *   3.3  Contribution Acceptance: WJQserver Studio encourages community contribution of code. If you contribute code to this project, you need to agree that your contributed code is licensed under the terms of this License.
 

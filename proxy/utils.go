@@ -10,7 +10,9 @@ import (
 )
 
 func listCheck(cfg *config.Config, c *app.RequestContext, user string, repo string, rawPath string) bool {
-
+	if cfg.Auth.ForceAllowApi && cfg.Auth.ForceAllowApiPassList {
+		return false
+	}
 	// 白名单检查
 	if cfg.Whitelist.Enabled {
 		whitelist := auth.CheckWhitelist(user, repo)
