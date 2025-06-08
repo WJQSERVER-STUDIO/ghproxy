@@ -110,7 +110,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		bodyReader = limitreader.NewRateLimitedReader(bodyReader, bandwidthLimit, int(bandwidthBurst), ctx)
 	}
 
-	if MatcherShell(u) && matchString(matcher, matchedMatchers) && cfg.Shell.Editor {
+	if MatcherShell(u) && matchString(matcher) && cfg.Shell.Editor {
 		// 判断body是不是gzip
 		var compress string
 		if resp.Header.Get("Content-Encoding") == "gzip" {
