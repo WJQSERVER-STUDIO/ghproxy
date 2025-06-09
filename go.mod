@@ -8,8 +8,8 @@ require (
 	github.com/WJQSERVER-STUDIO/logger v1.7.3
 	github.com/cloudwego/hertz v0.10.0
 	github.com/hertz-contrib/http2 v0.1.8
-	golang.org/x/net v0.40.0
-	golang.org/x/time v0.11.0
+	golang.org/x/net v0.41.0
+	golang.org/x/time v0.12.0
 )
 
 require (
@@ -36,10 +36,10 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	golang.org/x/arch v0.17.0 // indirect
-	golang.org/x/exp v0.0.0-20250531010427-b6e5de432a8b // indirect
+	golang.org/x/arch v0.18.0 // indirect
+	golang.org/x/exp v0.0.0-20250606033433-dcc06ee1d476 // indirect
 	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/text v0.25.0 // indirect
+	golang.org/x/text v0.26.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 )
 
