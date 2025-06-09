@@ -68,6 +68,12 @@ func TestMatcher_Compatibility(t *testing.T) {
 			config:       cfgWithAuth,
 			expectedUser: "owner", expectedRepo: "repo", expectedMatcher: "clone",
 		},
+		{
+			name:        "Girhub Broken Path",
+			rawPath:     "https://github.com/owner",
+			config:      cfgWithAuth,
+			expectError: true, expectedErrCode: 400,
+		},
 
 		{
 			name:         "RawGHUserContent Path",

@@ -9,6 +9,25 @@ import (
 	"sync"
 )
 
+var (
+	githubPrefix    = "https://github.com/"
+	rawPrefix       = "https://raw.githubusercontent.com/"
+	gistPrefix      = "https://gist.github.com/"
+	apiPrefix       = "https://api.github.com/"
+	githubPrefixLen int
+	rawPrefixLen    int
+	gistPrefixLen   int
+	apiPrefixLen    int
+)
+
+func init() {
+	githubPrefixLen = len(githubPrefix)
+	rawPrefixLen = len(rawPrefix)
+	gistPrefixLen = len(gistPrefix)
+	apiPrefixLen = len(apiPrefix)
+	//log.Printf("githubPrefixLen: %d, rawPrefixLen: %d, gistPrefixLen: %d, apiPrefixLen: %d", githubPrefixLen, rawPrefixLen, gistPrefixLen, apiPrefixLen)
+}
+
 // Matcher 从原始URL路径中高效地解析并匹配代理规则.
 func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHProxyErrors) {
 	if len(rawPath) < 18 {
@@ -16,8 +35,8 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 	}
 
 	// 匹配 "https://github.com/"
-	if strings.HasPrefix(rawPath, "https://github.com/") {
-		remaining := rawPath[19:]
+	if strings.HasPrefix(rawPath, githubPrefix) {
+		remaining := rawPath[githubPrefixLen:]
 		i := strings.IndexByte(remaining, '/')
 		if i <= 0 {
 			return "", "", "", NewErrorWithStatusLookup(400, "malformed github path: missing user")
@@ -55,8 +74,8 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 	}
 
 	// 匹配 "https://raw.githubusercontent.com/"
-	if strings.HasPrefix(rawPath, "https://raw.githubusercontent.com/") {
-		remaining := rawPath[34:]
+	if strings.HasPrefix(rawPath, rawPrefix) {
+		remaining := rawPath[rawPrefixLen:]
 		// 这里的逻辑与 github.com 的类似, 需要提取 user, repo, branch, file...
 		// 我们只需要 user 和 repo
 		i := strings.IndexByte(remaining, '/')
@@ -79,8 +98,8 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 	}
 
 	// 匹配 "https://gist.github.com/"
-	if strings.HasPrefix(rawPath, "https://gist.github.com/") {
-		remaining := rawPath[24:]
+	if strings.HasPrefix(rawPath, gistPrefix) {
+		remaining := rawPath[gistPrefixLen:]
 		i := strings.IndexByte(remaining, '/')
 		if i <= 0 {
 			// case: https://gist.github.com/user
@@ -96,11 +115,11 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 	}
 
 	// 匹配 "https://api.github.com/"
-	if strings.HasPrefix(rawPath, "https://api.github.com/") {
+	if strings.HasPrefix(rawPath, apiPrefix) {
 		if !cfg.Auth.ForceAllowApi && (cfg.Auth.Method != "header" || !cfg.Auth.Enabled) {
 			return "", "", "", NewErrorWithStatusLookup(403, "API proxy requires header authentication")
 		}
-		remaining := rawPath[23:]
+		remaining := rawPath[apiPrefixLen:]
 		var user, repo string
 		if strings.HasPrefix(remaining, "repos/") {
 			parts := strings.SplitN(remaining[6:], "/", 3)
@@ -120,103 +139,105 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 	return "", "", "", NewErrorWithStatusLookup(404, "no matcher found for the given path")
 }
 
+// 原实现
 /*
-	func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHProxyErrors) {
-		var (
-			user    string
-			repo    string
-			matcher string
-		)
-		// 匹配 "https://github.com"开头的链接
-		if strings.HasPrefix(rawPath, "https://github.com") {
-			remainingPath := strings.TrimPrefix(rawPath, "https://github.com")
+func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHProxyErrors) {
+	var (
+		user    string
+		repo    string
+		matcher string
+	)
+	// 匹配 "https://github.com"开头的链接
+	if strings.HasPrefix(rawPath, "https://github.com") {
+		remainingPath := strings.TrimPrefix(rawPath, "https://github.com")
 
-				//if strings.HasPrefix(remainingPath, "/") {
-			//		remainingPath = strings.TrimPrefix(remainingPath, "/")
-				//}
+		//if strings.HasPrefix(remainingPath, "/") {
+		//		remainingPath = strings.TrimPrefix(remainingPath, "/")
+		//}
 
-			remainingPath = strings.TrimPrefix(remainingPath, "/")
-			// 预期格式/user/repo/more...
-			// 取出user和repo和最后部分
-			parts := strings.Split(remainingPath, "/")
-			if len(parts) <= 2 {
-				errMsg := "Not enough parts in path after matching 'https://github.com*'"
-				return "", "", "", NewErrorWithStatusLookup(400, errMsg)
-			}
-			user = parts[0]
-			repo = parts[1]
-			// 匹配 "https://github.com"开头的链接
-			if len(parts) >= 3 {
-				switch parts[2] {
-				case "releases", "archive":
-					matcher = "releases"
-				case "blob":
-					matcher = "blob"
-				case "raw":
-					matcher = "raw"
-				case "info", "git-upload-pack":
-					matcher = "clone"
-				default:
-					errMsg := "Url Matched 'https://github.com*', but didn't match the next matcher"
-					return "", "", "", NewErrorWithStatusLookup(400, errMsg)
-				}
-			}
-			return user, repo, matcher, nil
+		remainingPath = strings.TrimPrefix(remainingPath, "/")
+		// 预期格式/user/repo/more...
+		// 取出user和repo和最后部分
+		parts := strings.Split(remainingPath, "/")
+		if len(parts) <= 2 {
+			errMsg := "Not enough parts in path after matching 'https://github.com*'"
+			return "", "", "", NewErrorWithStatusLookup(400, errMsg)
 		}
-		// 匹配 "https://raw"开头的链接
-		if strings.HasPrefix(rawPath, "https://raw") {
-			remainingPath := strings.TrimPrefix(rawPath, "https://")
-			parts := strings.Split(remainingPath, "/")
-			if len(parts) <= 3 {
-				errMsg := "URL after matched 'https://raw*' should have at least 4 parts (user/repo/branch/file)."
+		user = parts[0]
+		repo = parts[1]
+		// 匹配 "https://github.com"开头的链接
+		if len(parts) >= 3 {
+			switch parts[2] {
+			case "releases", "archive":
+				matcher = "releases"
+			case "blob":
+				matcher = "blob"
+			case "raw":
+				matcher = "raw"
+			case "info", "git-upload-pack":
+				matcher = "clone"
+			default:
+				errMsg := "Url Matched 'https://github.com*', but didn't match the next matcher"
 				return "", "", "", NewErrorWithStatusLookup(400, errMsg)
 			}
+		}
+		return user, repo, matcher, nil
+	}
+	// 匹配 "https://raw"开头的链接
+	if strings.HasPrefix(rawPath, "https://raw") {
+		remainingPath := strings.TrimPrefix(rawPath, "https://")
+		parts := strings.Split(remainingPath, "/")
+		if len(parts) <= 3 {
+			errMsg := "URL after matched 'https://raw*' should have at least 4 parts (user/repo/branch/file)."
+			return "", "", "", NewErrorWithStatusLookup(400, errMsg)
+		}
+		user = parts[1]
+		repo = parts[2]
+		matcher = "raw"
+
+		return user, repo, matcher, nil
+	}
+	// 匹配 "https://gist"开头的链接
+	if strings.HasPrefix(rawPath, "https://gist") {
+		remainingPath := strings.TrimPrefix(rawPath, "https://")
+		parts := strings.Split(remainingPath, "/")
+		if len(parts) <= 3 {
+			errMsg := "URL after matched 'https://gist*' should have at least 4 parts (user/gist_id)."
+			return "", "", "", NewErrorWithStatusLookup(400, errMsg)
+		}
+		user = parts[1]
+		repo = ""
+		matcher = "gist"
+		return user, repo, matcher, nil
+	}
+	// 匹配 "https://api.github.com/"开头的链接
+	if strings.HasPrefix(rawPath, "https://api.github.com/") {
+		matcher = "api"
+		remainingPath := strings.TrimPrefix(rawPath, "https://api.github.com/")
+
+		parts := strings.Split(remainingPath, "/")
+		if parts[0] == "repos" {
 			user = parts[1]
 			repo = parts[2]
-			matcher = "raw"
-
-			return user, repo, matcher, nil
 		}
-		// 匹配 "https://gist"开头的链接
-		if strings.HasPrefix(rawPath, "https://gist") {
-			remainingPath := strings.TrimPrefix(rawPath, "https://")
-			parts := strings.Split(remainingPath, "/")
-			if len(parts) <= 3 {
-				errMsg := "URL after matched 'https://gist*' should have at least 4 parts (user/gist_id)."
-				return "", "", "", NewErrorWithStatusLookup(400, errMsg)
-			}
+		if parts[0] == "users" {
 			user = parts[1]
-			repo = ""
-			matcher = "gist"
-			return user, repo, matcher, nil
 		}
-		// 匹配 "https://api.github.com/"开头的链接
-		if strings.HasPrefix(rawPath, "https://api.github.com/") {
-			matcher = "api"
-			remainingPath := strings.TrimPrefix(rawPath, "https://api.github.com/")
-
-			parts := strings.Split(remainingPath, "/")
-			if parts[0] == "repos" {
-				user = parts[1]
-				repo = parts[2]
+		if !cfg.Auth.ForceAllowApi {
+			if cfg.Auth.Method != "header" || !cfg.Auth.Enabled {
+				//return "", "", "", ErrAuthHeaderUnavailable
+				errMsg := "AuthHeader Unavailable, Need to open header auth to enable api proxy"
+				return "", "", "", NewErrorWithStatusLookup(403, errMsg)
 			}
-			if parts[0] == "users" {
-				user = parts[1]
-			}
-			if !cfg.Auth.ForceAllowApi {
-				if cfg.Auth.Method != "header" || !cfg.Auth.Enabled {
-					//return "", "", "", ErrAuthHeaderUnavailable
-					errMsg := "AuthHeader Unavailable, Need to open header auth to enable api proxy"
-					return "", "", "", NewErrorWithStatusLookup(403, errMsg)
-				}
-			}
-			return user, repo, matcher, nil
 		}
-		//return "", "", "", ErrNotFound
-		errMsg := "Didn't match any matcher"
-		return "", "", "", NewErrorWithStatusLookup(404, errMsg)
+		return user, repo, matcher, nil
 	}
+	//return "", "", "", ErrNotFound
+	errMsg := "Didn't match any matcher"
+	return "", "", "", NewErrorWithStatusLookup(404, errMsg)
+}
 */
+
 var (
 	proxyableMatchersMap map[string]struct{}
 	initMatchersOnce     sync.Once
