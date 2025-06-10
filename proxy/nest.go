@@ -1,7 +1,3 @@
-// Copyright 2025 WJQSERVER, WJQSERVER-STUDIO. All rights reserved.
-// 使用本源代码受 WSL 2.0(WJQserver Studio License v2.0)与MPL 2.0(Mozilla Public License v2.0)许可协议的约束
-// 此段代码使用双重授权许可, 允许用户选择其中一种许可证
-
 package proxy
 
 import (
