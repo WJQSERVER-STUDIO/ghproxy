@@ -402,6 +402,16 @@ func init() {
 	}
 }
 
+var viaString string = "WJQSERVER-STUDIO/GHProxy"
+
+func viaHeader() app.HandlerFunc {
+	return func(ctx context.Context, c *app.RequestContext) {
+		protoVersion := "1.1"
+		c.Header("Via", protoVersion+" "+viaString)
+		c.Next(ctx)
+	}
+}
+
 func main() {
 	if showVersion || showHelp {
 		return
@@ -450,6 +460,7 @@ func main() {
 
 	r.Use(recovery.Recovery()) // Recovery中间件
 	r.Use(loggin.Middleware()) // log中间件
+	r.Use(viaHeader())
 	setupApi(cfg, r, version)
 	setupPages(cfg, r)
 
