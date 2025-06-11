@@ -92,6 +92,8 @@ func HealthcheckHandler(c *app.RequestContext, ctx context.Context) {
 	c.Response.Header.Set("Content-Type", "application/json")
 	c.JSON(200, (map[string]interface{}{
 		"Status": "OK",
+		"Repo":   "WJQSERVER-STUDIO/GHProxy",
+		"Author": "WJQSERVER-STUDIO",
 	}))
 }
 
@@ -99,6 +101,8 @@ func VersionHandler(c *app.RequestContext, ctx context.Context, version string) 
 	c.Response.Header.Set("Content-Type", "application/json")
 	c.JSON(200, (map[string]interface{}{
 		"Version": version,
+		"Repo":    "WJQSERVER-STUDIO/GHProxy",
+		"Author":  "WJQSERVER-STUDIO",
 	}))
 }
 
