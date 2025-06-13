@@ -430,12 +430,14 @@ func main() {
 				server.WithH2C(true),
 				server.WithHostPorts(addr),
 				server.WithTransport(standard.NewTransporter),
+				server.WithStreamBody(true),
 			)
 			r.AddProtocol("h2", factory.NewServerFactory())
 		} else {
 			r = server.New(
 				server.WithHostPorts(addr),
 				server.WithTransport(standard.NewTransporter),
+				server.WithStreamBody(true),
 			)
 		}
 	} else if cfg.Server.NetLib == "netpoll" || cfg.Server.NetLib == "" {
@@ -444,12 +446,14 @@ func main() {
 				server.WithH2C(true),
 				server.WithHostPorts(addr),
 				server.WithSenseClientDisconnection(cfg.Server.SenseClientDisconnection),
+				server.WithStreamBody(true),
 			)
 			r.AddProtocol("h2", factory.NewServerFactory())
 		} else {
 			r = server.New(
 				server.WithHostPorts(addr),
 				server.WithSenseClientDisconnection(cfg.Server.SenseClientDisconnection),
+				server.WithStreamBody(true),
 			)
 		}
 	} else {
