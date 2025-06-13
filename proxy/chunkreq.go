@@ -57,6 +57,20 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		return
 	}
 
+	// 处理302情况
+	if resp.StatusCode == 302 {
+		finalURL := resp.Header.Get("Location")
+		if finalURL != "" {
+			err = resp.Body.Close()
+			if err != nil {
+				logError("Failed to close response body: %v", err)
+			}
+			c.Request.Header.Del("Referer")
+			logInfo("Internal Redirecting to %s", finalURL)
+			ChunkedProxyRequest(ctx, c, finalURL, cfg, matcher)
+		}
+	}
+
 	var (
 		bodySize      int
 		contentLength string
@@ -110,15 +124,6 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 	if cfg.RateLimit.BandwidthLimit.Enabled {
 		bodyReader = limitreader.NewRateLimitedReader(bodyReader, bandwidthLimit, int(bandwidthBurst), ctx)
 	}
-
-	/*
-		defer func() {
-			err := bodyReader.Close()
-			if err != nil {
-				logError("Failed to close response body: %v", err)
-			}
-		}()
-	*/
 
 	if MatcherShell(u) && matchString(matcher) && cfg.Shell.Editor {
 		// 判断body是不是gzip
