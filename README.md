@@ -109,7 +109,7 @@ wget -O install-dev.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghprox
 
 ## LICENSE
 
-v3.5.2开始, 本项目使用 [WJQserver Studio License 2.0](https://wjqserver-studio.github.io/LICENSE/LICENSE.html) 和 [Mozilla Public License Version 2.0](https://mozilla.org/MPL/2.0/) 双重许可, 您可从中选择一个使用
+v3.5.2开始, 本项目使用 [WJQserver Studio License 2.1](https://wjqserver-studio.github.io/LICENSE/LICENSE.html) 和 [Mozilla Public License Version 2.0](https://mozilla.org/MPL/2.0/) 双重许可, 您可从中选择一个使用
 
 前端位于单独仓库中, 且各个主题均存在各自的许可证, 本项目许可证并不包括前端
 
