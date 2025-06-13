@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"ghproxy/config"
@@ -33,8 +32,8 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 
 	rb := client.NewRequestBuilder(string(c.Request.Method()), u)
 	rb.NoDefaultHeaders()
-	rb.SetBody(bytes.NewBuffer(c.Request.Body()))
-	//rb.SetBody(c.RequestBodyStream())
+	//rb.SetBody(bytes.NewBuffer(c.Request.Body()))
+	rb.SetBody(c.RequestBodyStream())
 	rb.WithContext(ctx)
 
 	req, err = rb.Build()
@@ -112,12 +111,14 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 		bodyReader = limitreader.NewRateLimitedReader(bodyReader, bandwidthLimit, int(bandwidthBurst), ctx)
 	}
 
-	defer func() {
-		err := bodyReader.Close()
-		if err != nil {
-			logError("Failed to close response body: %v", err)
-		}
-	}()
+	/*
+		defer func() {
+			err := bodyReader.Close()
+			if err != nil {
+				logError("Failed to close response body: %v", err)
+			}
+		}()
+	*/
 
 	if MatcherShell(u) && matchString(matcher) && cfg.Shell.Editor {
 		// 判断body是不是gzip
