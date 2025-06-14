@@ -17,15 +17,16 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 	var (
 		req  *http.Request
 		resp *http.Response
+		err  error
 	)
 
 	go func() {
 		<-ctx.Done()
 		if resp != nil && resp.Body != nil {
-			resp.Body.Close()
-		}
-		if req != nil {
-			req.Body.Close()
+			err = resp.Body.Close()
+			if err != nil {
+				logError("Failed to close response body: %v", err)
+			}
 		}
 	}()
 
@@ -51,7 +52,7 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 		rb.SetBody(reqBodyReader)
 		rb.WithContext(ctx)
 
-		req, err := rb.Build()
+		req, err = rb.Build()
 		if err != nil {
 			HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 			return

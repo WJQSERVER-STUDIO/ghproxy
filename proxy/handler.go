@@ -68,7 +68,10 @@ func NoRouteHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 
 		// 处理blob/raw路径
 		if matcher == "blob" {
-			rawPath = strings.Replace(rawPath, "/blob/", "/raw/", 1)
+			rawPath = rawPath[10:]
+			rawPath = "raw.githubusercontent.com" + rawPath
+			rawPath = strings.Replace(rawPath, "/blob/", "/", 1)
+			matcher = "raw"
 		}
 
 		logDebug("Matched: %v", matcher)

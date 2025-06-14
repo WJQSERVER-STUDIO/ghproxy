@@ -507,7 +507,7 @@ func main() {
 		proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
 
-	r.GET("/api.github.com/repos/:user/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
+	r.Any("/api.github.com/repos/:user/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
 		c.Set("matcher", "api")
 		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
 	})
