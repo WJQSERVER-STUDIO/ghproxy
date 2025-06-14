@@ -1,197 +1,373 @@
-WJQserver Studio 开源许可证
-版本 v2.0
+Mozilla Public License Version 2.0
+==================================
+
+1. Definitions
+--------------
+
+1.1. "Contributor"
+    means each individual or legal entity that creates, contributes to
+    the creation of, or owns Covered Software.
+
+1.2. "Contributor Version"
+    means the combination of the Contributions of others (if any) used
+    by a Contributor and that particular Contributor's Contribution.
+
+1.3. "Contribution"
+    means Covered Software of a particular Contributor.
+
+1.4. "Covered Software"
+    means Source Code Form to which the initial Contributor has attached
+    the notice in Exhibit A, the Executable Form of such Source Code
+    Form, and Modifications of such Source Code Form, in each case
+    including portions thereof.
+
+1.5. "Incompatible With Secondary Licenses"
+    means
+
+    (a) that the initial Contributor has attached the notice described
+        in Exhibit B to the Covered Software; or
 
-版权所有 © WJQserver Studio 2024
+    (b) that the Covered Software was made available under the terms of
+        version 1.1 or earlier of the License, but not also under the
+        terms of a Secondary License.
 
-定义
+1.6. "Executable Form"
+    means any form of the work other than Source Code Form.
 
-*   许可 (License): 指的是在本许可证内定义的使用、复制、分发与修改软件的条款与要求。
-*   授权方 (Licensor): 指的是拥有版权的个人或组织，亦或是拥有版权的个人或组织所指派的实体，在本许可证中特指 WJQserver Studio。
-*   贡献者 (Contributor): 指的是授权方以及根据本许可证授予贡献代码或软件的个人或实体。
-*   您 (You): 指的是行使本许可授予的权限的个人或法律实体。
-*   衍生作品 (Derivative Works): 指的是基于本软件或本软件任何部分的修改作品，无论修改程度如何。这包括但不限于基于本软件或其任何部分的修改、修订、改编、翻译或其他形式的创作，以及包含本软件或其部分的集合作品。
-*   非营利性使用 (Non-profit Use): 指的是不以直接商业盈利为主要目的的使用方式，包括但不限于：
-    *   个人用途： 由个人为了个人学习、研究、实验、非商业项目、个人网站搭建、毕业设计、家庭内部娱乐等非直接商业目的使用软件。
-    *   教育用途： 在教育机构（如学校、大学、培训机构）内部用于教学、研究、学术交流等活动。
-    *   科研用途：  在科研院所、实验室等机构内部用于科学研究、实验开发等活动。
-    *   慈善与公益用途：  由慈善机构、公益组织等非营利性组织为了其公益使命或慈善事业内部运营使用，或对外提供不直接产生商业利润的公益服务。
-    *   内部运营用途 (非营利组织)： 非营利性组织在其内部运营中使用软件，例如用于行政管理、会员管理、内部沟通、项目管理等非直接营利性活动。
+1.7. "Larger Work"
+    means a work that combines Covered Software with other material, in
+    a separate file or files, that is not Covered Software.
 
-开源与自由软件
+1.8. "License"
+    means this document.
 
-本项目为开源软件，允许用户在遵循本许可证的前提下访问和使用源代码。
-本项目旨在向用户提供尽可能广泛的非商业使用自由，同时保障社区的共同发展和良性生态，并为商业创新提供清晰的路径。
-强调版权所有，所有权利由 WJQserver Studio 及贡献者共同保留。
+1.9. "Licensable"
+    means having the right to grant, to the maximum extent possible,
+    whether at the time of the initial grant or subsequently, any and
+    all of the rights conveyed by this License.
 
-许可证条款
+1.10. "Modifications"
+    means any of the following:
 
-1. 使用权限
+    (a) any file in Source Code Form that results from an addition to,
+        deletion from, or modification of the contents of Covered
+        Software; or
 
-*   1.1  非营利性使用：  您被授予在非营利性使用场景下，为了任何目的，自由使用本软件的权限。  非营利性使用的具体场景包括但不限于定义部分所列举的各种情况。
+    (b) any new file in Source Code Form that contains any Covered
+        Software.
 
-*   1.2  商业使用：  您可以在商业环境中使用本软件，无需获得额外授权，但您的商业使用行为必须遵守以下条款：
+1.11. "Patent Claims" of a Contributor
+    means any patent claim(s), including without limitation, method,
+    process, and apparatus claims, in any patent Licensable by such
+    Contributor that would be infringed, but for the grant of the
+    License, by the making, using, selling, offering for sale, having
+    made, import, or transfer of either its Contributions or its
+    Contributor Version.
 
-    *   1.2.1  保持声明：  您在进行商业使用时，不得移除或修改软件中包含的原始版权声明、许可证声明以及来源声明。
-    *   1.2.2  开源继承 (Copyleft) 与互惠共享：  如果您或您的组织希望将本软件或其衍生作品用于任何商业用途，包括但不限于：
+1.12. "Secondary License"
+    means either the GNU General Public License, Version 2.0, the GNU
+    Lesser General Public License, Version 2.1, the GNU Affero General
+    Public License, Version 3.0, or any later versions of those
+    licenses.
 
-        *   盈利性分发：  销售、出租、许可分发本软件或其衍生作品。
-        *   盈利性服务：  基于本软件或其衍生作品提供商业服务，例如 SaaS 服务、咨询服务、定制开发服务、收费技术支持服务等。
-        *   嵌入式商业应用：  将本软件或其衍生作品嵌入到商业产品或解决方案中进行销售。
-        *   组织内部商业运营：  在营利性组织的内部运营中使用修改后的版本以直接支持其商业活动，例如定制化内部系统，通过例如但不限于在软件或相关服务中投放广告 (例如 Google Ads 等)，应用内购买 (内购), 会员订阅， 增值功能收费等方式直接或间接产生商业收入。
+1.13. "Source Code Form"
+    means the form of the work preferred for making modifications.
 
-        您必须选择以下两种方式之一：
+1.14. "You" (or "Your")
+    means an individual or a legal entity exercising rights under this
+    License. For legal entities, "You" includes any entity that
+    controls, is controlled by, or is under common control with You. For
+    purposes of this definition, "control" means (a) the power, direct
+    or indirect, to cause the direction or management of such entity,
+    whether by contract or otherwise, or (b) ownership of more than
+    fifty percent (50%) of the outstanding shares or beneficial
+    ownership of such entity.
 
-        *   i)  继承本许可证并开源：  您必须以本许可证或兼容的开源许可证分发您的衍生作品，并公开您的衍生作品的全部源代码，使得您的衍生作品的接收者也享有与您相同的权利，包括进一步修改和商业使用的权利。 本选项旨在促进社区的共同发展和知识共享，确保基于本软件的商业创新成果也能回馈社区。
-        *   ii) 获得授权方明确授权：  如果您不希望以开源方式发布您的衍生作品，或者希望使用其他许可证进行分发，或者您希望在商业运营中使用修改后的版本但不开源，您必须事先获得 WJQserver Studio 的明确书面授权。  授权的具体条款和条件将由 WJQserver Studio 另行协商确定。
+2. License Grants and Conditions
+--------------------------------
 
-2. 复制与分发
+2.1. Grants
 
-*   2.1  原始版本复制与分发：  您可以复制和分发本软件的原始版本，前提是必须满足以下条件：
+Each Contributor hereby grants You a world-wide, royalty-free,
+non-exclusive license:
 
-    *   保留所有声明：  完整保留所有原始版权声明、许可证声明、来源声明以及其他所有权声明。
-    *   附带许可证：  在分发软件时，必须同时附带本许可证的完整文本，确保接收者知悉并理解本许可证的全部条款。
+(a) under intellectual property rights (other than patent or trademark)
+    Licensable by such Contributor to use, reproduce, make available,
+    modify, display, perform, distribute, and otherwise exploit its
+    Contributions, either on an unmodified basis, with Modifications, or
+    as part of a Larger Work; and
 
-*   2.2  衍生作品复制与分发：  您可以复制和分发基于本软件的衍生作品，您对衍生作品的分发行为将受到本许可证第 1.2.2 条（开源继承与互惠共享）的约束。
+(b) under Patent Claims of such Contributor to make, use, sell, offer
+    for sale, have made, import, and otherwise transfer either its
+    Contributions or its Contributor Version.
 
-3. 修改权限
+2.2. Effective Date
 
-*   3.1  自由修改：  您被授予自由修改本软件的权限，无论修改目的是非营利性使用还是商业用途。
+The licenses granted in Section 2.1 with respect to any Contribution
+become effective for each Contribution on the date the Contributor first
+distributes such Contribution.
 
-*   3.2  修改后使用与分发约束：  当您将修改后的版本用于商业用途或分发修改后的版本时，您需要遵守本许可证第 1.2.2 条（开源继承与互惠共享）以及第 2 条（复制与分发）的规定。  即使您不分发修改后的版本，只要您将其用于商业目的，也需要遵守开源继承条款或获得授权。
+2.3. Limitations on Grant Scope
 
-*   3.3  贡献接受：  WJQserver Studio 鼓励社区贡献代码。如果您向本项目贡献代码，您需要同意您的贡献代码按照本许可证条款进行许可。
+The licenses granted in this Section 2 are the only rights granted under
+this License. No additional rights or licenses will be implied from the
+distribution or licensing of Covered Software under this License.
+Notwithstanding Section 2.1(b) above, no patent license is granted by a
+Contributor:
 
-4. 专利权
+(a) for any code that a Contributor has removed from Covered Software;
+    or
 
-*   4.1  无专利担保，风险自担：  本软件以“现状”提供，授权方及贡献者明确声明，不对本软件的专利侵权问题做任何形式的担保，亦不承担任何因专利侵权可能产生的责任与后果。  用户理解并同意，使用本软件的专利风险完全由用户自行承担。
+(b) for infringements caused by: (i) Your and any other third party's
+    modifications of Covered Software, or (ii) the combination of its
+    Contributions with other software (except as part of its Contributor
+    Version); or
 
-*   4.2  专利纠纷应对：  如因用户使用本软件而引发任何专利侵权指控、诉讼或索赔，用户应自行负责处理并承担全部法律责任。  授权方及贡献者无义务参与任何相关法律程序，亦不承担任何由此产生的费用或赔偿。
-
-5. 免责声明
-
-*   5.1  “现状”提供，无任何保证：  本软件按“现状”提供，不提供任何明示或暗示的保证，包括但不限于适销性、特定用途适用性及非侵权性。
-
-*   5.2  责任限制：  在适用法律允许的最大范围内，在任何情况下，授权方或任何贡献者均不对因使用或无法使用本软件而产生的任何直接、间接、偶然、特殊、惩罚性或后果性损害（包括但不限于采购替代商品或服务；损失使用、数据或利润；或业务中断）负责，无论其是如何造成的，也无论依据何种责任理论，即使已被告知可能发生此类损害。
-
-*   5.3  用户法律责任：  用户需根据当地法律对待本项目，确保遵守所有适用法规。
-
-6. 许可证期限与终止
-
-*   6.1  许可证期限：  除版权所有人主动宣布放弃本软件版权外，本许可证无限期生效。
-
-*   6.2  许可证终止：  如果您未能遵守本许可证的任何条款或条件，授权方有权终止本许可证。  您的许可证将在您违反本许可证条款时自动终止。
-
-*   6.3  终止后的效力：  许可证终止后，您根据本许可证所享有的所有权利将立即终止，但您在许可证终止前已合法分发的软件副本，其接收者所获得的许可及权利将不受影响，继续有效。  免责声明（第 5 条）和责任限制（第 5.2 条）在本许可证终止后仍然有效。
-
-7. 条款修订
-
-*   7.1  修订权利保留：  授权方保留随时修改本许可证条款的权利，以便更好地适应法律、技术发展以及社区需求。
-
-*   7.2  修订生效与接受：  修订后的条款将在发布时生效，除非另行声明，否则继续使用、复制、分发或修改本软件即表示您接受修订后的条款。授权方鼓励用户定期查阅本许可证的最新版本。
-
-8. 其他
-
-*   8.1  法定权利：  本许可证不影响您作为最终用户在适用法律下的法定权利。
-
-*   8.2  条款可分割性：  若本许可证的某些条款被认定为不可执行，其余条款仍然完全有效。
-
-*   8.3  版本更新：  授权方可能会发布本许可证的修订版本或新版本。您可以选择是继续使用本许可证的旧版本还是选择适用新版本。
-
-WJQserver Studio Open Source License
-Version v2.0
-
-Copyright © WJQserver Studio 2024
-
-Definitions
-
-*   License: Refers to the terms and requirements for use, reproduction, distribution, and modification defined within this license.
-*   Licensor: Refers to the individual or organization that holds the copyright, or the entity designated by the copyright holder, specifically WJQserver Studio in this license.
-*   Contributor: Refers to the Licensor and individuals or entities who contribute code or software under this License.
-*   You: Refers to the individual or legal entity exercising permissions granted by this License.
-*   Derivative Works: Refers to works modified based on the Software or any part thereof, regardless of the extent of modification. This includes but is not limited to modifications, revisions, adaptations, translations, or other forms of creation based on the Software or any part thereof, as well as collective works containing the Software or parts thereof.
-*   Non-profit Use: Refers to uses not primarily intended for direct commercial profit, including but not limited to:
-    *   Personal Use: Use by an individual for personal learning, research, experimentation, non-commercial projects, personal website development, graduation projects, home entertainment, and other non-directly commercial purposes.
-    *   Educational Use: Use within educational institutions (such as schools, universities, training organizations) for activities such as teaching, research, and academic exchange.
-    *   Scientific Research Use: Use within scientific research institutions, laboratories, and similar organizations for activities such as scientific research and experimental development.
-    *   Charitable and Public Welfare Use: Use by charitable organizations, public welfare organizations, and similar non-profit entities for their public missions or internal operation of charitable activities, or to provide public services that do not directly generate commercial profit.
-    *   Internal Operational Use (Non-profit Organizations): Use within the internal operations of non-profit organizations, such as for administrative management, membership management, internal communication, project management, and other non-directly profit-generating activities.
-
-Open Source and Free Software
-
-This project is open-source software, allowing users to access and use the source code under the premise of complying with this License.
-This project aims to provide users with the broadest possible freedom for non-commercial use while ensuring the common development and healthy ecosystem of the community, and providing a clear path for commercial innovation.
-Copyright is emphasized; all rights are jointly reserved by WJQserver Studio and Contributors.
-
-License Terms
-
-1.  Permissions for Use
-
-*   1.1  Non-profit Use: You are granted permission to freely use the Software for any purpose in non-profit use scenarios. Specific non-profit use scenarios include but are not limited to the various situations listed in the Definition section.
-
-*   1.2  Commercial Use: You may use the Software in a commercial environment without additional authorization, but your commercial use must comply with the following terms:
-
-    *   1.2.1  Maintain Statements: When conducting commercial use, you must not remove or modify the original copyright notices, license notices, and source statements contained in the Software.
-    *   1.2.2  Open Source Inheritance (Copyleft) and Reciprocal Sharing: If you or your organization wish to use the Software or its Derivative Works for any commercial purpose, including but not limited to:
-
-        *   Profit-generating Distribution: Selling, renting, licensing, or distributing the Software or its Derivative Works.
-        *   Profit-generating Services: Providing commercial services based on the Software or its Derivative Works, such as SaaS services, consulting services, custom development services, and paid technical support services.
-        *   Embedded Commercial Applications: Embedding the Software or its Derivative Works into commercial products or solutions for sale.
-        *   Internal Commercial Operations: Using modified versions within the internal operations of for-profit organizations to directly support their commercial activities, such as customized internal systems, generating commercial revenue directly or indirectly through means including but not limited to placing advertisements in the software or related services (e.g., Google Ads), in-app purchases, membership subscriptions, and charging for value-added features.
-
-        You must choose one of the following two options:
-
-        *   i)  Inherit this License and Open Source: You must distribute your Derivative Works under this License or a compatible open-source license and publicly disclose the entire source code of your Derivative Works, so that recipients of your Derivative Works also enjoy the same rights as you, including the right to further modify and use commercially. This option aims to promote the common development and knowledge sharing of the community, ensuring that commercial innovation achievements based on this Software can also contribute back to the community.
-        *   ii) Obtain Explicit Authorization from the Licensor: If you do not wish to release your Derivative Works in an open-source manner, or wish to distribute them under another license, or you wish to use a modified version in commercial operations without open-sourcing it, you must obtain explicit written authorization from WJQserver Studio in advance. The specific terms and conditions of authorization will be determined separately by WJQserver Studio through negotiation.
-
-2. Reproduction and Distribution
-
-*   2.1  Reproduction and Distribution of Original Version: You may reproduce and distribute the original version of the Software, provided that the following conditions are met:
-
-    *   Retain All Statements: Completely retain all original copyright notices, license notices, source statements, and other proprietary notices.
-    *   Accompany with License: When distributing the Software, you must also include the full text of this License to ensure that recipients are aware of and understand all terms of this License.
-
-*   2.2  Reproduction and Distribution of Derivative Works: You may reproduce and distribute Derivative Works based on the Software. Your distribution of Derivative Works will be subject to the constraints of Clause 1.2.2 of this License (Open Source Inheritance and Reciprocal Sharing).
-
-3. Modification Permissions
-
-*   3.1  Free Modification: You are granted permission to freely modify the Software, regardless of whether the purpose of modification is for non-profit use or commercial use.
-
-*   3.2  Constraints on Use and Distribution after Modification: When you use a modified version for commercial purposes or distribute a modified version, you need to comply with the provisions of Clause 1.2.2 of this License (Open Source Inheritance and Reciprocal Sharing) and Clause 2 (Reproduction and Distribution). Even if you do not distribute the modified version, as long as you use it for commercial purposes, you also need to comply with the open-source inheritance clause or obtain authorization.
-
-*   3.3  Contribution Acceptance: WJQserver Studio encourages community contribution of code. If you contribute code to this project, you need to agree that your contributed code is licensed under the terms of this License.
-
-4. Patent Rights
-
-*   4.1  No Patent Warranty, Risk Self-Bearing: The software is provided “AS IS”, and the Licensor and Contributors explicitly declare that they do not provide any form of warranty regarding patent infringement issues of this software, nor do they assume any responsibility and consequences arising from patent infringement. Users understand and agree that the patent risk of using this software is entirely borne by the users themselves.
-
-*   4.2  Handling of Patent Disputes: If any patent infringement allegations, lawsuits, or claims arise due to the user's use of this Software, the user shall be solely responsible for handling and bear all legal liabilities. The Licensor and Contributors are under no obligation to participate in any related legal proceedings, nor do they bear any costs or compensation arising therefrom.
-
-5. Disclaimer of Warranty
-
-*   5.1  “AS IS” Provision, No Warranty: The software is provided “AS IS” without any express or implied warranties, including but not limited to warranties of merchantability, fitness for a particular purpose, and non-infringement.
-
-*   5.2  Limitation of Liability: To the maximum extent permitted by applicable law, in no event shall the Licensor or any Contributor be liable for any direct, indirect, incidental, special, punitive, or consequential damages (including but not limited to procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.
-
-*   5.3  User Legal Responsibility: Users shall treat this project in accordance with local laws and regulations to ensure compliance with all applicable laws and regulations.
-
-6. License Term and Termination
-
-*   6.1  License Term: Unless the copyright holder proactively announces the abandonment of the copyright of this software, this License shall be effective indefinitely from the date of your acceptance.
-
-*   6.2  License Termination: If you fail to comply with any terms or conditions of this License, the Licensor has the right to terminate this License. Your License will automatically terminate upon your violation of the terms of this License.
-
-*   6.3  Effect after Termination: Upon termination of the License, all rights granted to you under this License will terminate immediately, but the licenses and rights obtained by recipients of software copies you have legally distributed before the termination of the License will not be affected and will remain valid. The Disclaimer of Warranty (Clause 5) and Limitation of Liability (Clause 5.2) shall remain in effect after the termination of this License.
-
-7. Revision of Terms
-
-*   7.1  Reservation of Revision Rights: The Licensor reserves the right to modify the terms of this License at any time to better adapt to legal, technological developments, and community needs.
-
-*   7.2  Effectiveness and Acceptance of Revisions: Revised terms will take effect upon publication, and unless otherwise stated, continued use, reproduction, distribution, or modification of the Software indicates your acceptance of the revised terms. The Licensor encourages users to periodically review the latest version of this License.
-
-8.  Other
-
-*   8.1  Statutory Rights: This License does not affect your statutory rights as an end-user under applicable laws.
-
-*   8.2  Severability of Terms: If certain terms of this License are deemed unenforceable, the remaining terms shall remain in full force and effect.
-
-*   8.3  Version Updates: The Licensor may publish revised versions or new versions of this License. You may choose to continue using the old version of this License or choose to apply the new version.
+(c) under Patent Claims infringed by Covered Software in the absence of
+    its Contributions.
+
+This License does not grant any rights in the trademarks, service marks,
+or logos of any Contributor (except as may be necessary to comply with
+the notice requirements in Section 3.4).
+
+2.4. Subsequent Licenses
+
+No Contributor makes additional grants as a result of Your choice to
+distribute the Covered Software under a subsequent version of this
+License (see Section 10.2) or under the terms of a Secondary License (if
+permitted under the terms of Section 3.3).
+
+2.5. Representation
+
+Each Contributor represents that the Contributor believes its
+Contributions are its original creation(s) or it has sufficient rights
+to grant the rights to its Contributions conveyed by this License.
+
+2.6. Fair Use
+
+This License is not intended to limit any rights You have under
+applicable copyright doctrines of fair use, fair dealing, or other
+equivalents.
+
+2.7. Conditions
+
+Sections 3.1, 3.2, 3.3, and 3.4 are conditions of the licenses granted
+in Section 2.1.
+
+3. Responsibilities
+-------------------
+
+3.1. Distribution of Source Form
+
+All distribution of Covered Software in Source Code Form, including any
+Modifications that You create or to which You contribute, must be under
+the terms of this License. You must inform recipients that the Source
+Code Form of the Covered Software is governed by the terms of this
+License, and how they can obtain a copy of this License. You may not
+attempt to alter or restrict the recipients' rights in the Source Code
+Form.
+
+3.2. Distribution of Executable Form
+
+If You distribute Covered Software in Executable Form then:
+
+(a) such Covered Software must also be made available in Source Code
+    Form, as described in Section 3.1, and You must inform recipients of
+    the Executable Form how they can obtain a copy of such Source Code
+    Form by reasonable means in a timely manner, at a charge no more
+    than the cost of distribution to the recipient; and
+
+(b) You may distribute such Executable Form under the terms of this
+    License, or sublicense it under different terms, provided that the
+    license for the Executable Form does not attempt to limit or alter
+    the recipients' rights in the Source Code Form under this License.
+
+3.3. Distribution of a Larger Work
+
+You may create and distribute a Larger Work under terms of Your choice,
+provided that You also comply with the requirements of this License for
+the Covered Software. If the Larger Work is a combination of Covered
+Software with a work governed by one or more Secondary Licenses, and the
+Covered Software is not Incompatible With Secondary Licenses, this
+License permits You to additionally distribute such Covered Software
+under the terms of such Secondary License(s), so that the recipient of
+the Larger Work may, at their option, further distribute the Covered
+Software under the terms of either this License or such Secondary
+License(s).
+
+3.4. Notices
+
+You may not remove or alter the substance of any license notices
+(including copyright notices, patent notices, disclaimers of warranty,
+or limitations of liability) contained within the Source Code Form of
+the Covered Software, except that You may alter any license notices to
+the extent required to remedy known factual inaccuracies.
+
+3.5. Application of Additional Terms
+
+You may choose to offer, and to charge a fee for, warranty, support,
+indemnity or liability obligations to one or more recipients of Covered
+Software. However, You may do so only on Your own behalf, and not on
+behalf of any Contributor. You must make it absolutely clear that any
+such warranty, support, indemnity, or liability obligation is offered by
+You alone, and You hereby agree to indemnify every Contributor for any
+liability incurred by such Contributor as a result of warranty, support,
+indemnity or liability terms You offer. You may include additional
+disclaimers of warranty and limitations of liability specific to any
+jurisdiction.
+
+4. Inability to Comply Due to Statute or Regulation
+---------------------------------------------------
+
+If it is impossible for You to comply with any of the terms of this
+License with respect to some or all of the Covered Software due to
+statute, judicial order, or regulation then You must: (a) comply with
+the terms of this License to the maximum extent possible; and (b)
+describe the limitations and the code they affect. Such description must
+be placed in a text file included with all distributions of the Covered
+Software under this License. Except to the extent prohibited by statute
+or regulation, such description must be sufficiently detailed for a
+recipient of ordinary skill to be able to understand it.
+
+5. Termination
+--------------
+
+5.1. The rights granted under this License will terminate automatically
+if You fail to comply with any of its terms. However, if You become
+compliant, then the rights granted under this License from a particular
+Contributor are reinstated (a) provisionally, unless and until such
+Contributor explicitly and finally terminates Your grants, and (b) on an
+ongoing basis, if such Contributor fails to notify You of the
+non-compliance by some reasonable means prior to 60 days after You have
+come back into compliance. Moreover, Your grants from a particular
+Contributor are reinstated on an ongoing basis if such Contributor
+notifies You of the non-compliance by some reasonable means, this is the
+first time You have received notice of non-compliance with this License
+from such Contributor, and You become compliant prior to 30 days after
+Your receipt of the notice.
+
+5.2. If You initiate litigation against any entity by asserting a patent
+infringement claim (excluding declaratory judgment actions,
+counter-claims, and cross-claims) alleging that a Contributor Version
+directly or indirectly infringes any patent, then the rights granted to
+You by any and all Contributors for the Covered Software under Section
+2.1 of this License shall terminate.
+
+5.3. In the event of termination under Sections 5.1 or 5.2 above, all
+end user license agreements (excluding distributors and resellers) which
+have been validly granted by You or Your distributors under this License
+prior to termination shall survive termination.
+
+************************************************************************
+*                                                                      *
+*  6. Disclaimer of Warranty                                           *
+*  -------------------------                                           *
+*                                                                      *
+*  Covered Software is provided under this License on an "as is"       *
+*  basis, without warranty of any kind, either expressed, implied, or  *
+*  statutory, including, without limitation, warranties that the       *
+*  Covered Software is free of defects, merchantable, fit for a        *
+*  particular purpose or non-infringing. The entire risk as to the     *
+*  quality and performance of the Covered Software is with You.        *
+*  Should any Covered Software prove defective in any respect, You     *
+*  (not any Contributor) assume the cost of any necessary servicing,   *
+*  repair, or correction. This disclaimer of warranty constitutes an   *
+*  essential part of this License. No use of any Covered Software is   *
+*  authorized under this License except under this disclaimer.         *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  7. Limitation of Liability                                          *
+*  --------------------------                                          *
+*                                                                      *
+*  Under no circumstances and under no legal theory, whether tort      *
+*  (including negligence), contract, or otherwise, shall any           *
+*  Contributor, or anyone who distributes Covered Software as          *
+*  permitted above, be liable to You for any direct, indirect,         *
+*  special, incidental, or consequential damages of any character      *
+*  including, without limitation, damages for lost profits, loss of    *
+*  goodwill, work stoppage, computer failure or malfunction, or any    *
+*  and all other commercial damages or losses, even if such party      *
+*  shall have been informed of the possibility of such damages. This   *
+*  limitation of liability shall not apply to liability for death or   *
+*  personal injury resulting from such party's negligence to the       *
+*  extent applicable law prohibits such limitation. Some               *
+*  jurisdictions do not allow the exclusion or limitation of           *
+*  incidental or consequential damages, so this exclusion and          *
+*  limitation may not apply to You.                                    *
+*                                                                      *
+************************************************************************
+
+8. Litigation
+-------------
+
+Any litigation relating to this License may be brought only in the
+courts of a jurisdiction where the defendant maintains its principal
+place of business and such litigation shall be governed by laws of that
+jurisdiction, without reference to its conflict-of-law provisions.
+Nothing in this Section shall prevent a party's ability to bring
+cross-claims or counter-claims.
+
+9. Miscellaneous
+----------------
+
+This License represents the complete agreement concerning the subject
+matter hereof. If any provision of this License is held to be
+unenforceable, such provision shall be reformed only to the extent
+necessary to make it enforceable. Any law or regulation which provides
+that the language of a contract shall be construed against the drafter
+shall not be used to construe this License against a Contributor.
+
+10. Versions of the License
+---------------------------
+
+10.1. New Versions
+
+Mozilla Foundation is the license steward. Except as provided in Section
+10.3, no one other than the license steward has the right to modify or
+publish new versions of this License. Each version will be given a
+distinguishing version number.
+
+10.2. Effect of New Versions
+
+You may distribute the Covered Software under the terms of the version
+of the License under which You originally received the Covered Software,
+or under the terms of any subsequent version published by the license
+steward.
+
+10.3. Modified Versions
+
+If you create software not governed by this License, and you want to
+create a new license for such software, you may create and use a
+modified version of this License if you rename the license and remove
+any references to the name of the license steward (except to note that
+such modified license differs from this License).
+
+10.4. Distributing Source Code Form that is Incompatible With Secondary
+Licenses
+
+If You choose to distribute Source Code Form that is Incompatible With
+Secondary Licenses under the terms of this version of the License, the
+notice described in Exhibit B of this License must be attached.
+
+Exhibit A - Source Code Form License Notice
+-------------------------------------------
+
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+If it is not possible or desirable to put the notice in a particular
+file, then You may include the notice in a location (such as a LICENSE
+file in a relevant directory) where a recipient would be likely to look
+for such a notice.
+
+You may add additional accurate notices of copyright ownership.
+
+Exhibit B - "Incompatible With Secondary Licenses" Notice
+---------------------------------------------------------
+
+  This Source Code Form is "Incompatible With Secondary Licenses", as
+  defined by the Mozilla Public License, v. 2.0.

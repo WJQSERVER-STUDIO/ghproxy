@@ -18,23 +18,31 @@ type Config struct {
 	Whitelist WhitelistConfig
 	RateLimit RateLimitConfig
 	Outbound  OutboundConfig
+	Docker    DockerConfig
 }
 
 /*
 [server]
-host = "0.0.0.0"  # 监听地址
-port = 8080  # 监听端口
-sizeLimit = 125 # 125MB
-H2C = true # 是否开启H2C传输
+host = "0.0.0.0"
+port = 8080
+netlib = "netpoll" # "netpoll" / "std" "standard" "net/http" "net"
+sizeLimit = 125 # MB
+memLimit = 0 # MB
+H2C = true
+cors = "*" # "*"/"" -> "*" ; "nil" -> "" ;
+debug = false
 */
 
 type ServerConfig struct {
-	Port      int    `toml:"port"`
-	Host      string `toml:"host"`
-	SizeLimit int    `toml:"sizeLimit"`
-	H2C       bool   `toml:"H2C"`
-	Cors      string `toml:"cors"`
-	Debug     bool   `toml:"debug"`
+	Port                     int    `toml:"port"`
+	Host                     string `toml:"host"`
+	NetLib                   string `toml:"netlib"`
+	SenseClientDisconnection bool   `toml:"senseClientDisconnection"`
+	SizeLimit                int    `toml:"sizeLimit"`
+	MemLimit                 int64  `toml:"memLimit"`
+	H2C                      bool   `toml:"H2C"`
+	Cors                     string `toml:"cors"`
+	Debug                    bool   `toml:"debug"`
 }
 
 /*
@@ -43,12 +51,14 @@ mode = "auto" # "auto" or "advanced"
 maxIdleConns = 100 # only for advanced mode
 maxIdleConnsPerHost = 60 # only for advanced mode
 maxConnsPerHost = 0 # only for advanced mode
+useCustomRawHeaders = false
 */
 type HttpcConfig struct {
 	Mode                string `toml:"mode"`
 	MaxIdleConns        int    `toml:"maxIdleConns"`
 	MaxIdleConnsPerHost int    `toml:"maxIdleConnsPerHost"`
 	MaxConnsPerHost     int    `toml:"maxConnsPerHost"`
+	UseCustomRawHeaders bool   `toml:"useCustomRawHeaders"`
 }
 
 /*
@@ -86,9 +96,11 @@ type PagesConfig struct {
 }
 
 type LogConfig struct {
-	LogFilePath string `toml:"logFilePath"`
-	MaxLogSize  int    `toml:"maxLogSize"`
-	Level       string `toml:"level"`
+	LogFilePath  string `toml:"logFilePath"`
+	MaxLogSize   int    `toml:"maxLogSize"`
+	Level        string `toml:"level"`
+	Async        bool   `toml:"async"`
+	HertZLogPath string `toml:"hertzLogPath"`
 }
 
 /*
@@ -98,15 +110,17 @@ Key = ""
 Token = "token"
 enabled = false
 passThrough = false
-ForceAllowApi = true
+ForceAllowApi = false
+ForceAllowApiPassList = false
 */
 type AuthConfig struct {
-	Enabled       bool   `toml:"enabled"`
-	Method        string `toml:"method"`
-	Key           string `toml:"key"`
-	Token         string `toml:"token"`
-	PassThrough   bool   `toml:"passThrough"`
-	ForceAllowApi bool   `toml:"ForceAllowApi"`
+	Enabled               bool   `toml:"enabled"`
+	Method                string `toml:"method"`
+	Key                   string `toml:"key"`
+	Token                 string `toml:"token"`
+	PassThrough           bool   `toml:"passThrough"`
+	ForceAllowApi         bool   `toml:"ForceAllowApi"`
+	ForceAllowApiPassList bool   `toml:"ForceAllowApiPassList"`
 }
 
 type BlacklistConfig struct {
@@ -119,11 +133,35 @@ type WhitelistConfig struct {
 	WhitelistFile string `toml:"whitelistFile"`
 }
 
+/*
+[rateLimit]
+enabled = false
+rateMethod = "total" # "total" or "ip"
+ratePerMinute = 100
+burst = 10
+
+	[rateLimit.bandwidthLimit]
+	enabled = false
+	totalLimit = "100mbps"
+	totalBurst = "100mbps"
+	singleLimit = "10mbps"
+	singleBurst = "10mbps"
+*/
+
 type RateLimitConfig struct {
-	Enabled       bool   `toml:"enabled"`
-	RateMethod    string `toml:"rateMethod"`
-	RatePerMinute int    `toml:"ratePerMinute"`
-	Burst         int    `toml:"burst"`
+	Enabled        bool   `toml:"enabled"`
+	RateMethod     string `toml:"rateMethod"`
+	RatePerMinute  int    `toml:"ratePerMinute"`
+	Burst          int    `toml:"burst"`
+	BandwidthLimit BandwidthLimitConfig
+}
+
+type BandwidthLimitConfig struct {
+	Enabled     bool   `toml:"enabled"`
+	TotalLimit  string `toml:"totalLimit"`
+	TotalBurst  string `toml:"totalBurst"`
+	SingleLimit string `toml:"singleLimit"`
+	SingleBurst string `toml:"singleBurst"`
 }
 
 /*
@@ -134,6 +172,16 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
 type OutboundConfig struct {
 	Enabled bool   `toml:"enabled"`
 	Url     string `toml:"url"`
+}
+
+/*
+[docker]
+enabled = false
+target = "ghcr" # ghcr/dockerhub
+*/
+type DockerConfig struct {
+	Enabled bool   `toml:"enabled"`
+	Target  string `toml:"target"`
 }
 
 // LoadConfig 从 TOML 配置文件加载配置
@@ -178,7 +226,9 @@ func DefaultConfig() *Config {
 		Server: ServerConfig{
 			Port:      8080,
 			Host:      "0.0.0.0",
+			NetLib:    "netpoll",
 			SizeLimit: 125,
+			MemLimit:  0,
 			H2C:       true,
 			Cors:      "*",
 			Debug:     false,
@@ -204,35 +254,48 @@ func DefaultConfig() *Config {
 			StaticDir: "/data/www",
 		},
 		Log: LogConfig{
-			LogFilePath: "/data/ghproxy/log/ghproxy.log",
-			MaxLogSize:  10,
-			Level:       "info",
+			LogFilePath:  "/data/ghproxy/log/ghproxy.log",
+			MaxLogSize:   10,
+			Level:        "info",
+			HertZLogPath: "/data/ghproxy/log/hertz.log",
 		},
 		Auth: AuthConfig{
-			Enabled:       false,
-			Method:        "parameters",
-			Key:           "",
-			Token:         "token",
-			PassThrough:   false,
-			ForceAllowApi: false,
+			Enabled:               false,
+			Method:                "parameters",
+			Key:                   "",
+			Token:                 "token",
+			PassThrough:           false,
+			ForceAllowApi:         false,
+			ForceAllowApiPassList: false,
 		},
 		Blacklist: BlacklistConfig{
 			Enabled:       false,
-			BlacklistFile: "/data/ghproxy/config/blacklist.txt",
+			BlacklistFile: "/data/ghproxy/config/blacklist.json",
 		},
 		Whitelist: WhitelistConfig{
 			Enabled:       false,
-			WhitelistFile: "/data/ghproxy/config/whitelist.txt",
+			WhitelistFile: "/data/ghproxy/config/whitelist.json",
 		},
 		RateLimit: RateLimitConfig{
 			Enabled:       false,
 			RateMethod:    "total",
 			RatePerMinute: 100,
 			Burst:         10,
+			BandwidthLimit: BandwidthLimitConfig{
+				Enabled:     false,
+				TotalLimit:  "100mbps",
+				TotalBurst:  "100mbps",
+				SingleLimit: "10mbps",
+				SingleBurst: "10mbps",
+			},
 		},
 		Outbound: OutboundConfig{
 			Enabled: false,
 			Url:     "socks5://127.0.0.1:1080",
+		},
+		Docker: DockerConfig{
+			Enabled: false,
+			Target:  "ghcr",
 		},
 	}
 }

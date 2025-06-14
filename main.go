@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"time"
 
 	"ghproxy/api"
@@ -16,21 +17,27 @@ import (
 	"ghproxy/middleware/loggin"
 	"ghproxy/proxy"
 	"ghproxy/rate"
+	"ghproxy/weakcache"
 
-	"github.com/WJQSERVER-STUDIO/go-utils/logger"
+	"github.com/WJQSERVER-STUDIO/logger"
+	"github.com/hertz-contrib/http2/factory"
+	"github.com/wjqserver/modembed"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/adaptor"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/hertz/pkg/network/standard"
 
-	"github.com/hertz-contrib/http2/factory"
+	_ "net/http/pprof"
 )
 
 var (
 	cfg         *config.Config
 	r           *server.Hertz
 	configfile  = "/data/ghproxy/config/config.toml"
+	hertZfile   *os.File
 	cfgfile     string
 	version     string
 	runMode     string
@@ -43,6 +50,10 @@ var (
 var (
 	//go:embed pages/*
 	pagesFS embed.FS
+)
+
+var (
+	wcache *weakcache.Cache[string] // docker token缓存
 )
 
 var (
@@ -116,6 +127,7 @@ func loadConfig() {
 
 func setupLogger(cfg *config.Config) {
 	var err error
+
 	err = logger.Init(cfg.Log.LogFilePath, cfg.Log.MaxLogSize)
 	if err != nil {
 		fmt.Printf("Failed to initialize logger: %v\n", err)
@@ -126,10 +138,35 @@ func setupLogger(cfg *config.Config) {
 		fmt.Printf("Logger Level Error: %v\n", err)
 		os.Exit(1)
 	}
+	logger.SetAsync(cfg.Log.Async)
+
 	fmt.Printf("Log Level: %s\n", cfg.Log.Level)
 	logDebug("Config File Path: ", cfgfile)
 	logDebug("Loaded config: %v\n", cfg)
-	logInfo("Init Completed")
+	logInfo("Logger Initialized Successfully")
+}
+
+func setupHertZLogger(cfg *config.Config) {
+	var err error
+
+	if cfg.Log.HertZLogPath != "" {
+		hertZfile, err = os.OpenFile(cfg.Log.HertZLogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		if err != nil {
+			hlog.SetOutput(os.Stdout)
+			logWarning("Failed to open hertz log file: %v", err)
+		} else {
+			hlog.SetOutput(hertZfile)
+		}
+		hlog.SetLevel(hlog.LevelInfo)
+	}
+
+}
+
+func setMemLimit(cfg *config.Config) {
+	if cfg.Server.MemLimit > 0 {
+		debug.SetMemoryLimit((cfg.Server.MemLimit) * 1024 * 1024)
+		logInfo("Set Memory Limit to %d MB", cfg.Server.MemLimit)
+	}
 }
 
 func loadlist(cfg *config.Config) {
@@ -153,37 +190,53 @@ func setupRateLimit(cfg *config.Config) {
 }
 
 func InitReq(cfg *config.Config) {
-	proxy.InitReq(cfg)
+	err := proxy.InitReq(cfg)
+	if err != nil {
+		fmt.Printf("Failed to initialize request: %v\n", err)
+		os.Exit(1)
+	}
 }
 
 // loadEmbeddedPages 加载嵌入式页面资源
 func loadEmbeddedPages(cfg *config.Config) (fs.FS, fs.FS, error) {
+	pageFS := modembed.NewModTimeFS(pagesFS, time.Now())
 	var pages fs.FS
 	var err error
 	switch cfg.Pages.Theme {
 	case "bootstrap":
-		pages, err = fs.Sub(pagesFS, "pages/bootstrap")
+		pages, err = fs.Sub(pageFS, "pages/bootstrap")
 	case "nebula":
-		pages, err = fs.Sub(pagesFS, "pages/nebula")
+		pages, err = fs.Sub(pageFS, "pages/nebula")
 	case "design":
-		pages, err = fs.Sub(pagesFS, "pages/design")
+		pages, err = fs.Sub(pageFS, "pages/design")
 	case "metro":
-		pages, err = fs.Sub(pagesFS, "pages/metro")
+		pages, err = fs.Sub(pageFS, "pages/metro")
 	case "classic":
-		pages, err = fs.Sub(pagesFS, "pages/classic")
+		pages, err = fs.Sub(pageFS, "pages/classic")
 	case "mino":
-		pages, err = fs.Sub(pagesFS, "pages/mino")
+		pages, err = fs.Sub(pageFS, "pages/mino")
+	case "hub":
+		pages, err = fs.Sub(pageFS, "pages/hub")
 	default:
-		pages, err = fs.Sub(pagesFS, "pages/bootstrap") // 默认主题
-		logWarning("Invalid Pages Theme: %s, using default theme 'bootstrap'", cfg.Pages.Theme)
+		pages, err = fs.Sub(pageFS, "pages/design") // 默认主题
+		logWarning("Invalid Pages Theme: %s, using default theme 'design'", cfg.Pages.Theme)
 	}
 
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to load embedded pages: %w", err)
 	}
 
+	// 初始化errPagesFs
+	errPagesInitErr := proxy.InitErrPagesFS(pageFS)
+	if errPagesInitErr != nil {
+		logWarning("errPagesInitErr: %s", errPagesInitErr)
+	}
+
 	var assets fs.FS
-	assets, err = fs.Sub(pagesFS, "pages/assets")
+	assets, err = fs.Sub(pageFS, "pages/assets")
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to load embedded assets: %w", err)
+	}
 	return pages, assets, nil
 }
 
@@ -214,7 +267,6 @@ func setupPages(cfg *config.Config, r *server.Hertz) {
 		r.StaticFile("/style.css", stylesheetsPath)
 		r.StaticFile("/bootstrap.min.css", bootstrapPath)
 		r.StaticFile("/bootstrap.bundle.min.js", bootstrapBundlePath)
-		//router.StaticFile("/bootstrap.min.css", bootstrapPath)
 
 	default:
 		// 处理无效的Pages Mode
@@ -230,6 +282,12 @@ func setupPages(cfg *config.Config, r *server.Hertz) {
 	}
 }
 
+func pageCacheHeader() func(ctx context.Context, c *app.RequestContext) {
+	return func(ctx context.Context, c *app.RequestContext) {
+		c.Header("Cache-Control", "public, max-age=3600, must-revalidate")
+	}
+}
+
 func setInternalRoute(cfg *config.Config, r *server.Hertz) error {
 
 	// 加载嵌入式资源
@@ -238,61 +296,69 @@ func setInternalRoute(cfg *config.Config, r *server.Hertz) error {
 		logError("Failed when processing pages: %s", err)
 		return err
 	}
-	// 设置嵌入式资源路由
-	r.GET("/", func(ctx context.Context, c *app.RequestContext) {
-		staticServer := http.FileServer(http.FS(pages))
-		req, err := adaptor.GetCompatRequest(&c.Request)
-		if err != nil {
-			logError("%s", err)
-			return
-		}
-		staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-	})
-	r.GET("/favicon.ico", func(ctx context.Context, c *app.RequestContext) {
-		staticServer := http.FileServer(http.FS(pages))
-		req, err := adaptor.GetCompatRequest(&c.Request)
-		if err != nil {
-			logError("%s", err)
-			return
-		}
-		staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-	})
-	r.GET("/script.js", func(ctx context.Context, c *app.RequestContext) {
-		staticServer := http.FileServer(http.FS(pages))
-		req, err := adaptor.GetCompatRequest(&c.Request)
-		if err != nil {
-			logError("%s", err)
-			return
-		}
-		staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-	})
-	r.GET("/style.css", func(ctx context.Context, c *app.RequestContext) {
-		staticServer := http.FileServer(http.FS(pages))
-		req, err := adaptor.GetCompatRequest(&c.Request)
-		if err != nil {
-			logError("%s", err)
-			return
-		}
-		staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-	})
-	r.GET("/bootstrap.min.css", func(ctx context.Context, c *app.RequestContext) {
-		staticServer := http.FileServer(http.FS(assets))
-		req, err := adaptor.GetCompatRequest(&c.Request)
-		if err != nil {
-			logError("%s", err)
-			return
-		}
-		staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-	})
-	r.GET("/bootstrap.bundle.min.js", func(ctx context.Context, c *app.RequestContext) {
-		staticServer := http.FileServer(http.FS(assets))
-		req, err := adaptor.GetCompatRequest(&c.Request)
-		if err != nil {
-			logError("%s", err)
-			return
-		}
-		staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-	})
+	/*
+		// 设置嵌入式资源路由
+		r.GET("/", func(ctx context.Context, c *app.RequestContext) {
+			staticServer := http.FileServer(http.FS(pages))
+			req, err := adaptor.GetCompatRequest(&c.Request)
+			if err != nil {
+				logError("%s", err)
+				return
+			}
+			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
+		})
+			r.GET("/favicon.ico", func(ctx context.Context, c *app.RequestContext) {
+				staticServer := http.FileServer(http.FS(assets))
+				req, err := adaptor.GetCompatRequest(&c.Request)
+				if err != nil {
+					logError("%s", err)
+					return
+				}
+				staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
+			})
+		r.GET("/script.js", func(ctx context.Context, c *app.RequestContext) {
+			staticServer := http.FileServer(http.FS(pages))
+			req, err := adaptor.GetCompatRequest(&c.Request)
+			if err != nil {
+				logError("%s", err)
+				return
+			}
+			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
+		})
+		r.GET("/style.css", func(ctx context.Context, c *app.RequestContext) {
+			staticServer := http.FileServer(http.FS(pages))
+			req, err := adaptor.GetCompatRequest(&c.Request)
+			if err != nil {
+				logError("%s", err)
+				return
+			}
+			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
+		})
+		r.GET("/bootstrap.min.css", func(ctx context.Context, c *app.RequestContext) {
+			staticServer := http.FileServer(http.FS(assets))
+			req, err := adaptor.GetCompatRequest(&c.Request)
+			if err != nil {
+				logError("%s", err)
+				return
+			}
+			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
+		})
+		r.GET("/bootstrap.bundle.min.js", func(ctx context.Context, c *app.RequestContext) {
+			staticServer := http.FileServer(http.FS(assets))
+			req, err := adaptor.GetCompatRequest(&c.Request)
+			if err != nil {
+				logError("%s", err)
+				return
+			}
+			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
+		})
+	*/
+	r.GET("/", pageCacheHeader(), adaptor.HertzHandler(http.FileServer(http.FS(pages))))
+	r.GET("/favicon.ico", pageCacheHeader(), adaptor.HertzHandler(http.FileServer(http.FS(assets))))
+	r.GET("/script.js", pageCacheHeader(), adaptor.HertzHandler(http.FileServer(http.FS(pages))))
+	r.GET("/style.css", pageCacheHeader(), adaptor.HertzHandler(http.FileServer(http.FS(pages))))
+	r.GET("/bootstrap.min.css", pageCacheHeader(), adaptor.HertzHandler(http.FileServer(http.FS(assets))))
+	r.GET("/bootstrap.bundle.min.js", pageCacheHeader(), adaptor.HertzHandler(http.FileServer(http.FS(assets))))
 	return nil
 }
 
@@ -315,9 +381,14 @@ func init() {
 	loadConfig()
 	if cfg != nil { // 在setupLogger前添加空值检查
 		setupLogger(cfg)
+		setupHertZLogger(cfg)
 		InitReq(cfg)
+		setMemLimit(cfg)
 		loadlist(cfg)
 		setupRateLimit(cfg)
+		if cfg.Docker.Enabled {
+			wcache = proxy.InitWeakCache()
+		}
 
 		if cfg.Server.Debug {
 			runMode = "dev"
@@ -331,76 +402,134 @@ func init() {
 	}
 }
 
+var viaString string = "WJQSERVER-STUDIO/GHProxy"
+
+func viaHeader() app.HandlerFunc {
+	return func(ctx context.Context, c *app.RequestContext) {
+		protoVersion := "1.1"
+		c.Header("Via", protoVersion+" "+viaString)
+		c.Next(ctx)
+	}
+}
+
 func main() {
-	// 如果 showVersion 为 true，则在 init 阶段已退出，这里直接返回
 	if showVersion || showHelp {
 		return
 	}
-	logDebug("Run Mode: %s", runMode)
+	logDebug("Run Mode: %s Netlib: %s", runMode, cfg.Server.NetLib)
 
-	// 确保在程序配置加载且非版本显示模式下执行
 	if cfg == nil {
 		fmt.Println("Config not loaded, exiting.")
-		return // 如果配置未加载，则不继续执行
+		return
 	}
 
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
+	if cfg.Server.NetLib == "std" || cfg.Server.NetLib == "standard" || cfg.Server.NetLib == "net" || cfg.Server.NetLib == "net/http" {
+		if cfg.Server.H2C {
+			r = server.New(
+				server.WithH2C(true),
+				server.WithHostPorts(addr),
+				server.WithTransport(standard.NewTransporter),
+				server.WithStreamBody(true),
+			)
+			r.AddProtocol("h2", factory.NewServerFactory())
+		} else {
+			r = server.New(
+				server.WithHostPorts(addr),
+				server.WithTransport(standard.NewTransporter),
+				server.WithStreamBody(true),
+			)
+		}
+	} else if cfg.Server.NetLib == "netpoll" || cfg.Server.NetLib == "" {
+		if cfg.Server.H2C {
+			r = server.New(
+				server.WithH2C(true),
+				server.WithHostPorts(addr),
+				server.WithSenseClientDisconnection(cfg.Server.SenseClientDisconnection),
+				server.WithStreamBody(true),
+			)
+			r.AddProtocol("h2", factory.NewServerFactory())
+		} else {
+			r = server.New(
+				server.WithHostPorts(addr),
+				server.WithSenseClientDisconnection(cfg.Server.SenseClientDisconnection),
+				server.WithStreamBody(true),
+			)
+		}
+	} else {
+		logError("Invalid NetLib: %s", cfg.Server.NetLib)
+		fmt.Printf("Invalid NetLib: %s\n", cfg.Server.NetLib)
+		os.Exit(1)
+	}
 
-	r := server.New(
-		server.WithHostPorts(addr),
-		server.WithH2C(true),
-	)
-
-	r.AddProtocol("h2", factory.NewServerFactory())
-
-	// 添加Recovery中间件
-	r.Use(recovery.Recovery())
-	// 添加log中间件
-	r.Use(loggin.Middleware())
-
+	r.Use(recovery.Recovery()) // Recovery中间件
+	r.Use(loggin.Middleware()) // log中间件
+	r.Use(viaHeader())
 	setupApi(cfg, r, version)
-
 	setupPages(cfg, r)
 
+	r.GET("/github.com/:user/:repo/releases/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "releases")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
+
+	r.GET("/github.com/:user/:repo/archive/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "releases")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
+
+	r.GET("/github.com/:user/:repo/blob/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "blob")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
+
+	r.GET("/github.com/:user/:repo/raw/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "raw")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
+
+	r.GET("/github.com/:user/:repo/info/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "clone")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
+	r.GET("/github.com/:user/:repo/git-upload-pack", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "clone")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
+
+	r.GET("/raw.githubusercontent.com/:user/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "raw")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
+
+	r.GET("/gist.githubusercontent.com/:user/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "gist")
+		proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
+
+	r.Any("/api.github.com/repos/:user/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("matcher", "api")
+		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+	})
+
+	r.GET("/v2/", func(ctx context.Context, c *app.RequestContext) {
+		emptyJSON := "{}"
+		c.Header("Content-Type", "application/json")
+		c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
+
+		c.Header("Docker-Distribution-API-Version", "registry/2.0")
+
+		c.Status(200)
+		c.Write([]byte(emptyJSON))
+	})
+
+	r.Any("/v2/:target/:user/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
+		proxy.GhcrWithImageRouting(cfg)(ctx, c)
+	})
+
 	/*
-		// 1. GitHub Releases/Archive - Use distinct path segments for type
-		r.GET("/github.com/:username/:repo/releases/*filepath", func(ctx context.Context, c *app.RequestContext) { // Distinct path for releases
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
-
-		r.GET("/github.com/:username/:repo/archive/*filepath", func(ctx context.Context, c *app.RequestContext) { // Distinct path for archive
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
-
-		// 2. GitHub Blob/Raw - Use distinct path segments for type
-		r.GET("/github.com/:username/:repo/blob/*filepath", func(ctx context.Context, c *app.RequestContext) { // Distinct path for blob
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
-
-		r.GET("/github.com/:username/:repo/raw/*filepath", func(ctx context.Context, c *app.RequestContext) { // Distinct path for raw
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
-
-		r.GET("/github.com/:username/:repo/info/*filepath", func(ctx context.Context, c *app.RequestContext) { // Distinct path for info
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
-		r.GET("/github.com/:username/:repo/git-upload-pack", func(ctx context.Context, c *app.RequestContext) {
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
-
-		// 4. Raw GitHubusercontent - Keep as is (assuming it's distinct enough)
-		r.GET("/raw.githubusercontent.com/:username/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
-
-		// 5. Gist GitHubusercontent - Keep as is (assuming it's distinct enough)
-		r.GET("/gist.githubusercontent.com/:username/*filepath", func(ctx context.Context, c *app.RequestContext) {
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
-		})
-
-		// 6. GitHub API Repos - Keep as is (assuming it's distinct enough)
-		r.GET("/api.github.com/repos/:username/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
-			proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
+		r.Any("/v2/:target/*filepath", func(ctx context.Context, c *app.RequestContext) {
+			proxy.GhcrRouting(cfg)(ctx, c)
 		})
 	*/
 
@@ -412,7 +541,26 @@ func main() {
 	fmt.Printf("A Go Based High-Performance Github Proxy \n")
 	fmt.Printf("Made by WJQSERVER-STUDIO\n")
 
-	r.Spin()
+	if cfg.Server.Debug {
+		go func() {
+			http.ListenAndServe("localhost:6060", nil)
+		}()
+	}
+	if wcache != nil {
+		defer wcache.StopCleanup()
+	}
+
 	defer logger.Close()
+	defer func() {
+		if hertZfile != nil {
+			err := hertZfile.Close()
+			if err != nil {
+				logError("Failed to close hertz log file: %v", err)
+			}
+		}
+	}()
+
+	r.Spin()
+
 	fmt.Println("Program Exit")
 }

@@ -1,7 +1,9 @@
 [server]
 host = "127.0.0.1" 
 port = 8080 
+netlib = "netpoll" # "netpoll" / "std" "standard" "net/http" "net"
 sizeLimit = 125 # MB
+memLimit = 0 # MB
 H2C = true
 cors = "*" # "*"/"" -> "*" ; "nil" -> "" ;
 debug = false
@@ -30,6 +32,7 @@ staticDir = "/usr/local/ghproxy/pages"
 logFilePath = "/usr/local/ghproxy/log/ghproxy.log" 
 maxLogSize = 5 # MB
 level = "info" # dump, debug, info, warn, error, none
+hertzLogPath = "/usr/local/ghproxy/log/hertz.log" 
 
 [auth]
 authMethod = "parameters" # "header" or "parameters"
@@ -55,3 +58,7 @@ burst = 5
 [outbound]
 enabled = false
 url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
+
+[docker]
+enabled = false
+target = "ghcr" # ghcr/dockerhub

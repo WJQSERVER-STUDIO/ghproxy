@@ -1,8 +1,13 @@
 # GHProxy
 
-![pull](https://img.shields.io/docker/pulls/wjqserver/ghproxy.svg)![Docker Image Size (tag)](https://img.shields.io/docker/image-size/wjqserver/ghproxy/latest)[![Go Report Card](https://goreportcard.com/badge/github.com/WJQSERVER-STUDIO/ghproxy)](https://goreportcard.com/report/github.com/WJQSERVER-STUDIO/ghproxy)
+![GitHub Release](https://img.shields.io/github/v/release/WJQSERVER-STUDIO/ghproxy?display_name=tag&style=flat)
+![pull](https://img.shields.io/docker/pulls/wjqserver/ghproxy.svg)
+![Docker Image Size (tag)](https://img.shields.io/docker/image-size/wjqserver/ghproxy/latest)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/WJQSERVER-STUDIO/ghproxy)
+[![Go Report Card](https://goreportcard.com/badge/github.com/WJQSERVER-STUDIO/ghproxy)](https://goreportcard.com/report/github.com/WJQSERVER-STUDIO/ghproxy)
 
-使用Go实现的GHProxy,用于加速部分地区Github仓库的拉取,支持速率限制,用户鉴权,支持Docker部署
+
+支持 Git clone、raw、releases的 Github 加速项目, 支持自托管的同时带来卓越的性能与极低的资源占用(Golang和HertZ带来的优势), 同时支持多种额外功能
 
 ## 项目说明
 
@@ -12,13 +17,15 @@
 - 🌐 **使用字节旗下的 [HertZ](https://github.com/cloudwego/hertz) 作为 Web 框架**
 - 📡 **使用 [Touka-HTTPC](https://github.com/satomitouka/touka-httpc) 作为 HTTP 客户端**
 - 📥 **支持 Git clone、raw、releases 等文件拉取**
+- 🐳 **支持反代Docker, GHCR等镜像仓库**
 - 🎨 **支持多个前端主题**
 - 🚫 **支持自定义黑名单/白名单**
 - 🗄️ **支持 Git Clone 缓存（配合 [Smart-Git](https://github.com/WJQSERVER-STUDIO/smart-git)）**
-- 🐳 **支持 Docker 部署**
+- 🐳 **支持自托管与Docker容器化部署**
 - ⚡ **支持速率限制**
+- ⚡ **支持带宽速率限制**
 - 🔒 **支持用户鉴权**
-- 🐚 **支持 shell 脚本嵌套加速**
+- 🐚 **支持 shell 脚本多层嵌套加速**
 
 ### 项目相关
 
@@ -28,11 +35,11 @@
 
 [相关文章](https://blog.wjqserver.com/categories/my-program/)
 
-[项目文档](https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/docs/menu.md)
+[GHProxy项目文档](https://wjqserver-docs.pages.dev/docs/ghproxy/) 感谢 [@redbunnys](https://github.com/redbunnys)的维护
 
 ### 使用示例
 
-```
+```bash 
 # 下载文件
 https://ghproxy.1888866.xyz/raw.githubusercontent.com/WJQSERVER-STUDIO/tools-stable/main/tools-stable-ghproxy.sh
 https://ghproxy.1888866.xyz/https://raw.githubusercontent.com/WJQSERVER-STUDIO/tools-stable/main/tools-stable-ghproxy.sh
@@ -40,6 +47,15 @@ https://ghproxy.1888866.xyz/https://raw.githubusercontent.com/WJQSERVER-STUDIO/t
 # 克隆仓库
 git clone https://ghproxy.1888866.xyz/github.com/WJQSERVER-STUDIO/ghproxy.git
 git clone https://ghproxy.1888866.xyz/https://github.com/WJQSERVER-STUDIO/ghproxy.git
+
+# Docker(OCI) 代理
+docker pull gh.example.com/wjqserver/ghproxy
+docker pull gh.example.com/adguard/adguardhome
+
+docker pull gh.example.com/docker.io/wjqserver/ghproxy
+docker pull gh.example.com/docker.io/adguard/adguardhome
+
+docker pull gh.example.com/ghcr.io/openfaas/queue-worker 
 ```
 
 ## 部署说明
@@ -93,7 +109,9 @@ wget -O install-dev.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghprox
 
 ## LICENSE
 
-本项目使用WJQserver Studio License 2.0 [WJQserver Studio License 2.0](https://wjqserver-studio.github.io/LICENSE/LICENSE.html)
+v3.5.2开始, 本项目使用 [WJQserver Studio License 2.1](https://wjqserver-studio.github.io/LICENSE/LICENSE.html) 和 [Mozilla Public License Version 2.0](https://mozilla.org/MPL/2.0/) 双重许可, 您可从中选择一个使用
+
+前端位于单独仓库中, 且各个主题均存在各自的许可证, 本项目许可证并不包括前端
 
 在v2.3.0之前, 本项目使用WJQserver Studio License 1.2
 

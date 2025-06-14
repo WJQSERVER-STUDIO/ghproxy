@@ -21,7 +21,6 @@ RUN VERSION=$(curl -s https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH
     wget -O /data/${APPLICATION}/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz https://github.com/${USER}/${REPO}/releases/download/$VERSION/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz && \
     tar -zxvf /data/${APPLICATION}/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz -C /data/${APPLICATION} && \
     rm -rf /data/${APPLICATION}/${APPLICATION}-${TARGETOS}-${TARGETARCH}.tar.gz
-RUN wget -O /usr/local/bin/init.sh https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/docker/dockerfile//init.sh
 
 # 拉取配置
 RUN wget -O /data/${APPLICATION}/config.toml https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/config/config.toml
@@ -30,7 +29,6 @@ RUN wget -O /data/${APPLICATION}/whitelist.json https://raw.githubusercontent.co
 
 # 权限
 RUN chmod +x /data/${APPLICATION}/${APPLICATION}
-RUN chmod +x /usr/local/bin/init.sh
 
 FROM alpine:latest
 

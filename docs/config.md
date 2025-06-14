@@ -1,5 +1,7 @@
 # ghproxy 用户配置文档
 
+> 弃用, 请转到 [GHProxy项目文档](https://wjqserver-docs.pages.dev/docs/ghproxy/)
+
 `ghproxy` 的配置主要通过修改 `config` 目录下的 `config.toml`、`blacklist.json` 和 `whitelist.json` 文件来实现。本文档将详细介绍这些配置文件的作用以及用户可以自定义的配置选项。
 
 ## `config.toml` - 主配置文件
@@ -12,7 +14,9 @@
 [server]
 host = "0.0.0.0"
 port = 8080
+netlib = "netpoll" # "netpoll" / "std" "standard" "net/http" "net"
 sizeLimit = 125 # MB
+memLimit = 0 # MB
 H2C = true
 cors = "*" # "*"/"" -> "*" ; "nil" -> "" ;
 debug = false
@@ -22,6 +26,7 @@ mode = "auto" # "auto" or "advanced"
 maxIdleConns = 100 # only for advanced mode
 maxIdleConnsPerHost = 60 # only for advanced mode
 maxConnsPerHost = 0 # only for advanced mode
+useCustomRawHeaders = false
 
 [gitclone]
 mode = "bypass" # bypass / cache
@@ -41,6 +46,7 @@ staticDir = "/data/www"
 logFilePath = "/data/ghproxy/log/ghproxy.log"
 maxLogSize = 5 # MB
 level = "info" # dump, debug, info, warn, error, none
+hertzLogPath = "/data/ghproxy/log/hertz.log"
 
 [auth]
 method = "parameters" # "header" or "parameters"
@@ -64,9 +70,20 @@ rateMethod = "total" # "ip" or "total"
 ratePerMinute = 180
 burst = 5
 
+[rateLimit.bandwidthLimit]
+	enabled = false
+	totalLimit = "100mbps"
+	totalBurst = "100mbps"
+	singleLimit = "10mbps"
+	singleBurst = "10mbps"
+
 [outbound]
 enabled = false
 url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
+
+[docker]
+enabled = false
+target = "ghcr" # ghcr/dockerhub or "xx.example.com"
 ```
 
 ### 配置项详细说明
@@ -81,10 +98,18 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
         *   类型: 整数 (`int`)
         *   默认值: `8080`
         *   说明:  设置 `ghproxy` 监听的端口号。
+    *   `netlib`: 底层网络库。
+        *   类型: 字符串 (`string`)
+        *   默认值: `""` (HertZ默认处置)
+        *   说明: `"std"` `"standard"` `"net/http"` `"net"` 均会被设置为go标准库`net/http`, 设置为`"netpoll"`或`""`会由`HertZ`默认逻辑处理
     *   `sizeLimit`: 请求体大小限制。
         *   类型: 整数 (`int`)
         *   默认值: `125` (MB)
         *   说明:  限制允许接收的请求体最大大小，单位为 MB。用于防止过大的请求导致服务压力过大。
+    *   `memLimit`:  `runtime`内存限制
+        *   类型: 整数 (`int64`)
+        *   默认值: `0` (不传入)
+        *   说明: 给`runtime`的指标, 让gc行为更高效
     *   `H2C`:  是否启用 H2C (HTTP/2 Cleartext) 传输。
         *   类型: 布尔值 (`bool`)
         *   默认值: `true` (启用)
@@ -123,6 +148,10 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
         *   类型: 整数 (`int`)
         *   默认值: `0` (不限制)
         *   说明:  设置 HTTP 客户端连接池中，每个主机允许建立的最大连接数。设置为 `0` 表示不限制。
+    *   `useCustomRawHeaders`: 使用预定义header避免github waf对应zh-CN的封锁
+        *   类型: 布尔值(`bool`)
+        *   默认值: `false`(停用)
+        *   说明: 启用后, 拉取raw文件会使用程序预定义的固定headers, 而不是原先的复制行为
 
 *   **`[gitclone]` - Git 克隆配置**
 
@@ -193,6 +222,10 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
             *   `"warn"`:   输出警告和错误日志。
             *   `"error"`:  仅输出错误日志。
             *   `"none"`:   禁用所有日志输出。
+    *   `hertzLogPath`:  `HertZ`日志文件路径。
+        *   类型: 字符串 (`string`)
+        *   默认值: `"/data/ghproxy/log/hertz.log"`
+        *   说明:  设置 `HertZ` 日志文件的存储路径。
 
 *   **`[auth]` - 认证配置**
 
@@ -267,6 +300,27 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
         *   类型: 整数 (`int`)
         *   默认值: `5`
         *   说明:  允许在短时间内超过 `ratePerMinute` 的突发请求数。
+    *   **`[rateLimit.bandwidthLimit]` 带宽速率限制**
+        *   `enabled`: 是否启用带宽速率限制。
+            *   类型: 布尔值 (`bool`)
+            *   默认值: `false` (禁用)
+            *   说明: 启用后，`ghproxy` 将根据配置的策略限制带宽使用，防止服务被滥用。
+        *   `totalLimit`: 全局带宽限制。
+            *   类型: 字符串 (`string`)
+            *   默认值: `"100mbps"`
+            *   说明: 设置全局最大带宽使用量。支持的单位有 "kbps", "mbps", "gbps"。
+        *   `totalBurst`: 全局突发带宽。
+            *   类型: 字符串 (`string`)
+            *   默认值: `"100mbps"`
+            *   说明: 设置全局突发带宽使用量。支持的单位有 "kbps", "mbps", "gbps"。
+        *   `singleLimit`: 单个连接带宽限制。
+            *   类型: 字符串 (`string`)
+            *   默认值: `"10mbps"`
+            *   说明: 设置单个连接的最大带宽使用量。支持的单位有 "kbps", "mbps", "gbps"。
+        *   `singleBurst`: 单个连接突发带宽。
+            *   类型: 字符串 (`string`)
+            *   默认值: `"10mbps"`
+            *   说明: 设置单个连接的突发带宽使用量。支持的单位有 "kbps", "mbps", "gbps"。
 
 *   **`[outbound]` - 出站代理配置**
 
@@ -279,6 +333,22 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
         *   默认值: `"socks5://127.0.0.1:1080"`
         *   支持协议: `socks5://` 和 `http://`
         *   说明:  设置出站代理服务器的 URL。支持 SOCKS5 和 HTTP 代理协议。
+
+*   **`[docker]` - Docker 镜像代理配置**
+
+    *   `enabled`: 是否启用 Docker 镜像代理功能。
+        *   类型: 布尔值 (`bool`)
+        *   默认值: `false` (禁用)
+        *   说明: 当设置为 `true` 时，`ghproxy` 将尝试代理 Docker 镜像的下载请求，以加速从 GitHub Container Registry (GHCR) 或 Docker Hub 下载镜像。
+
+    *   `target`: 代理的目标 Docker 注册表。
+        *   类型: 字符串 (`string`)
+        *   默认值: `"ghcr"` (代理 GHCR)
+        *   可选值: `"ghcr"` 或 `"dockerhub"`
+        *   说明: 指定要代理的 Docker 注册表。
+            *   `"ghcr"`: 代理 GitHub Container Registry (ghcr.io)。
+            *   `"dockerhub"`: 代理 Docker Hub (docker.io)。
+            *   自定义, 支持传入自定义target, 例如`"docker.example.com"`
 
 ## `blacklist.json` - 黑名单配置
 

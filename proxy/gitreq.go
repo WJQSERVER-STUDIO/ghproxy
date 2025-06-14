@@ -8,13 +8,34 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/WJQSERVER-STUDIO/go-utils/limitreader"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
 func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Config, mode string) {
+
+	var (
+		req  *http.Request
+		resp *http.Response
+		err  error
+	)
+
+	go func() {
+		<-ctx.Done()
+		if resp != nil && resp.Body != nil {
+			err = resp.Body.Close()
+			if err != nil {
+				logError("Failed to close response body: %v", err)
+			}
+		}
+	}()
+
 	method := string(c.Request.Method())
 
-	logDump("Url Before FMT:%s", u)
+	reqBodyReader := bytes.NewBuffer(c.Request.Body())
+
+	//bodyReader := c.Request.BodyStream() // 不可替换为此实现
+
 	if cfg.GitClone.Mode == "cache" {
 		userPath, repoPath, remainingPath, queryParams, err := extractParts(u)
 		if err != nil {
@@ -23,27 +44,21 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 		}
 		// 构建新url
 		u = cfg.GitClone.SmartGitAddr + userPath + repoPath + remainingPath + "?" + queryParams.Encode()
-		logDump("New Url After FMT:%s", u)
 	}
 
-	var (
-		resp *http.Response
-		//err  error
-	)
-
-	body := c.Request.Body()
-
-	bodyReader := bytes.NewBuffer(body)
-	// 创建请求
-
 	if cfg.GitClone.Mode == "cache" {
-		req, err := gitclient.NewRequest(method, u, bodyReader)
+		rb := gitclient.NewRequestBuilder(method, u)
+		rb.NoDefaultHeaders()
+		rb.SetBody(reqBodyReader)
+		rb.WithContext(ctx)
+
+		req, err = rb.Build()
 		if err != nil {
 			HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 			return
 		}
-		setRequestHeaders(c, req)
-		removeWSHeader(req)
+
+		setRequestHeaders(c, req, cfg, "clone")
 		AuthPassThrough(c, cfg, req)
 
 		resp, err = gitclient.Do(req)
@@ -52,13 +67,18 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 			return
 		}
 	} else {
-		req, err := client.NewRequest(method, u, bodyReader)
+		rb := client.NewRequestBuilder(string(c.Request.Method()), u)
+		rb.NoDefaultHeaders()
+		rb.SetBody(reqBodyReader)
+		rb.WithContext(ctx)
+
+		req, err := rb.Build()
 		if err != nil {
 			HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 			return
 		}
-		setRequestHeaders(c, req)
-		removeWSHeader(req)
+
+		setRequestHeaders(c, req, cfg, "clone")
 		AuthPassThrough(c, cfg, req)
 
 		resp, err = client.Do(req)
@@ -72,6 +92,9 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 	if contentLength != "" {
 		size, err := strconv.Atoi(contentLength)
 		sizelimit := cfg.Server.SizeLimit * 1024 * 1024
+		if err != nil {
+			logWarning("%s %s %s %s %s Content-Length header is not a valid integer: %v", c.ClientIP(), c.Method(), c.Path(), c.UserAgent(), c.Request.Header.GetProtocol(), err)
+		}
 		if err == nil && size > sizelimit {
 			finalURL := []byte(resp.Request.URL.String())
 			c.Redirect(http.StatusMovedPermanently, finalURL)
@@ -82,7 +105,7 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 
 	for key, values := range resp.Header {
 		for _, value := range values {
-			c.Header(key, value)
+			c.Response.Header.Add(key, value)
 		}
 	}
 
@@ -114,5 +137,11 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 		c.Response.Header.Set("Expires", "0")
 	}
 
-	c.SetBodyStream(resp.Body, -1)
+	bodyReader := resp.Body
+
+	if cfg.RateLimit.BandwidthLimit.Enabled {
+		bodyReader = limitreader.NewRateLimitedReader(bodyReader, bandwidthLimit, int(bandwidthBurst), ctx)
+	}
+
+	c.SetBodyStream(bodyReader, -1)
 }

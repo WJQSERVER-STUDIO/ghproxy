@@ -1,7 +1,10 @@
 [server]
 host = "0.0.0.0" 
 port = 8080 
+netlib = "netpoll" # "netpoll" / "std" "standard" "net/http" "net"
+senseClientDisconnection = false
 sizeLimit = 125 # MB
+memLimit = 0 # MB
 H2C = true
 cors = "*" # "*"/"" -> "*" ; "nil" -> "" ;
 debug = false
@@ -11,6 +14,7 @@ mode = "auto" # "auto" or "advanced"
 maxIdleConns = 100 # only for advanced mode
 maxIdleConnsPerHost = 60 # only for advanced mode
 maxConnsPerHost = 0 # only for advanced mode
+useCustomRawHeaders = false
 
 [gitclone]
 mode = "bypass" # bypass / cache
@@ -30,6 +34,8 @@ staticDir = "/data/www"
 logFilePath = "/data/ghproxy/log/ghproxy.log" 
 maxLogSize = 5 # MB
 level = "info" # dump, debug, info, warn, error, none
+async = false
+hertzLogPath = "/data/ghproxy/log/hertz.log"
 
 [auth]
 method = "parameters" # "header" or "parameters"
@@ -38,6 +44,7 @@ key = ""
 enabled = false
 passThrough = false
 ForceAllowApi = false
+ForceAllowApiPassList = false
 
 [blacklist]
 blacklistFile = "/data/ghproxy/config/blacklist.json"
@@ -53,6 +60,17 @@ rateMethod = "total" # "ip" or "total"
 ratePerMinute = 180
 burst = 5
 
+[rateLimit.bandwidthLimit]
+	enabled = false
+	totalLimit = "100mbps"
+	totalBurst = "100mbps"
+	singleLimit = "10mbps"
+	singleBurst = "10mbps"
+
 [outbound]
 enabled = false
 url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
+
+[docker]
+enabled = false
+target = "ghcr" # ghcr/dockerhub

@@ -1,5 +1,367 @@
 # 更新日志
 
+3.5.5 - 2025-06-14
+---
+- CHANGE: 修正新匹配器的覆盖问题, 同时增加test的覆盖
+
+25w47a - 2025-06-14
+---
+- PRE-RELEASE: 此版本是v3.5.5预发布版本,请勿在生产环境中使用;
+- CHANGE: 修正新匹配器的覆盖问题, 同时增加test的覆盖
+
+3.5.4 - 2025-06-14
+---
+- CHANGE: 移植来自于[GHProxy-Touka](https://github.com/WJQSERVER-STUDIO/ghproxy-touka)的blob处理逻辑与302处理逻辑
+
+25w46c - 2025-06-14
+---
+- PRE-RELEASE: 此版本是v3.5.4预发布版本,请勿在生产环境中使用;
+- CHANGE: 移植来自于[GHProxy-Touka](https://github.com/WJQSERVER-STUDIO/ghproxy-touka)的blob处理逻辑与302处理逻辑
+
+25w46b - 2025-06-14
+---
+- PRE-RELEASE: 此版本是v3.5.4预发布版本,请勿在生产环境中使用;
+- CHANGE: 修改关闭行为以测试问题
+
+25w46a - 2025-06-14
+---
+- PRE-RELEASE: 此版本是v3.5.4预发布版本,请勿在生产环境中使用;
+- CHANGE: 修改payload行为以测试问题
+
+3.5.3 - 2025-06-13
+---
+- CHANGE: 显式配置`WithStreamBody(true)`
+
+3.5.2 - 2025-06-11
+---
+- CHANGE: 加入MPL 2.0许可证, 项目转为双重许可
+
+3.5.1 - 2025-06-09
+---
+- CHANGE: 大幅优化`Matcher`的性能, 实现零分配, 大幅提升性能; 单次操作时间: `254.3 ns/op` => `29.59 ns/op`
+
+25w45a - 2025-06-09
+---
+- PRE-RELEASE: 此版本是v3.5.1预发布版本,请勿在生产环境中使用;
+- CHANGE: 大幅优化`Matcher`的性能, 实现零分配, 大幅提升性能; 单次操作时间: `254.3 ns/op` => `29.59 ns/op`
+
+3.5.0 - 2025-06-05
+---
+- CHANGE: 更新许可证 v2.0 => v2.1
+- CHANGE: 修正工作流的一些问题
+- ADD: 增加`ForceAllowApiPassList`, 实现 #114
+
+25w44a - 2025-06-05
+---
+- PRE-RELEASE: 此版本是v3.5.0预发布版本,请勿在生产环境中使用;
+- CHANGE: 更新许可证 v2.0 => v2.1
+- CHANGE: 修正工作流的一些问题
+- ADD: 增加`ForceAllowApiPassList`, 实现 #114
+
+3.4.3 - 2025-06-05
+---
+- CHANGE: 弃用`adaptor.GetCompatRequest`, 切换到`adaptor.HertzHandler`
+- CHANGE: 为`embedFS`使用包装器, 使其支持`Last-Modified`
+- CHANGE: 为静态资源增加`Cache-Control: public, max-age=3600, must-revalidate`
+
+25w43a - 2025-06-05
+---
+- PRE-RELEASE: 此版本是v3.4.3预发布版本,请勿在生产环境中使用;
+- CHANGE: 弃用`adaptor.GetCompatRequest`, 切换到`adaptor.HertzHandler`
+- CHANGE: 为`embedFS`使用包装器, 使其支持`Last-Modified`
+- CHANGE: 为静态资源增加`Cache-Control: public, max-age=3600, must-revalidate`
+
+3.4.2 - 2025-06-03
+---
+- DEP: 回滚 github.com/nyaruka/phonenumbers 版本到 v1.6.1, v1.6.3观测到了一些反射造成的内存占用异常
+
+25w42a - 2025-06-02
+---
+- PRE-RELEASE: 此版本是v3.4.2预发布版本,请勿在生产环境中使用;
+- DEP: 回滚 github.com/nyaruka/phonenumbers 版本到 v1.6.1, v1.6.3观测到了一些反射造成的内存占用异常
+
+3.4.1 - 2025-05-29
+---
+- ADD: 为`errorpage`部分增加lru缓存, 避免重复渲染
+- CHANGE: 把json库替换到[sonic](github.com/bytedance/sonic)
+
+25w41b - 2025-05-28
+---
+- PRE-RELEASE: 此版本是v3.4.1预发布版本,请勿在生产环境中使用;
+- CHANGE: 把json库替换到[sonic](github.com/bytedance/sonic)
+
+25w41a - 2025-05-28
+---
+- PRE-RELEASE: 此版本是v3.4.1预发布版本,请勿在生产环境中使用;
+- ADD: 为`errorpage`部分增加lru缓存, 避免重复渲染
+- CHANGE: 替换到实验性的`encoding/json/v2`
+
+3.4.0 - 2025-05-21
+---
+- ADD: 初步实现多`target` Docker代理
+- ADD: 加入`weakcache`用于处理短期令牌
+- ADD: 新增`hub`主题
+- ADD: 新增`/api/shell_nest/status`与`/api/oci_proxy/status` API
+
+25w40b - 2025-05-21
+---
+- PRE-RELEASE: 此版本是v3.4.0预发布版本,请勿在生产环境中使用;
+- ADD: 新增`hub`主题
+- ADD: 新增`/api/shell_nest/status`与`/api/oci_proxy/status` API
+- CHANGE: 对细节进行优化
+
+25w40a - 2025-05-21
+---
+- PRE-RELEASE: 此版本是v3.4.0预发布版本,请勿在生产环境中使用;
+- ADD: 初步实现多`target` Docker代理
+- ADD: 加入`weakcache`用于处理短期令牌
+
+3.3.3 - 2025-05-20
+---
+- CHANGE: 加入`senseClientDisconnection`与`async`配置项
+
+25w39a - 2025-05-19
+---
+- PRE-RELEASE: 此版本是v3.3.3预发布版本,请勿在生产环境中使用;
+- CHANGE: 加入`senseClientDisconnection`与`async`配置项
+
+3.3.2 - 2025-05-18
+---
+- CHANGE: 默认主题改为`design`
+
+25w38a - 2025-05-18
+---
+- PRE-RELEASE: 此版本是v3.3.2预发布版本,请勿在生产环境中使用;
+- CHANGE: 默认主题改为`design`
+
+3.3.1 - 2025-05-16
+- CHANGE: 为`target`放宽限制, 支持自定义
+- CHANGE: 更新`hertz`, `0.9.7`=>`0.10.0`
+
+25w37a - 2025-05-16
+---
+- PRE-RELEASE: 此版本是v3.3.1预发布版本,请勿在生产环境中使用;
+- CHANGE: 为`target`放宽限制, 支持自定义
+- CHANGE: 更新`hertz`, `0.9.7`=>`0.10.0`
+
+3.3.0 - 2025-05-15
+---
+- CHANGE: 为`httpc`加入`request builder`的`withcontext`选项
+- ADD: 加入带宽限制功能
+- ADD: 为`netpoll`模式开启探测客户端是否断开功能
+
+25w36d - 2025-05-14
+---
+- PRE-RELEASE: 此版本是v3.3.0预发布版本,请勿在生产环境中使用;
+- ADD: 为`netpoll`模式开启探测客户端是否断开功能
+
+25w36c - 2025-05-14
+---
+- PRE-RELEASE: 此版本是v3.3.0预发布版本,请勿在生产环境中使用;
+- ADD: 加入带宽限制功能
+- CHANGE: 将`httpc`切换回主分支, `25w36b`测试的部分已被合入`httpc`主线
+
+25w36b - 2025-05-13
+---
+- PRE-RELEASE: 此版本是v3.3.0预发布版本,请勿在生产环境中使用;
+- CHANGE: `httpc`切换到`dev`, 测试在retry前检查ctx状态
+
+25w36a - 2025-05-13
+---
+- PRE-RELEASE: 此版本是v3.3.0预发布版本,请勿在生产环境中使用;
+- CHANGE: 为`httpc`加入`request builder`的`withcontext`选项
+
+3.2.4 - 2025-05-13
+---
+- CHANGE: 移除未使用的变量与相关计算
+
+25w35a - 2025-05-12
+---
+- PRE-RELEASE: 此版本是v3.2.4预发布版本,请勿在生产环境中使用;
+- CHANGE: 移除未使用的变量与相关计算
+
+3.2.3 - 2025-05-07
+---
+- CHANGE: 迁移logger库到新的仓库, 开启异步日志记录
+- CHANGE: 更新Go版本到go1.24.3
+- CHANGE: 迁移httpc到新的仓库
+
+25w34b - 2025-05-07
+---
+- PRE-RELEASE: 此版本是v3.2.3预发布版本,请勿在生产环境中使用;
+- CHANGE: 更新Go版本到go1.24.3
+
+25w34a - 2025-05-05
+---
+- PRE-RELEASE: 此版本是v3.2.3预发布版本,请勿在生产环境中使用;
+- CHANGE: 迁移logger库到新的仓库, 开启异步日志记录
+- CHANGE: 迁移httpc到新的仓库
+
+3.2.2 - 2025-04-29
+---
+- ADD: 实验性的raw Header处置, 用于应对Github对zh-CN的限制
+- FIX: 修正Header部分的一些处理问题
+- REVERT: 为`git clone`部分回滚 3.1.0中的 "使用`bodystream`进行req方向的body复制, 而不是使用额外的`buffer reader`" 修改
+
+25w33b - 2025-04-29
+---
+- PRE-RELEASE: 此版本是v3.2.2预发布版本,请勿在生产环境中使用;
+- REVERT: 为`git clone`部分回滚 3.1.0中的 "使用`bodystream`进行req方向的body复制, 而不是使用额外的`buffer reader`" 修改
+
+25w33a - 2025-04-29
+---
+- PRE-RELEASE: 此版本是v3.2.2预发布版本,请勿在生产环境中使用;
+- ADD: 实验性的raw Header处置, 用于应对Github对zh-CN的限制
+- FIX: 修正Header部分的一些处理问题
+
+3.2.1 - 2025-04-29
+---
+- FIX: 修复在`HertZ`路由匹配器下`matcher`键值不一致的问题
+
+25w32a - 2025-04-29
+---
+- PRE-RELEASE: 此版本是v3.2.1预发布版本,请勿在生产环境中使用;
+- FIX: 修复在`HertZ`路由匹配器下`matcher`键值不一致的问题
+
+3.2.0 - 2025-04-27
+---
+- CHANGE: 加入`ghcr`和`dockerhub`反代功能
+- FIX: 修复在`HertZ`路由匹配器下与用户名相关功能异常的问题
+
+25w31a - 2025-04-27
+---
+- PRE-RELEASE: 此版本是v3.2.0预发布版本,请勿在生产环境中使用;
+- CHANGE: 加入`ghcr`和`dockerhub`反代功能
+- FIX: 修复在`HertZ`路由匹配器下与用户名相关功能异常的问题
+
+3.1.0 - 2025-04-24
+---
+- CHANGE: 对标准url使用`HertZ`路由匹配器, 而不是自制匹配器, 以提升效率
+- CHANGE: 使用`bodystream`进行req方向的body复制, 而不是使用额外的`buffer reader`
+- CHANGE: 使用`HertZ`的`requestContext`传递matcher参数, 而不是`25w30a`中的ctx
+- CHANGE: 改进`rate`模块, 避免并发竞争问题
+- CHANGE: 将大部分状态码返回改为新的`html/tmpl`方式处理
+- CHANGE: 修改部分log等级
+- FIX:    修正默认配置的填充错误
+- CHANGE: 使用go `html/tmpl`处理状态码页面, 同时实现错误信息显示
+- CHANGE: 改进handle, 复用共同部分
+- CHANGE: 细化url匹配的返回码处理
+- CHANGE: 增加404界面
+
+25w30e - 2025-04-24
+---
+- PRE-RELEASE: 此版本是v3.1.0预发布版本,请勿在生产环境中使用;
+- CHANGE: 改进`rate`模块, 避免并发竞争问题
+- CHANGE: 将大部分状态码返回改为新的`html/tmpl`方式处理
+- CHANGE: 修改部分log等级
+- FIX: 修正默认配置的填充错误
+
+25w30d - 2025-04-22
+---
+- PRE-RELEASE: 此版本是v3.1.0预发布版本,请勿在生产环境中使用;
+- CHANGE: 使用go `html/tmpl`处理状态码页面, 同时实现错误信息显示
+
+25w30c - 2025-04-21
+---
+- PRE-RELEASE: 此版本是v3.1.0预发布版本,请勿在生产环境中使用;
+- CHANGE: 改进handle, 复用共同部分
+- CHANGE: 细化url匹配的返回码处理
+- CHANGE: 增加404界面
+
+25w30b - 2025-04-21
+---
+- PRE-RELEASE: 此版本是v3.1.0预发布版本,请勿在生产环境中使用;
+- CHANGE: 使用`bodystream`进行req方向的body复制, 而不是使用额外的`buffer reader`
+- CHANGE: 使用`HertZ`的`requestContext`传递matcher参数, 而不是`25w30a`中的标准ctx
+
+25w30a - 2025-04-19
+---
+- PRE-RELEASE: 此版本是v3.1.0预发布版本,请勿在生产环境中使用;
+- CHANGE: 对标准url使用`HertZ`路由匹配器, 而不是自制匹配器
+
+3.0.3 - 2025-04-19
+---
+- CHANGE: 增加移除部分header的处置, 避免向服务端/客户端透露过多信息
+- FIX: 修正非预期的header操作行为
+- CHANGE: 合并header相关逻辑, 避免多次操作
+- CHANGE: 对editor模式下的input进行处置, 增加隐式关闭处理
+- CHANGE: 增加`netlib`配置项
+
+25w29b - 2025-04-19
+---
+- PRE-RELEASE: 此版本是v3.0.3预发布版本,请勿在生产环境中使用;
+- CHANGE: 增加`netlib`配置项
+
+25w29a - 2025-04-17
+---
+- PRE-RELEASE: 此版本是v3.0.3预发布版本,请勿在生产环境中使用;
+- CHANGE: 增加移除部分header的处置, 避免向服务端/客户端透露过多信息
+- FIX: 修正非预期的header操作行为
+- CHANGE: 合并header相关逻辑, 避免多次操作
+- CHANGE: 对editor模式下的input进行处置, 增加隐式关闭处理
+
+3.0.2 - 2025-04-15
+---
+- CHANGE: 避免重复的re编译操作
+- CHANGE: 去除不必要的请求
+- CHANGE: 改进`httpc`相关配置
+- CHANGE: 更新`httpc` 0.4.0
+- CHANGE: 为不遵守`RFC 2616`, `RFC 9112`的客户端带来兼容性改进
+
+25w28b - 2025-04-15
+---
+- PRE-RELEASE: 此版本是v3.0.2预发布版本,请勿在生产环境中使用;
+- CHANGE: 改进resp关闭
+- CHANGE: 避免重复的re编译操作
+
+25w28a - 2025-04-14
+---
+- PRE-RELEASE: 此版本是预发布版本,请勿在生产环境中使用;
+- CHANGE: 去除不必要的请求
+- CHANGE: 改进`httpc`相关配置
+- CHANGE: 合入test版本修改
+
+25w28t-2 - 2025-04-11
+---
+- TEST: 测试验证版本
+- CHANGE: 为不遵守`RFC 2616`, `RFC 9112`的客户端带来兼容性改进
+
+25w28t-1 - 2025-04-11
+---
+- TEST: 测试验证版本
+- CHANGE: 更新httpc 0.4.0
+
+3.0.1 - 2025-04-08
+---
+- CHANGE: 加入`memLimit`指示gc
+- CHANGE: 加入`hlog`输出路径配置
+- CHANGE: 修正H2C配置问题
+
+25w27a - 2025-04-07
+---
+- PRE-RELEASE: 此版本是v3.0.1的预发布版本,请勿在生产环境中使用;
+- CHANGE: 加入`memLimit`指示gc
+- CHANGE: 加入`hlog`输出路径配置
+- CHANGE: 修正H2C配置问题
+
+3.0.0 - 2025-04-04
+---
+- RELEASE: Next Gen; 下一个起点; 
+- CHANGE: 使用HertZ框架重构, 提升性能
+- CHANGE: 前端在构建时加入, 新增`Design`,`Metro`,`Classic`主题
+- CHANGE: 加入`Mino`主题对接选项
+- FIX: 修正部分日志输出问题
+- CHANGE: 移除gin残留
+- CHANGE: 移除无用传入参数, 调整代码结构
+- CHANGE: 改进cli
+- CHANGE: 改进`脚本嵌套加速处理器`
+- CHANGE&FIX: 使用`c.SetBodyStream`方式, 修正此前`chunked`传输中存在的诸多问题, 参看[HertZ Issues #1309](https://github.com/cloudwego/hertz/issues/1309)
+- PORT: 从v2移植`matcher`相关改进
+- CHANGE: 增加默认配置生成
+- CHANGE: 优化前端资源加载
+- CHANGE: 将`cfg`flag改为`c`以符合`POSIX`规范
+- CHANGE: 为`smart-git`添加`no-cache`标头
+
 25w26a - 2025-04-03
 ---
 - PRE-RELEASE: 此版本是v3的预发布版本,请勿在生产环境中使用;
