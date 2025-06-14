@@ -68,6 +68,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 			c.Request.Header.Del("Referer")
 			logInfo("Internal Redirecting to %s", finalURL)
 			ChunkedProxyRequest(ctx, c, finalURL, cfg, matcher)
+			return
 		}
 	}
 
