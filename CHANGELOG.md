@@ -1,5 +1,14 @@
 # 更新日志
 
+3.5.5 - 2025-06-14
+---
+- CHANGE: 修正新匹配器的覆盖问题, 同时增加test的覆盖
+
+25w47a - 2025-06-14
+---
+- PRE-RELEASE: 此版本是v3.5.5预发布版本,请勿在生产环境中使用;
+- CHANGE: 修正新匹配器的覆盖问题, 同时增加test的覆盖
+
 3.5.4 - 2025-06-14
 ---
 - CHANGE: 移植来自于[GHProxy-Touka](https://github.com/WJQSERVER-STUDIO/ghproxy-touka)的blob处理逻辑与302处理逻辑

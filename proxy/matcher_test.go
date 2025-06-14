@@ -88,6 +88,12 @@ func TestMatcher_Compatibility(t *testing.T) {
 			expectedUser: "user", expectedRepo: "", expectedMatcher: "gist",
 		},
 		{
+			name:         "Gist UserContent Path",
+			rawPath:      "https://gist.githubusercontent.com/user/abcdef1234567890",
+			config:       cfgWithAuth,
+			expectedUser: "user", expectedRepo: "", expectedMatcher: "gist",
+		},
+		{
 			name:         "API Repos Path (with Auth)",
 			rawPath:      "https://api.github.com/repos/owner/repo/pulls",
 			config:       cfgWithAuth,

@@ -10,14 +10,16 @@ import (
 )
 
 var (
-	githubPrefix    = "https://github.com/"
-	rawPrefix       = "https://raw.githubusercontent.com/"
-	gistPrefix      = "https://gist.github.com/"
-	apiPrefix       = "https://api.github.com/"
-	githubPrefixLen int
-	rawPrefixLen    int
-	gistPrefixLen   int
-	apiPrefixLen    int
+	githubPrefix         = "https://github.com/"
+	rawPrefix            = "https://raw.githubusercontent.com/"
+	gistPrefix           = "https://gist.github.com/"
+	gistContentPrefix    = "https://gist.githubusercontent.com/"
+	apiPrefix            = "https://api.github.com/"
+	githubPrefixLen      int
+	rawPrefixLen         int
+	gistPrefixLen        int
+	gistContentPrefixLen int
+	apiPrefixLen         int
 )
 
 func init() {
@@ -25,6 +27,7 @@ func init() {
 	rawPrefixLen = len(rawPrefix)
 	gistPrefixLen = len(gistPrefix)
 	apiPrefixLen = len(apiPrefix)
+	gistContentPrefixLen = len(gistContentPrefix)
 	//log.Printf("githubPrefixLen: %d, rawPrefixLen: %d, gistPrefixLen: %d, apiPrefixLen: %d", githubPrefixLen, rawPrefixLen, gistPrefixLen, apiPrefixLen)
 }
 
@@ -110,6 +113,23 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 			return "", "", "", NewErrorWithStatusLookup(400, "malformed gist url: missing user")
 		}
 		// case: https://gist.github.com/user/gist_id...
+		user := remaining[:i]
+		return user, "", "gist", nil
+	}
+
+	// 匹配 "https://gist.githubusercontent.com/"
+	if strings.HasPrefix(rawPath, gistContentPrefix) {
+		remaining := rawPath[gistContentPrefixLen:]
+		i := strings.IndexByte(remaining, '/')
+		if i <= 0 {
+			// case: https://gist.githubusercontent.com/user
+			// 这种情况下, gist_id 缺失, 但我们仍然可以认为 user 是有效的
+			if len(remaining) > 0 {
+				return remaining, "", "gist", nil
+			}
+			return "", "", "", NewErrorWithStatusLookup(400, "malformed gist url: missing user")
+		}
+		// case: https://gist.githubusercontent.com/user/gist_id...
 		user := remaining[:i]
 		return user, "", "gist", nil
 	}
