@@ -1,5 +1,9 @@
 # 更新日志
 
+3.5.4 - 2025-06-14
+---
+- CHANGE: 移植来自于[GHProxy-Touka](https://github.com/WJQSERVER-STUDIO/ghproxy-touka)的blob处理逻辑与302处理逻辑
+
 25w46c - 2025-06-14
 ---
 - PRE-RELEASE: 此版本是v3.5.4预发布版本,请勿在生产环境中使用;
