@@ -81,7 +81,7 @@ func setRequestHeaders(c *app.RequestContext, req *http.Request, cfg *config.Con
 			headerValue := string(value)
 			req.Header.Set(headerKey, headerValue)
 		})
-		for key := range cloneHeadersToRemove {
+		for key := range reqHeadersToRemove {
 			req.Header.Del(key)
 		}
 	}
