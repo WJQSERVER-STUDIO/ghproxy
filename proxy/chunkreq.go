@@ -28,6 +28,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 				logError("Failed to close response body: %v", err)
 			}
 		}
+		c.Abort()
 	}()
 
 	rb := client.NewRequestBuilder(string(c.Request.Method()), u)
@@ -58,7 +59,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 	}
 
 	// 处理302情况
-	if resp.StatusCode == 302 {
+	if resp.StatusCode == 302 || resp.StatusCode == 301 {
 		finalURL := resp.Header.Get("Location")
 		if finalURL != "" {
 			err = resp.Body.Close()
@@ -68,6 +69,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 			c.Request.Header.Del("Referer")
 			logInfo("Internal Redirecting to %s", finalURL)
 			ChunkedProxyRequest(ctx, c, finalURL, cfg, matcher)
+			return
 		}
 	}
 
@@ -151,6 +153,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 			return
 		}
 		c.SetBodyStream(bodyReader, -1)
+		bodyReader.Close()
 	}
 
 }
