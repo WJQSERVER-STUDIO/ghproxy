@@ -49,6 +49,16 @@ var (
 	}
 )
 
+// copyHeader 将所有头部从 src 复制到 dst。
+// 对于多值头部，它会为每个值调用 Add，从而保留所有值。
+func copyHeader(dst, src http.Header) {
+	for k, vv := range src {
+		for _, v := range vv {
+			dst.Add(k, v)
+		}
+	}
+}
+
 func setRequestHeaders(c *app.RequestContext, req *http.Request, cfg *config.Config, matcher string) {
 	if matcher == "raw" && cfg.Httpc.UseCustomRawHeaders {
 		// 使用预定义Header
@@ -56,20 +66,23 @@ func setRequestHeaders(c *app.RequestContext, req *http.Request, cfg *config.Con
 			req.Header.Set(key, value)
 		}
 	} else if matcher == "clone" {
+
 		c.Request.Header.VisitAll(func(key, value []byte) {
 			headerKey := string(key)
 			headerValue := string(value)
-			if _, shouldRemove := cloneHeadersToRemove[headerKey]; !shouldRemove {
-				req.Header.Set(headerKey, headerValue)
-			}
+			req.Header.Set(headerKey, headerValue)
 		})
+		for key := range cloneHeadersToRemove {
+			req.Header.Del(key)
+		}
 	} else {
 		c.Request.Header.VisitAll(func(key, value []byte) {
 			headerKey := string(key)
 			headerValue := string(value)
-			if _, shouldRemove := reqHeadersToRemove[headerKey]; !shouldRemove {
-				req.Header.Set(headerKey, headerValue)
-			}
+			req.Header.Set(headerKey, headerValue)
 		})
+		for key := range cloneHeadersToRemove {
+			req.Header.Del(key)
+		}
 	}
 }

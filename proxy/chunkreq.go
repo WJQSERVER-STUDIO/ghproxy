@@ -28,6 +28,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 				logError("Failed to close response body: %v", err)
 			}
 		}
+		c.Abort()
 	}()
 
 	rb := client.NewRequestBuilder(string(c.Request.Method()), u)
@@ -152,6 +153,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 			return
 		}
 		c.SetBodyStream(bodyReader, -1)
+		bodyReader.Close()
 	}
 
 }
