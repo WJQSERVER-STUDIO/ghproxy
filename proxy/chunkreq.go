@@ -59,7 +59,7 @@ func ChunkedProxyRequest(ctx context.Context, c *app.RequestContext, u string, c
 	}
 
 	// 处理302情况
-	if resp.StatusCode == 302 {
+	if resp.StatusCode == 302 || resp.StatusCode == 301 {
 		finalURL := resp.Header.Get("Location")
 		if finalURL != "" {
 			err = resp.Body.Close()
