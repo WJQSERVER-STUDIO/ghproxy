@@ -431,6 +431,7 @@ func main() {
 				server.WithHostPorts(addr),
 				server.WithTransport(standard.NewTransporter),
 				server.WithStreamBody(true),
+				server.WithIdleTimeout(30*time.Second),
 			)
 			r.AddProtocol("h2", factory.NewServerFactory())
 		} else {
@@ -438,6 +439,7 @@ func main() {
 				server.WithHostPorts(addr),
 				server.WithTransport(standard.NewTransporter),
 				server.WithStreamBody(true),
+				server.WithIdleTimeout(30*time.Second),
 			)
 		}
 	} else if cfg.Server.NetLib == "netpoll" || cfg.Server.NetLib == "" {
@@ -447,6 +449,7 @@ func main() {
 				server.WithHostPorts(addr),
 				server.WithSenseClientDisconnection(cfg.Server.SenseClientDisconnection),
 				server.WithStreamBody(true),
+				server.WithIdleTimeout(30*time.Second),
 			)
 			r.AddProtocol("h2", factory.NewServerFactory())
 		} else {
@@ -454,6 +457,7 @@ func main() {
 				server.WithHostPorts(addr),
 				server.WithSenseClientDisconnection(cfg.Server.SenseClientDisconnection),
 				server.WithStreamBody(true),
+				server.WithIdleTimeout(30*time.Second),
 			)
 		}
 	} else {
@@ -461,6 +465,14 @@ func main() {
 		fmt.Printf("Invalid NetLib: %s\n", cfg.Server.NetLib)
 		os.Exit(1)
 	}
+
+	/*
+		if cfg.Server.GoPoolSize > 0 {
+			gopool.SetCap(int32(cfg.Server.GoPoolSize))
+		} else {
+			gopool.SetCap(1024)
+		}
+	*/
 
 	r.Use(recovery.Recovery()) // Recovery中间件
 	r.Use(loggin.Middleware()) // log中间件
