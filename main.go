@@ -151,7 +151,11 @@ func setMemLimit(cfg *config.Config) {
 }
 
 func loadlist(cfg *config.Config) {
-	auth.Init(cfg)
+	err := auth.ListInit(cfg)
+	if err != nil {
+		logger.Errorf("Failed to initialize list: %v", err)
+	}
+
 }
 
 func setupApi(cfg *config.Config, r *touka.Engine, version string) {

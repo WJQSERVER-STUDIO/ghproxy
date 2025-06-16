@@ -7,19 +7,20 @@ import (
 	"github.com/infinite-iroha/touka"
 )
 
-func Init(cfg *config.Config) {
+func ListInit(cfg *config.Config) error {
 	if cfg.Blacklist.Enabled {
 		err := InitBlacklist(cfg)
 		if err != nil {
-			panic(err.Error())
+			return err
 		}
 	}
 	if cfg.Whitelist.Enabled {
 		err := InitWhitelist(cfg)
 		if err != nil {
-			panic(err.Error())
+			return err
 		}
 	}
+	return nil
 }
 
 func AuthHandler(c *touka.Context, cfg *config.Config) (isValid bool, err error) {
