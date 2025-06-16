@@ -241,7 +241,7 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 			}
 		}
 	*/
-	copyHeader(resp.Header, c.GetAllReqHeader())
+	c.SetHeaders(resp.Header)
 
 	c.Status(resp.StatusCode)
 

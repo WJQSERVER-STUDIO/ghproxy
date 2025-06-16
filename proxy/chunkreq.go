@@ -100,12 +100,9 @@ func ChunkedProxyRequest(ctx context.Context, c *touka.Context, u string, cfg *c
 	}
 
 	// 复制响应头，排除需要移除的 header
-	for key, values := range resp.Header {
-		if _, shouldRemove := respHeadersToRemove[key]; !shouldRemove {
-			for _, value := range values {
-				c.Header(key, value)
-			}
-		}
+	c.SetHeaders(resp.Header)
+	for key := range respHeadersToRemove {
+		c.DelHeader(key)
 	}
 
 	switch cfg.Server.Cors {
