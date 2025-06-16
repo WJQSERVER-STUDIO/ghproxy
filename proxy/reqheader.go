@@ -4,7 +4,7 @@ import (
 	"ghproxy/config"
 	"net/http"
 
-	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/infinite-iroha/touka"
 )
 
 var (
@@ -59,28 +59,19 @@ func copyHeader(dst, src http.Header) {
 	}
 }
 
-func setRequestHeaders(c *app.RequestContext, req *http.Request, cfg *config.Config, matcher string) {
+func setRequestHeaders(c *touka.Context, req *http.Request, cfg *config.Config, matcher string) {
 	if matcher == "raw" && cfg.Httpc.UseCustomRawHeaders {
 		// 使用预定义Header
 		for key, value := range defaultHeaders {
 			req.Header.Set(key, value)
 		}
 	} else if matcher == "clone" {
-
-		c.Request.Header.VisitAll(func(key, value []byte) {
-			headerKey := string(key)
-			headerValue := string(value)
-			req.Header.Set(headerKey, headerValue)
-		})
+		copyHeader(req.Header, c.Request.Header)
 		for key := range cloneHeadersToRemove {
 			req.Header.Del(key)
 		}
 	} else {
-		c.Request.Header.VisitAll(func(key, value []byte) {
-			headerKey := string(key)
-			headerValue := string(value)
-			req.Header.Set(headerKey, headerValue)
-		})
+		copyHeader(req.Header, c.Request.Header)
 		for key := range reqHeadersToRemove {
 			req.Header.Del(key)
 		}

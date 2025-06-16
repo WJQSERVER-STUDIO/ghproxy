@@ -2,9 +2,10 @@ package proxy
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
-	json "github.com/bytedance/sonic"
+	"github.com/infinite-iroha/touka"
 
 	"ghproxy/config"
 	"ghproxy/weakcache"
@@ -14,7 +15,6 @@ import (
 	"strings"
 
 	"github.com/WJQSERVER-STUDIO/go-utils/limitreader"
-	"github.com/cloudwego/hertz/pkg/app"
 )
 
 var (
@@ -35,8 +35,8 @@ func InitWeakCache() *weakcache.Cache[string] {
 	return cache
 }
 
-func GhcrWithImageRouting(cfg *config.Config) app.HandlerFunc {
-	return func(ctx context.Context, c *app.RequestContext) {
+func GhcrWithImageRouting(cfg *config.Config) touka.HandlerFunc {
+	return func(c *touka.Context) {
 
 		charToFind := '.'
 		reqTarget := c.Param("target")
@@ -57,7 +57,7 @@ func GhcrWithImageRouting(cfg *config.Config) app.HandlerFunc {
 				target = reqTarget
 			}
 		} else {
-			path = string(c.Request.RequestURI())
+			path = c.GetRequestURI()
 			reqImageUser = c.Param("target")
 			reqImageName = c.Param("user")
 		}
@@ -67,24 +67,25 @@ func GhcrWithImageRouting(cfg *config.Config) app.HandlerFunc {
 			Image: fmt.Sprintf("%s/%s", reqImageUser, reqImageName),
 		}
 
-		GhcrToTarget(ctx, c, cfg, target, path, image)
+		GhcrToTarget(c, cfg, target, path, image)
 
 	}
 
 }
 
-func GhcrToTarget(ctx context.Context, c *app.RequestContext, cfg *config.Config, target string, path string, image *imageInfo) {
+func GhcrToTarget(c *touka.Context, cfg *config.Config, target string, path string, image *imageInfo) {
 	if cfg.Docker.Enabled {
+		var ctx = c.Request.Context()
 		if target != "" {
-			GhcrRequest(ctx, c, "https://"+target+"/v2/"+path+"?"+string(c.Request.QueryString()), image, cfg, target)
+			GhcrRequest(ctx, c, "https://"+target+"/v2/"+path+"?"+c.GetReqQueryString(), image, cfg, target)
 		} else {
 			if cfg.Docker.Target == "ghcr" {
-				GhcrRequest(ctx, c, "https://"+ghcrTarget+string(c.Request.RequestURI()), image, cfg, ghcrTarget)
+				GhcrRequest(ctx, c, "https://"+ghcrTarget+c.GetRequestURI(), image, cfg, ghcrTarget)
 			} else if cfg.Docker.Target == "dockerhub" {
-				GhcrRequest(ctx, c, "https://"+dockerhubTarget+string(c.Request.RequestURI()), image, cfg, dockerhubTarget)
+				GhcrRequest(ctx, c, "https://"+dockerhubTarget+c.GetRequestURI(), image, cfg, dockerhubTarget)
 			} else if cfg.Docker.Target != "" {
 				// 自定义taget
-				GhcrRequest(ctx, c, "https://"+cfg.Docker.Target+string(c.Request.RequestURI()), image, cfg, cfg.Docker.Target)
+				GhcrRequest(ctx, c, "https://"+cfg.Docker.Target+c.GetRequestURI(), image, cfg, cfg.Docker.Target)
 			} else {
 				// 配置为空
 				ErrorPage(c, NewErrorWithStatusLookup(403, "Docker Target is not set"))
@@ -98,10 +99,10 @@ func GhcrToTarget(ctx context.Context, c *app.RequestContext, cfg *config.Config
 	}
 }
 
-func GhcrRequest(ctx context.Context, c *app.RequestContext, u string, image *imageInfo, cfg *config.Config, target string) {
+func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageInfo, cfg *config.Config, target string) {
 
 	var (
-		method []byte
+		method string
 		req    *http.Request
 		resp   *http.Response
 		err    error
@@ -117,11 +118,11 @@ func GhcrRequest(ctx context.Context, c *app.RequestContext, u string, image *im
 		}
 	}()
 
-	method = c.Request.Method()
+	method = c.Request.Method
 
-	rb := ghcrclient.NewRequestBuilder(string(method), u)
+	rb := ghcrclient.NewRequestBuilder(method, u)
 	rb.NoDefaultHeaders()
-	rb.SetBody(c.Request.BodyStream())
+	rb.SetBody(c.Request.Body)
 	rb.WithContext(ctx)
 
 	req, err = rb.Build()
@@ -130,17 +131,18 @@ func GhcrRequest(ctx context.Context, c *app.RequestContext, u string, image *im
 		return
 	}
 
-	c.Request.Header.VisitAll(func(key, value []byte) {
-		headerKey := string(key)
-		headerValue := string(value)
-		req.Header.Add(headerKey, headerValue)
-	})
+	//c.Request.Header.VisitAll(func(key, value []byte) {
+	//	headerKey := string(key)
+	//	headerValue := string(value)
+	//	req.Header.Add(headerKey, headerValue)
+	//})
+	copyHeader(c.Request.Header, req.Header)
 
 	req.Header.Set("Host", target)
 	if image != nil {
 		token, exist := cache.Get(image.Image)
 		if exist {
-			logDebug("Use Cache Token: %s", token)
+			c.Debugf("Use Cache Token: %s", token)
 			req.Header.Set("Authorization", "Bearer "+token)
 		}
 	}
@@ -154,7 +156,7 @@ func GhcrRequest(ctx context.Context, c *app.RequestContext, u string, image *im
 	// 处理状态码
 	if resp.StatusCode == 401 {
 		// 请求target /v2/路径
-		if string(c.Request.URI().Path()) != "/v2/" {
+		if string(c.GetRequestURIPath()) != "/v2/" {
 			resp.Body.Close()
 			if image == nil {
 				ErrorPage(c, NewErrorWithStatusLookup(401, "Unauthorized"))
@@ -164,13 +166,13 @@ func GhcrRequest(ctx context.Context, c *app.RequestContext, u string, image *im
 
 			// 更新kv
 			if token != "" {
-				logDump("Update Cache Token: %s", token)
+				c.Debugf("Update Cache Token: %s", token)
 				cache.Put(image.Image, token)
 			}
 
 			rb := ghcrclient.NewRequestBuilder(string(method), u)
 			rb.NoDefaultHeaders()
-			rb.SetBody(c.Request.BodyStream())
+			rb.SetBody(c.Request.Body)
 			rb.WithContext(ctx)
 
 			req, err = rb.Build()
@@ -178,12 +180,14 @@ func GhcrRequest(ctx context.Context, c *app.RequestContext, u string, image *im
 				HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 				return
 			}
-
-			c.Request.Header.VisitAll(func(key, value []byte) {
-				headerKey := string(key)
-				headerValue := string(value)
-				req.Header.Add(headerKey, headerValue)
-			})
+			/*
+				c.Request.Header.VisitAll(func(key, value []byte) {
+					headerKey := string(key)
+					headerValue := string(value)
+					req.Header.Add(headerKey, headerValue)
+				})
+			*/
+			copyHeader(c.Request.Header, req.Header)
 
 			req.Header.Set("Host", target)
 			if token != "" {
@@ -214,27 +218,30 @@ func GhcrRequest(ctx context.Context, c *app.RequestContext, u string, image *im
 		var err error
 		bodySize, err = strconv.Atoi(contentLength)
 		if err != nil {
-			logWarning("%s %s %s %s %s Content-Length header is not a valid integer: %v", c.ClientIP(), c.Method(), c.Path(), c.UserAgent(), c.Request.Header.GetProtocol(), err)
+			c.Warnf("%s %s %s %s %s Content-Length header is not a valid integer: %v", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.UserAgent(), c.Request.Proto, err)
 			bodySize = -1
 		}
 		if err == nil && bodySize > sizelimit {
 			finalURL := resp.Request.URL.String()
 			err = resp.Body.Close()
 			if err != nil {
-				logError("Failed to close response body: %v", err)
+				c.Errorf("Failed to close response body: %v", err)
 			}
-			c.Redirect(301, []byte(finalURL))
-			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Method(), c.Path(), c.UserAgent(), c.Request.Header.GetProtocol(), finalURL, bodySize)
+			c.Redirect(301, finalURL)
+			c.Warnf("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.UserAgent(), c.Request.Proto, finalURL, bodySize)
 			return
 		}
 	}
 
 	// 复制响应头，排除需要移除的 header
-	for key, values := range resp.Header {
-		for _, value := range values {
-			c.Response.Header.Add(key, value)
+	/*
+		for key, values := range resp.Header {
+			for _, value := range values {
+				c.Response.Header.Add(key, value)
+			}
 		}
-	}
+	*/
+	c.SetHeaders(resp.Header)
 
 	c.Status(resp.StatusCode)
 
@@ -256,7 +263,7 @@ type AuthToken struct {
 	Token string `json:"token"`
 }
 
-func ChallengeReq(target string, image *imageInfo, ctx context.Context, c *app.RequestContext) (token string) {
+func ChallengeReq(target string, image *imageInfo, ctx context.Context, c *touka.Context) (token string) {
 	var resp401 *http.Response
 	var req401 *http.Request
 	var err error
@@ -280,7 +287,7 @@ func ChallengeReq(target string, image *imageInfo, ctx context.Context, c *app.R
 	defer resp401.Body.Close()
 	bearer, err := parseBearerWWWAuthenticateHeader(resp401.Header.Get("Www-Authenticate"))
 	if err != nil {
-		logError("Failed to parse Www-Authenticate header: %v", err)
+		c.Errorf("Failed to parse Www-Authenticate header: %v", err)
 		return
 	}
 
@@ -296,13 +303,13 @@ func ChallengeReq(target string, image *imageInfo, ctx context.Context, c *app.R
 
 	getAuthReq, err := getAuthRB.Build()
 	if err != nil {
-		logError("Failed to create request: %v", err)
+		c.Errorf("Failed to create request: %v", err)
 		return
 	}
 
 	authResp, err := ghcrclient.Do(getAuthReq)
 	if err != nil {
-		logError("Failed to send request: %v", err)
+		c.Errorf("Failed to send request: %v", err)
 		return
 	}
 
@@ -310,7 +317,7 @@ func ChallengeReq(target string, image *imageInfo, ctx context.Context, c *app.R
 
 	bodyBytes, err := io.ReadAll(authResp.Body)
 	if err != nil {
-		logError("Failed to read auth response body: %v", err)
+		c.Errorf("Failed to read auth response body: %v", err)
 		return
 	}
 
@@ -318,7 +325,7 @@ func ChallengeReq(target string, image *imageInfo, ctx context.Context, c *app.R
 	var authToken AuthToken
 	err = json.Unmarshal(bodyBytes, &authToken)
 	if err != nil {
-		logError("Failed to decode auth response body: %v", err)
+		c.Errorf("Failed to decode auth response body: %v", err)
 		return
 	}
 	token = authToken.Token

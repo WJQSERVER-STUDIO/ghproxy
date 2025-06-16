@@ -141,4 +141,7 @@ jobs:
           push: true
           tags: | 
             ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+            ${{ env.IMAGE_NAME }}:v4
             ${{ env.IMAGE_NAME }}:latest
+            wjqserver/ghproxy-touka:latest
+            wjqserver/ghproxy-touka:${{ env.VERSION }}

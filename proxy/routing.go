@@ -1,42 +1,43 @@
 package proxy
 
 import (
-	"context"
 	"ghproxy/config"
-	"ghproxy/rate"
 	"strings"
 
-	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/infinite-iroha/touka"
 )
 
-func RoutingHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *rate.IPRateLimiter) app.HandlerFunc {
-	return func(ctx context.Context, c *app.RequestContext) {
+func RoutingHandler(cfg *config.Config) touka.HandlerFunc {
+	return func(c *touka.Context) {
 
 		var shoudBreak bool
 
-		shoudBreak = rateCheck(cfg, c, limiter, iplimiter)
-		if shoudBreak {
-			return
-		}
+		//	shoudBreak = rateCheck(cfg, c, limiter, iplimiter)
+		//	if shoudBreak {
+		//		return
+		//}
 
 		var (
 			rawPath string
 		)
 
-		rawPath = strings.TrimPrefix(string(c.Request.RequestURI()), "/") // 去掉前缀/
+		rawPath = strings.TrimPrefix(c.GetRequestURI(), "/") // 去掉前缀/
 
 		var (
-			user    string
-			repo    string
-			matcher string
+			user string
+			repo string
 		)
 
 		user = c.Param("user")
 		repo = c.Param("repo")
-		matcher = c.GetString("matcher")
+		matcher, exists := c.GetString("matcher")
+		if !exists {
+			ErrorPage(c, NewErrorWithStatusLookup(500, "Matcher Not Found in Context"))
+			c.Errorf("Matcher Not Found in Context Path: %s", c.GetRequestURIPath())
+			return
+		}
 
-		logDump("%s %s %s %s %s Matched-Username: %s, Matched-Repo: %s", c.ClientIP(), c.Method(), rawPath, c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), user, repo)
-		logDump("%s", c.Request.Header.Header())
+		ctx := c.Request.Context()
 
 		shoudBreak = listCheck(cfg, c, user, repo, rawPath)
 		if shoudBreak {
@@ -49,7 +50,6 @@ func RoutingHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		}
 
 		// 处理blob/raw路径
-		// 处理blob/raw路径
 		if matcher == "blob" {
 			rawPath = rawPath[10:]
 			rawPath = "raw.githubusercontent.com" + rawPath
@@ -60,8 +60,6 @@ func RoutingHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 		// 为rawpath加入https:// 头
 		rawPath = "https://" + rawPath
 
-		logDebug("Matched: %v", matcher)
-
 		switch matcher {
 		case "releases", "blob", "raw", "gist", "api":
 			ChunkedProxyRequest(ctx, c, rawPath, cfg, matcher)
@@ -69,7 +67,7 @@ func RoutingHandler(cfg *config.Config, limiter *rate.RateLimiter, iplimiter *ra
 			GitReq(ctx, c, rawPath, cfg, "git")
 		default:
 			ErrorPage(c, NewErrorWithStatusLookup(500, "Matched But Not Matched"))
-			logError("Matched But Not Matched Path: %s rawPath: %s matcher: %s", c.Path(), rawPath, matcher)
+			c.Errorf("Matched But Not Matched Path: %s rawPath: %s matcher: %s", c.GetRequestURIPath(), rawPath, matcher)
 			return
 		}
 	}

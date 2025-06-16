@@ -1,12 +1,8 @@
 [server]
 host = "0.0.0.0" 
 port = 8080 
-netlib = "netpoll" # "netpoll" / "std" "standard" "net/http" "net"
-senseClientDisconnection = false
-goPoolSize = 1024
 sizeLimit = 125 # MB
 memLimit = 0 # MB
-H2C = true
 cors = "*" # "*"/"" -> "*" ; "nil" -> "" ;
 debug = false
 
@@ -34,9 +30,7 @@ staticDir = "/data/www"
 [log]
 logFilePath = "/data/ghproxy/log/ghproxy.log" 
 maxLogSize = 5 # MB
-level = "info" # dump, debug, info, warn, error, none
-async = false
-hertzLogPath = "/data/ghproxy/log/hertz.log"
+level = "info" # debug, info, warn, error, none
 
 [auth]
 method = "parameters" # "header" or "parameters"
@@ -57,7 +51,6 @@ whitelistFile = "/data/ghproxy/config/whitelist.json"
 
 [rateLimit]
 enabled = false
-rateMethod = "total" # "ip" or "total"
 ratePerMinute = 180
 burst = 5
 
@@ -74,4 +67,4 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
 
 [docker]
 enabled = false
-target = "ghcr" # ghcr/dockerhub
+target = "dockerhub" # ghcr/dockerhub/ custom

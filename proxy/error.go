@@ -11,24 +11,13 @@ import (
 	"html/template"
 	"io/fs"
 
-	"github.com/WJQSERVER-STUDIO/logger"
-	"github.com/cloudwego/hertz/pkg/app"
 	lru "github.com/hashicorp/golang-lru/v2"
+	"github.com/infinite-iroha/touka"
 )
 
-// 日志模块
-var (
-	logw       = logger.Logw
-	logDump    = logger.LogDump
-	logDebug   = logger.LogDebug
-	logInfo    = logger.LogInfo
-	logWarning = logger.LogWarning
-	logError   = logger.LogError
-)
-
-func HandleError(c *app.RequestContext, message string) {
+func HandleError(c *touka.Context, message string) {
 	ErrorPage(c, NewErrorWithStatusLookup(500, message))
-	logError("Error handled: %s", message)
+	c.Errorf("%s %s %s %s %s Error: %v", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.UserAgent(), c.Request.Proto, message)
 }
 
 type GHProxyErrors struct {
@@ -131,18 +120,18 @@ type ErrorPageData struct {
 
 // ToCacheKey 为 ErrorPageData 生成一个唯一的 SHA256 字符串键。
 // 使用 gob 序列化来确保结构体内容到字节序列的顺序一致性，然后计算哈希。
-func (d ErrorPageData) ToCacheKey() string {
+func (d ErrorPageData) ToCacheKey() (string, error) {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 	err := enc.Encode(d)
 	if err != nil {
-		logError("Failed to gob encode ErrorPageData for cache key: %v", err)
-		return ""
+		//logError("Failed to gob encode ErrorPageData for cache key: %v", err)
+		return "", fmt.Errorf("failed to gob encode ErrorPageData for cache key: %w", err)
 	}
 
 	hasher := sha256.New()
 	hasher.Write(buf.Bytes())
-	return hex.EncodeToString(hasher.Sum(nil))
+	return hex.EncodeToString(hasher.Sum(nil)), nil
 }
 
 func ErrPageUnwarper(errInfo *GHProxyErrors) ErrorPageData {
@@ -184,7 +173,7 @@ func NewSizedLRUCache(maxBytes int64) (*SizedLRUCache, error) {
 		c.mu.Lock()
 		defer c.mu.Unlock()
 		c.currentBytes -= int64(len(value))
-		logDebug("LRU evicted key: %s, size: %d, current total: %d", key, len(value), c.currentBytes)
+		//logDebug("LRU evicted key: %s, size: %d, current total: %d", key, len(value), c.currentBytes)
 	})
 	if err != nil {
 		return nil, err
@@ -206,7 +195,7 @@ func (c *SizedLRUCache) Add(key string, value []byte) {
 
 	// 如果待添加的条目本身就大于缓存的最大容量，则不进行缓存。
 	if itemSize > c.maxBytes {
-		logWarning("Item key %s (size %d) larger than cache max capacity %d. Not caching.", key, itemSize, c.maxBytes)
+		//c.Warnf("Item key %s (size %d) larger than cache max capacity %d. Not caching.", key, itemSize, c.maxBytes)
 		return
 	}
 
@@ -214,23 +203,23 @@ func (c *SizedLRUCache) Add(key string, value []byte) {
 	if oldVal, ok := c.cache.Get(key); ok {
 		c.currentBytes -= int64(len(oldVal))
 		c.cache.Remove(key)
-		logDebug("Key %s exists, removed old size %d. Current total: %d", key, len(oldVal), c.currentBytes)
+		//logDebug("Key %s exists, removed old size %d. Current total: %d", key, len(oldVal), c.currentBytes)
 	}
 
 	// 主动逐出最旧的条目，直到有足够的空间容纳新条目。
 	for c.currentBytes+itemSize > c.maxBytes && c.cache.Len() > 0 {
-		_, oldVal, existed := c.cache.RemoveOldest()
+		_, _, existed := c.cache.RemoveOldest()
 		if !existed {
-			logWarning("Attempted to remove oldest, but item not found.")
+			//c.Warnf("Attempted to remove oldest, but item not found.")
 			break
 		}
-		logDebug("Proactively evicted item (size %d) to free space. Current total: %d", len(oldVal), c.currentBytes)
+		//logDebug("Proactively evicted item (size %d) to free space. Current total: %d", len(oldVal), c.currentBytes)
 	}
 
 	// 添加新条目到内部 LRU 缓存。
 	c.cache.Add(key, value)
 	c.currentBytes += itemSize // 手动增加新条目的大小到 currentBytes。
-	logDebug("Item added: key %s, size: %d, current total: %d", key, itemSize, c.currentBytes)
+	//logDebug("Item added: key %s, size: %d, current total: %d", key, itemSize, c.currentBytes)
 }
 
 const maxErrorPageCacheBytes = 512 * 1024 // 错误页面缓存的最大容量：512KB
@@ -242,7 +231,7 @@ func init() {
 	var err error
 	errorPageCache, err = NewSizedLRUCache(maxErrorPageCacheBytes)
 	if err != nil {
-		logError("Failed to initialize error page LRU cache: %v", err)
+		//	logError("Failed to initialize error page LRU cache: %v", err)
 		panic(err)
 	}
 }
@@ -293,37 +282,50 @@ func htmlTemplateRender(data interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func ErrorPage(c *app.RequestContext, errInfo *GHProxyErrors) {
+func ErrorPage(c *touka.Context, errInfo *GHProxyErrors) {
 	// 将 errInfo 转换为 ErrorPageData 结构体
+	var err error
+	var cacheKey string
 	pageDataStruct := ErrPageUnwarper(errInfo)
 	// 使用 ErrorPageData 生成一个唯一的 SHA256 缓存键
-	cacheKey := pageDataStruct.ToCacheKey()
+	cacheKey, err = pageDataStruct.ToCacheKey()
+	if err != nil {
+		c.Warnf("Failed to generate cache key for error page: %v", err)
+		fallbackErrorJson(c, errInfo)
+		return
+	}
+
+	// 检查生成的缓存键是否为空，这可能表示序列化或哈希计算失败
+
 	if cacheKey == "" {
 		c.JSON(errInfo.StatusCode, map[string]string{"error": errInfo.ErrorMessage})
-		logWarning("Failed to generate cache key for error page: %v", errInfo)
+		c.Warnf("Failed to generate cache key for error page: %v", errInfo)
 		return
 	}
 
 	var pageData []byte
-	var err error
 
 	// 尝试从缓存中获取页面数据
 	if cachedPage, found := errorPageCache.Get(cacheKey); found {
 		pageData = cachedPage
-		logDebug("Serving error page from cache (Key: %s)", cacheKey)
+		c.Debugf("Serving error page from cache (Key: %s)", cacheKey)
 	} else {
 		// 如果不在缓存中，则渲染页面
 		pageData, err = htmlTemplateRender(pageDataStruct)
 		if err != nil {
 			c.JSON(errInfo.StatusCode, map[string]string{"error": errInfo.ErrorMessage})
-			logWarning("Failed to render error page for status %d (Key: %s): %v", errInfo.StatusCode, cacheKey, err)
+			c.Warnf("Failed to render error page for status %d (Key: %s): %v", errInfo.StatusCode, cacheKey, err)
 			return
 		}
 
 		// 将渲染结果存入缓存
 		errorPageCache.Add(cacheKey, pageData)
-		logDebug("Cached error page (Key: %s, Size: %d bytes)", cacheKey, len(pageData))
+		c.Debugf("Cached error page (Key: %s, Size: %d bytes)", cacheKey, len(pageData))
 	}
 
-	c.Data(errInfo.StatusCode, "text/html; charset=utf-8", pageData)
+	c.Raw(errInfo.StatusCode, "text/html; charset=utf-8", pageData)
+}
+
+func fallbackErrorJson(c *touka.Context, errInfo *GHProxyErrors) {
+	c.JSON(errInfo.StatusCode, map[string]string{"error": errInfo.ErrorMessage})
 }
