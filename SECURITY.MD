@@ -6,10 +6,13 @@
 
 | 版本 | 是否支持 |
 | --- | --- |
-| v3.x.x | :white_check_mark: 当前最新版本序列 |
+| v4.x.x | :white_check_mark: 当前最新版本序列 |
+| v3.x.x | :x: 这些版本已结束生命周期,不受支持 |
 | v2.x.x | :x: 这些版本已结束生命周期,不受支持 |
 | v1.x.x | :x: 这些版本已结束生命周期,不受支持 |
-| 25w*a/b/c... | :warning: 此为PRE-RELEASE版本,用于开发与测试,可能存在未知的问题 |
+| *-rc.x | :warning: 此为PRE-RELEASE预发布版本,用于测试问题 |
+| *-beta.x | :warning: 此为Beta测试版本,用于开发与测试,可能存在未知的问题 |
+| 25w*a/b/c... | :warning: 此为PRE-RELEASE版本,用于开发与测试,可能存在未知的问题 生命周期已完全结束 |
 | 24w*a/b/c... | :warning: 此为PRE-RELEASE版本,用于开发与测试,可能存在未知的问题 生命周期已完全结束 |
 | v0.x.x | :x: 这些版本不再受支持 |
 
@@ -17,9 +20,15 @@
 
 本项目为开源项目,开发者不对使用本项目造成的任何损失或问题承担责任。用户需自行评估并承担使用本项目的风险。
 
-使用本项目,请遵循 **[WSL 2.0 (WJQSERVER-STUDIO LICENSE 2.0)](https://wjqserver-studio.github.io/LICENSE/LICENSE.html)** 协议。
+使用本项目,请遵循 **[WSL 2.1 (WJQSERVER-STUDIO LICENSE 2.1)](https://wjqserver-studio.github.io/LICENSE/LICENSE.html)** 协议 或 [Mozilla Public License Version 2.0](https://mozilla.org/MPL/2.0/) 。
 
-本项目所有文件均受到 WSL 2.0 (WJQSERVER-STUDIO LICENSE 2.0) 协议保护,任何人不得在任何情况下以非 WSL 2.0 (WJQSERVER-STUDIO LICENSE 2.0) 协议内规定的方式使用,复制,修改,编译,发布,分发,再许可,或者出售本项目的任何部分。
+#### 选择WSL 2.1时
+
+本项目所有文件均受到 WSL 2.1 (WJQSERVER-STUDIO LICENSE 2.1) 协议保护,任何人不得在任何情况下以非 WSL 2.1 (WJQSERVER-STUDIO LICENSE 2.1) 协议内规定的方式使用,复制,修改,编译,发布,分发,再许可,或者出售本项目的任何部分。
+
+#### 选择MPL 2.0时
+
+本项目内文件除特别版权标注声明外, 均受到 [Mozilla Public License Version 2.0](https://mozilla.org/MPL/2.0/) 授权保护, 具体条款参看 [Mozilla Public License Version 2.0](https://mozilla.org/MPL/2.0/)
 
 ## 报告漏洞
 

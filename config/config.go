@@ -25,26 +25,19 @@ type Config struct {
 [server]
 host = "0.0.0.0"
 port = 8080
-netlib = "netpoll" # "netpoll" / "std" "standard" "net/http" "net"
-goPoolSize = 1024
 sizeLimit = 125 # MB
 memLimit = 0 # MB
-H2C = true
 cors = "*" # "*"/"" -> "*" ; "nil" -> "" ;
 debug = false
 */
 
 type ServerConfig struct {
-	Port                     int    `toml:"port"`
-	Host                     string `toml:"host"`
-	NetLib                   string `toml:"netlib"`
-	SenseClientDisconnection bool   `toml:"senseClientDisconnection"`
-	GoPoolSize               int    `toml:"goPoolSize"`
-	SizeLimit                int    `toml:"sizeLimit"`
-	MemLimit                 int64  `toml:"memLimit"`
-	H2C                      bool   `toml:"H2C"`
-	Cors                     string `toml:"cors"`
-	Debug                    bool   `toml:"debug"`
+	Port      int    `toml:"port"`
+	Host      string `toml:"host"`
+	SizeLimit int    `toml:"sizeLimit"`
+	MemLimit  int64  `toml:"memLimit"`
+	Cors      string `toml:"cors"`
+	Debug     bool   `toml:"debug"`
 }
 
 /*
@@ -98,11 +91,9 @@ type PagesConfig struct {
 }
 
 type LogConfig struct {
-	LogFilePath  string `toml:"logFilePath"`
-	MaxLogSize   int    `toml:"maxLogSize"`
-	Level        string `toml:"level"`
-	Async        bool   `toml:"async"`
-	HertZLogPath string `toml:"hertzLogPath"`
+	LogFilePath string `toml:"logFilePath"`
+	MaxLogSize  int64  `toml:"maxLogSize"`
+	Level       string `toml:"level"`
 }
 
 /*
@@ -138,7 +129,6 @@ type WhitelistConfig struct {
 /*
 [rateLimit]
 enabled = false
-rateMethod = "total" # "total" or "ip"
 ratePerMinute = 100
 burst = 10
 
@@ -151,10 +141,9 @@ burst = 10
 */
 
 type RateLimitConfig struct {
-	Enabled        bool   `toml:"enabled"`
-	RateMethod     string `toml:"rateMethod"`
-	RatePerMinute  int    `toml:"ratePerMinute"`
-	Burst          int    `toml:"burst"`
+	Enabled        bool `toml:"enabled"`
+	RatePerMinute  int  `toml:"ratePerMinute"`
+	Burst          int  `toml:"burst"`
 	BandwidthLimit BandwidthLimitConfig
 }
 
@@ -226,15 +215,12 @@ func FileExists(filename string) bool {
 func DefaultConfig() *Config {
 	return &Config{
 		Server: ServerConfig{
-			Port:       8080,
-			Host:       "0.0.0.0",
-			NetLib:     "netpoll",
-			GoPoolSize: 1024,
-			SizeLimit:  125,
-			MemLimit:   0,
-			H2C:        true,
-			Cors:       "*",
-			Debug:      false,
+			Port:      8080,
+			Host:      "0.0.0.0",
+			SizeLimit: 125,
+			MemLimit:  0,
+			Cors:      "*",
+			Debug:     false,
 		},
 		Httpc: HttpcConfig{
 			Mode:                "auto",
@@ -257,10 +243,9 @@ func DefaultConfig() *Config {
 			StaticDir: "/data/www",
 		},
 		Log: LogConfig{
-			LogFilePath:  "/data/ghproxy/log/ghproxy.log",
-			MaxLogSize:   10,
-			Level:        "info",
-			HertZLogPath: "/data/ghproxy/log/hertz.log",
+			LogFilePath: "/data/ghproxy/log/ghproxy.log",
+			MaxLogSize:  10,
+			Level:       "info",
 		},
 		Auth: AuthConfig{
 			Enabled:               false,
@@ -280,8 +265,8 @@ func DefaultConfig() *Config {
 			WhitelistFile: "/data/ghproxy/config/whitelist.json",
 		},
 		RateLimit: RateLimitConfig{
-			Enabled:       false,
-			RateMethod:    "total",
+			Enabled: false,
+			//RateMethod:    "total",
 			RatePerMinute: 100,
 			Burst:         10,
 			BandwidthLimit: BandwidthLimitConfig{

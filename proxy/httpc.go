@@ -39,7 +39,7 @@ func initHTTPClient(cfg *config.Config) {
 	proTolcols.SetHTTP1(true)
 	proTolcols.SetHTTP2(true)
 	proTolcols.SetUnencryptedHTTP2(true)
-	if cfg.Httpc.Mode == "auto" {
+	if cfg.Httpc.Mode == "auto" || cfg.Httpc.Mode == "" {
 
 		tr = &http.Transport{
 			IdleConnTimeout: 30 * time.Second,
@@ -57,16 +57,7 @@ func initHTTPClient(cfg *config.Config) {
 			Protocols:           proTolcols,
 		}
 	} else {
-		// 错误的模式
-		logError("unknown httpc mode: %s", cfg.Httpc.Mode)
-		fmt.Println("unknown httpc mode: ", cfg.Httpc.Mode)
-		logWarning("use Auto to Run HTTP Client")
-		fmt.Println("use Auto to Run HTTP Client")
-		tr = &http.Transport{
-			IdleConnTimeout: 30 * time.Second,
-			WriteBufferSize: 32 * 1024, // 32KB
-			ReadBufferSize:  32 * 1024, // 32KB
-		}
+		panic("unknown httpc mode: " + cfg.Httpc.Mode)
 	}
 	if cfg.Outbound.Enabled {
 		initTransport(cfg, tr)
@@ -86,7 +77,7 @@ func initHTTPClient(cfg *config.Config) {
 
 func initGitHTTPClient(cfg *config.Config) {
 
-	if cfg.Httpc.Mode == "auto" {
+	if cfg.Httpc.Mode == "auto" || cfg.Httpc.Mode == "" {
 		gittr = &http.Transport{
 			IdleConnTimeout: 30 * time.Second,
 			WriteBufferSize: 32 * 1024, // 32KB
@@ -101,17 +92,7 @@ func initGitHTTPClient(cfg *config.Config) {
 			ReadBufferSize:      32 * 1024, // 32KB
 		}
 	} else {
-		// 错误的模式
-		logError("unknown httpc mode: %s", cfg.Httpc.Mode)
-		fmt.Println("unknown httpc mode: ", cfg.Httpc.Mode)
-		logWarning("use Auto to Run HTTP Client")
-		fmt.Println("use Auto to Run HTTP Client")
-		gittr = &http.Transport{
-			//MaxIdleConns:    160,
-			IdleConnTimeout: 30 * time.Second,
-			WriteBufferSize: 32 * 1024, // 32KB
-			ReadBufferSize:  32 * 1024, // 32KB
-		}
+		panic("unknown httpc mode: " + cfg.Httpc.Mode)
 	}
 	if cfg.Outbound.Enabled {
 		initTransport(cfg, gittr)
@@ -157,7 +138,7 @@ func initGhcrHTTPClient(cfg *config.Config) {
 	var proTolcols = new(http.Protocols)
 	proTolcols.SetHTTP1(true)
 	proTolcols.SetHTTP2(true)
-	if cfg.Httpc.Mode == "auto" {
+	if cfg.Httpc.Mode == "auto" || cfg.Httpc.Mode == "" {
 
 		ghcrtr = &http.Transport{
 			IdleConnTimeout: 30 * time.Second,
@@ -175,16 +156,7 @@ func initGhcrHTTPClient(cfg *config.Config) {
 			Protocols:           proTolcols,
 		}
 	} else {
-		// 错误的模式
-		logError("unknown httpc mode: %s", cfg.Httpc.Mode)
-		fmt.Println("unknown httpc mode: ", cfg.Httpc.Mode)
-		logWarning("use Auto to Run HTTP Client")
-		fmt.Println("use Auto to Run HTTP Client")
-		ghcrtr = &http.Transport{
-			IdleConnTimeout: 30 * time.Second,
-			WriteBufferSize: 32 * 1024, // 32KB
-			ReadBufferSize:  32 * 1024, // 32KB
-		}
+		panic(fmt.Sprintf("unknown httpc mode: %s", cfg.Httpc.Mode))
 	}
 	if cfg.Outbound.Enabled {
 		initTransport(cfg, ghcrtr)

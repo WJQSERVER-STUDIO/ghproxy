@@ -6,16 +6,15 @@
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/WJQSERVER-STUDIO/ghproxy)
 [![Go Report Card](https://goreportcard.com/badge/github.com/WJQSERVER-STUDIO/ghproxy)](https://goreportcard.com/report/github.com/WJQSERVER-STUDIO/ghproxy)
 
-
-支持 Git clone、raw、releases的 Github 加速项目, 支持自托管的同时带来卓越的性能与极低的资源占用(Golang和HertZ带来的优势), 同时支持多种额外功能
+GHProxy是一个基于Go的支持代理Github仓库资源和API的项目, 同时支持Docker镜像代理与脚本嵌套加速等多种功能
 
 ## 项目说明
 
 ### 项目特点
 
 - ⚡ **基于 Go 语言实现，跨平台的同时提供高并发性能**
-- 🌐 **使用字节旗下的 [HertZ](https://github.com/cloudwego/hertz) 作为 Web 框架**
-- 📡 **使用 [Touka-HTTPC](https://github.com/satomitouka/touka-httpc) 作为 HTTP 客户端**
+- 🌐 **使用自有[Touka框架](https://github.com/infinite-iroha/touka)作为 HTTP服务端框架**
+- 📡 **使用 [Touka-HTTPC](https://github.com/WJQSERVER-STUDIO/httpc) 作为 HTTP 客户端**
 - 📥 **支持 Git clone、raw、releases 等文件拉取**
 - 🐳 **支持反代Docker, GHCR等镜像仓库**
 - 🎨 **支持多个前端主题**
@@ -98,9 +97,9 @@ wget -O install-dev.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghprox
 
 ## 项目简史
 
-**本项目是[WJQSERVER-STUDIO/ghproxy-go](https://github.com/WJQSERVER-STUDIO/ghproxy-go)的重构版本,实现了原项目原定功能的同时,进一步优化了性能**
-关于此项目的详细开发过程,请参看Commit记录与[CHANGELOG.md](https://github.com/WJQSERVER-STUDIO/ghproxy/blob/main/CHANGELOG.md)
+本项目旨在于构建一个高效且功能多样的GHProxy
 
+- v4.0.0 迁移到[Touka框架](https://github.com/infinite-iroha/touka)
 - v3.0.0 迁移到HertZ框架, 进一步提升效率
 - v2.4.1 对路径匹配进行优化
 - v2.0.0 对`proxy`核心模块进行了重构,大幅优化内存占用
@@ -120,10 +119,6 @@ v3.5.2开始, 本项目使用 [WJQserver Studio License 2.1](https://wjqserver-s
 ## 赞助
 
 如果您觉得本项目对您有帮助,欢迎赞助支持,您的赞助将用于Demo服务器开支及开发者时间成本支出,感谢您的支持!
-
-为爱发电,开源不易
-
-爱发电: https://afdian.com/a/wjqserver
 
 USDT(TRC20): `TNfSYG6F2vkiibd6J6mhhHNWDgWgNdF5hN`
 

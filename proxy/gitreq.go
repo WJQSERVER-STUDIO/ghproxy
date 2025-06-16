@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"ghproxy/config"
@@ -9,30 +8,36 @@ import (
 	"strconv"
 
 	"github.com/WJQSERVER-STUDIO/go-utils/limitreader"
-	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/infinite-iroha/touka"
 )
 
-func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Config, mode string) {
+func GitReq(ctx context.Context, c *touka.Context, u string, cfg *config.Config, mode string) {
 
 	var (
-		req  *http.Request
 		resp *http.Response
-		err  error
 	)
 
 	go func() {
 		<-ctx.Done()
 		if resp != nil && resp.Body != nil {
-			err = resp.Body.Close()
-			if err != nil {
-				logError("Failed to close response body: %v", err)
-			}
+			resp.Body.Close()
 		}
 	}()
 
-	method := string(c.Request.Method())
+	/*
+		fullBody, err := c.GetReqBodyFull()
+		if err != nil {
+			HandleError(c, fmt.Sprintf("Failed to read request body: %v", err))
+			return
+		}
+		reqBodyReader := bytes.NewBuffer(fullBody)
+	*/
 
-	reqBodyReader := bytes.NewBuffer(c.Request.Body())
+	reqBodyReader, err := c.GetReqBodyBuffer()
+	if err != nil {
+		HandleError(c, fmt.Sprintf("Failed to read request body: %v", err))
+		return
+	}
 
 	//bodyReader := c.Request.BodyStream() // 不可替换为此实现
 
@@ -47,12 +52,12 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 	}
 
 	if cfg.GitClone.Mode == "cache" {
-		rb := gitclient.NewRequestBuilder(method, u)
+		rb := gitclient.NewRequestBuilder(c.Request.Method, u)
 		rb.NoDefaultHeaders()
 		rb.SetBody(reqBodyReader)
 		rb.WithContext(ctx)
 
-		req, err = rb.Build()
+		req, err := rb.Build()
 		if err != nil {
 			HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 			return
@@ -66,8 +71,9 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 			HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 			return
 		}
+		defer resp.Body.Close()
 	} else {
-		rb := client.NewRequestBuilder(string(c.Request.Method()), u)
+		rb := client.NewRequestBuilder(c.Request.Method, u)
 		rb.NoDefaultHeaders()
 		rb.SetBody(reqBodyReader)
 		rb.WithContext(ctx)
@@ -86,6 +92,7 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 			HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 			return
 		}
+		defer resp.Body.Close()
 	}
 
 	contentLength := resp.Header.Get("Content-Length")
@@ -93,21 +100,25 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 		size, err := strconv.Atoi(contentLength)
 		sizelimit := cfg.Server.SizeLimit * 1024 * 1024
 		if err != nil {
-			logWarning("%s %s %s %s %s Content-Length header is not a valid integer: %v", c.ClientIP(), c.Method(), c.Path(), c.UserAgent(), c.Request.Header.GetProtocol(), err)
+			c.Warnf("%s %s %s %s %s Content-Length header is not a valid integer: %v", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.UserAgent(), c.Request.Proto, err)
 		}
 		if err == nil && size > sizelimit {
-			finalURL := []byte(resp.Request.URL.String())
+			finalURL := resp.Request.URL.String()
 			c.Redirect(http.StatusMovedPermanently, finalURL)
-			logWarning("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Method(), c.Path(), c.Request.Header.Get("User-Agent"), c.Request.Header.GetProtocol(), finalURL, size)
+			c.Warnf("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.UserAgent(), c.Request.Proto, finalURL, size)
 			return
 		}
 	}
 
-	for key, values := range resp.Header {
-		for _, value := range values {
-			c.Response.Header.Add(key, value)
+	/*
+		for key, values := range resp.Header {
+			for _, value := range values {
+				c.Response.Header.Add(key, value)
+			}
 		}
-	}
+	*/
+	//copyHeader( resp.Header)
+	c.SetHeaders(resp.Header)
 
 	headersToRemove := map[string]struct{}{
 		"Content-Security-Policy":   {},
@@ -132,17 +143,20 @@ func GitReq(ctx context.Context, c *app.RequestContext, u string, cfg *config.Co
 
 	c.Status(resp.StatusCode)
 	if cfg.GitClone.Mode == "cache" {
-		c.Response.Header.Set("Cache-Control", "no-store, no-cache, must-revalidate")
-		c.Response.Header.Set("Pragma", "no-cache")
-		c.Response.Header.Set("Expires", "0")
+		c.SetHeader("Cache-Control", "no-store, no-cache, must-revalidate")
+		c.SetHeader("Pragma", "no-cache")
+		c.SetHeader("Expires", "0")
 	}
 
 	bodyReader := resp.Body
+
+	// 读取body内容
+	//bodyContent, _ := io.ReadAll(bodyReader)
+	//	c.Infof("%s", bodyContent)
 
 	if cfg.RateLimit.BandwidthLimit.Enabled {
 		bodyReader = limitreader.NewRateLimitedReader(bodyReader, bandwidthLimit, int(bandwidthBurst), ctx)
 	}
 
 	c.SetBodyStream(bodyReader, -1)
-	bodyReader.Close()
 }
