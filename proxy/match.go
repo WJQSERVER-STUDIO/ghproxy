@@ -26,8 +26,8 @@ func init() {
 	githubPrefixLen = len(githubPrefix)
 	rawPrefixLen = len(rawPrefix)
 	gistPrefixLen = len(gistPrefix)
-	apiPrefixLen = len(apiPrefix)
 	gistContentPrefixLen = len(gistContentPrefix)
+	apiPrefixLen = len(apiPrefix)
 	//log.Printf("githubPrefixLen: %d, rawPrefixLen: %d, gistPrefixLen: %d, apiPrefixLen: %d", githubPrefixLen, rawPrefixLen, gistPrefixLen, apiPrefixLen)
 }
 

@@ -1,5 +1,12 @@
 # 更新日志
 
+4.0.0-beta.0 - 2025-06-15
+---
+- BETA-TEST: 此版本是v4.0.0的测试版本,请勿在生产环境中使用;
+- CHANGE: 移交到Touka框架
+- REMOVE: 移除req rate limit的total方式
+- CHANGE: 使用[reco](https://github.com/fenthope/reco)日志库, 异步使能
+
 3.5.6 - 2025-06-15
 ---
 - FIX: 修正blob重写的生成问题

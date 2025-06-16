@@ -4,38 +4,26 @@ import (
 	"fmt"
 	"ghproxy/config"
 
-	"github.com/WJQSERVER-STUDIO/logger"
-	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/infinite-iroha/touka"
 )
 
-var (
-	logw       = logger.Logw
-	logDump    = logger.LogDump
-	logDebug   = logger.LogDebug
-	logInfo    = logger.LogInfo
-	logWarning = logger.LogWarning
-	logError   = logger.LogError
-)
-
-func Init(cfg *config.Config) {
+func ListInit(cfg *config.Config) error {
 	if cfg.Blacklist.Enabled {
 		err := InitBlacklist(cfg)
 		if err != nil {
-			logError(err.Error())
-			return
+			return err
 		}
 	}
 	if cfg.Whitelist.Enabled {
 		err := InitWhitelist(cfg)
 		if err != nil {
-			logError(err.Error())
-			return
+			return err
 		}
 	}
-	logDebug("Auth Init")
+	return nil
 }
 
-func AuthHandler(c *app.RequestContext, cfg *config.Config) (isValid bool, err error) {
+func AuthHandler(c *touka.Context, cfg *config.Config) (isValid bool, err error) {
 	if cfg.Auth.Method == "parameters" {
 		isValid, err = AuthParametersHandler(c, cfg)
 		return isValid, err
@@ -43,10 +31,10 @@ func AuthHandler(c *app.RequestContext, cfg *config.Config) (isValid bool, err e
 		isValid, err = AuthHeaderHandler(c, cfg)
 		return isValid, err
 	} else if cfg.Auth.Method == "" {
-		logError("Auth method not set")
+		c.Errorf("Auth method not set")
 		return true, nil
 	} else {
-		logError("Auth method not supported %s", cfg.Auth.Method)
+		c.Errorf("Auth method not supported %s", cfg.Auth.Method)
 		return false, fmt.Errorf("%s", fmt.Sprintf("Auth method %s not supported", cfg.Auth.Method))
 	}
 }

@@ -7,6 +7,8 @@ import (
 	"ghproxy/config"
 	"io"
 	"strings"
+
+	"github.com/infinite-iroha/touka"
 )
 
 func EditorMatcher(rawPath string, cfg *config.Config) (bool, error) {
@@ -52,21 +54,19 @@ func modifyURL(url string, host string, cfg *config.Config) string {
 	// 去除url内的https://或http://
 	matched, err := EditorMatcher(url, cfg)
 	if err != nil {
-		logDump("Invalid URL: %s", url)
 		return url
 	}
 	if matched {
 		var u = url
 		u = strings.TrimPrefix(u, "https://")
 		u = strings.TrimPrefix(u, "http://")
-		logDump("Modified URL: %s", "https://"+host+"/"+u)
 		return "https://" + host + "/" + u
 	}
 	return url
 }
 
 // processLinks 处理链接，返回包含处理后数据的 io.Reader
-func processLinks(input io.ReadCloser, compress string, host string, cfg *config.Config) (readerOut io.Reader, written int64, err error) {
+func processLinks(input io.ReadCloser, compress string, host string, cfg *config.Config, c *touka.Context) (readerOut io.Reader, written int64, err error) {
 	pipeReader, pipeWriter := io.Pipe() // 创建 io.Pipe
 	readerOut = pipeReader
 
@@ -75,11 +75,11 @@ func processLinks(input io.ReadCloser, compress string, host string, cfg *config
 			if pipeWriter != nil { // 确保 pipeWriter 关闭，即使发生错误
 				if err != nil {
 					if closeErr := pipeWriter.CloseWithError(err); closeErr != nil { // 如果有错误，传递错误给 reader
-						logError("pipeWriter close with error failed: %v, original error: %v", closeErr, err)
+						c.Errorf("pipeWriter close with error failed: %v, original error: %v", closeErr, err)
 					}
 				} else {
 					if closeErr := pipeWriter.Close(); closeErr != nil { // 没有错误，正常关闭
-						logError("pipeWriter close failed: %v", closeErr)
+						c.Errorf("pipeWriter close failed: %v", closeErr)
 						if err == nil { // 如果之前没有错误，记录关闭错误
 							err = closeErr
 						}
@@ -90,7 +90,7 @@ func processLinks(input io.ReadCloser, compress string, host string, cfg *config
 
 		defer func() {
 			if err := input.Close(); err != nil {
-				logError("input close failed: %v", err)
+				c.Errorf("input close failed: %v", err)
 			}
 
 		}()
@@ -127,7 +127,7 @@ func processLinks(input io.ReadCloser, compress string, host string, cfg *config
 
 			if gzipWriter != nil {
 				if closeErr = gzipWriter.Close(); closeErr != nil {
-					logError("gzipWriter close failed %v", closeErr)
+					c.Errorf("gzipWriter close failed %v", closeErr)
 					// 如果已经存在错误，则保留。否则，记录此错误。
 					if err == nil {
 						err = closeErr
@@ -135,7 +135,7 @@ func processLinks(input io.ReadCloser, compress string, host string, cfg *config
 				}
 			}
 			if flushErr := bufWriter.Flush(); flushErr != nil {
-				logError("writer flush failed %v", flushErr)
+				c.Errorf("writer flush failed %v", flushErr)
 				// 如果已经存在错误，则保留。否则，记录此错误。
 				if err == nil {
 					err = flushErr
@@ -156,7 +156,6 @@ func processLinks(input io.ReadCloser, compress string, host string, cfg *config
 
 			// 替换所有匹配的 URL
 			modifiedLine := urlPattern.ReplaceAllStringFunc(line, func(originalURL string) string {
-				logDump("originalURL: %s", originalURL)
 				return modifyURL(originalURL, host, cfg) // 假设 modifyURL 函数已定义
 			})
 

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"ghproxy/config"
 
-	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/infinite-iroha/touka"
 )
 
-func AuthParametersHandler(c *app.RequestContext, cfg *config.Config) (isValid bool, err error) {
+func AuthParametersHandler(c *touka.Context, cfg *config.Config) (isValid bool, err error) {
 	if !cfg.Auth.Enabled {
 		return true, nil
 	}
@@ -18,8 +18,6 @@ func AuthParametersHandler(c *app.RequestContext, cfg *config.Config) (isValid b
 	} else {
 		authToken = c.Query("auth_token")
 	}
-
-	logDebug("%s %s %s %s %s AUTH_TOKEN: %s", c.ClientIP(), c.Method(), string(c.Path()), c.Request.Header.UserAgent(), c.Request.Header.GetProtocol(), authToken)
 
 	if authToken == "" {
 		return false, fmt.Errorf("Auth token not found")

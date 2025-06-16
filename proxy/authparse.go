@@ -34,7 +34,7 @@ func parseBearerWWWAuthenticateHeader(headerValue string) (*BearerAuthParams, er
 		trimmedPair := strings.TrimSpace(pair)
 		keyValue := strings.SplitN(trimmedPair, "=", 2)
 		if len(keyValue) != 2 {
-			logWarning("Skipping malformed parameter '%s' in Www-Authenticate header: %s", pair, headerValue)
+			//logWarning("Skipping malformed parameter '%s' in Www-Authenticate header: %s", pair, headerValue)
 			continue
 		}
 		key := strings.TrimSpace(keyValue[0])

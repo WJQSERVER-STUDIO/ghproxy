@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"embed"
 	"flag"
 	"fmt"
@@ -14,35 +13,28 @@ import (
 	"ghproxy/api"
 	"ghproxy/auth"
 	"ghproxy/config"
-	"ghproxy/middleware/loggin"
 	"ghproxy/proxy"
-	"ghproxy/rate"
+
 	"ghproxy/weakcache"
 
-	"github.com/WJQSERVER-STUDIO/logger"
-	"github.com/hertz-contrib/http2/factory"
+	"github.com/fenthope/ikumi"
+	"github.com/fenthope/reco"
+	"github.com/fenthope/record"
+	"github.com/infinite-iroha/touka"
 	"github.com/wjqserver/modembed"
-
-	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
-	"github.com/cloudwego/hertz/pkg/app/server"
-	"github.com/cloudwego/hertz/pkg/common/adaptor"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
-	"github.com/cloudwego/hertz/pkg/network/standard"
+	"golang.org/x/time/rate"
 
 	_ "net/http/pprof"
 )
 
 var (
 	cfg         *config.Config
-	r           *server.Hertz
+	r           *touka.Engine
 	configfile  = "/data/ghproxy/config/config.toml"
 	hertZfile   *os.File
 	cfgfile     string
 	version     string
 	runMode     string
-	limiter     *rate.RateLimiter
-	iplimiter   *rate.IPRateLimiter
 	showVersion bool
 	showHelp    bool
 )
@@ -57,12 +49,12 @@ var (
 )
 
 var (
-	logw       = logger.Logw
-	logDump    = logger.LogDump
-	logDebug   = logger.LogDebug
-	logInfo    = logger.LogInfo
-	logWarning = logger.LogWarning
-	logError   = logger.LogError
+	logger     *reco.Logger
+	logDump    = logger.Debugf
+	logDebug   = logger.Debugf
+	logInfo    = logger.Infof
+	logWarning = logger.Warnf
+	logError   = logger.Errorf
 )
 
 func readFlag() {
@@ -127,39 +119,28 @@ func loadConfig() {
 
 func setupLogger(cfg *config.Config) {
 	var err error
-
-	err = logger.Init(cfg.Log.LogFilePath, cfg.Log.MaxLogSize)
+	if cfg.Log.Level == "" {
+		cfg.Log.Level = "info"
+	}
+	recoLevel := reco.ParseLevel(cfg.Log.Level)
+	logger, err = reco.New(reco.Config{
+		Level:          recoLevel,
+		Mode:           reco.ModeText,
+		FilePath:       cfg.Log.LogFilePath,
+		MaxFileSizeMB:  cfg.Log.MaxLogSize,
+		EnableRotation: true,
+		Async:          true,
+	})
 	if err != nil {
 		fmt.Printf("Failed to initialize logger: %v\n", err)
 		os.Exit(1)
 	}
-	err = logger.SetLogLevel(cfg.Log.Level)
-	if err != nil {
-		fmt.Printf("Logger Level Error: %v\n", err)
-		os.Exit(1)
-	}
-	logger.SetAsync(cfg.Log.Async)
+	logger.SetLevel(recoLevel)
 
 	fmt.Printf("Log Level: %s\n", cfg.Log.Level)
-	logDebug("Config File Path: ", cfgfile)
-	logDebug("Loaded config: %v\n", cfg)
-	logInfo("Logger Initialized Successfully")
-}
-
-func setupHertZLogger(cfg *config.Config) {
-	var err error
-
-	if cfg.Log.HertZLogPath != "" {
-		hertZfile, err = os.OpenFile(cfg.Log.HertZLogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-		if err != nil {
-			hlog.SetOutput(os.Stdout)
-			logWarning("Failed to open hertz log file: %v", err)
-		} else {
-			hlog.SetOutput(hertZfile)
-		}
-		hlog.SetLevel(hlog.LevelInfo)
-	}
-
+	logger.Debugf("Config File Path: %s", cfgfile)
+	logger.Debugf("Loaded config: %v", cfg)
+	logger.Infof("Logger Initialized Successfully")
 }
 
 func setMemLimit(cfg *config.Config) {
@@ -170,23 +151,15 @@ func setMemLimit(cfg *config.Config) {
 }
 
 func loadlist(cfg *config.Config) {
-	auth.Init(cfg)
-}
-
-func setupApi(cfg *config.Config, r *server.Hertz, version string) {
-	api.InitHandleRouter(cfg, r, version)
-}
-
-func setupRateLimit(cfg *config.Config) {
-	if cfg.RateLimit.Enabled {
-		if cfg.RateLimit.RateMethod == "ip" {
-			iplimiter = rate.NewIPRateLimiter(cfg.RateLimit.RatePerMinute, cfg.RateLimit.Burst, 1*time.Minute)
-		} else if cfg.RateLimit.RateMethod == "total" {
-			limiter = rate.New(cfg.RateLimit.RatePerMinute, cfg.RateLimit.Burst, 1*time.Minute)
-		} else {
-			logError("Invalid RateLimit Method: %s", cfg.RateLimit.RateMethod)
-		}
+	err := auth.ListInit(cfg)
+	if err != nil {
+		logger.Errorf("Failed to initialize list: %v", err)
 	}
+
+}
+
+func setupApi(cfg *config.Config, r *touka.Engine, version string) {
+	api.InitHandleRouter(cfg, r, version)
 }
 
 func InitReq(cfg *config.Config) {
@@ -241,7 +214,7 @@ func loadEmbeddedPages(cfg *config.Config) (fs.FS, fs.FS, error) {
 }
 
 // setupPages 设置页面路由
-func setupPages(cfg *config.Config, r *server.Hertz) {
+func setupPages(cfg *config.Config, r *touka.Engine) {
 	switch cfg.Pages.Mode {
 	case "internal":
 		err := setInternalRoute(cfg, r)
@@ -252,21 +225,7 @@ func setupPages(cfg *config.Config, r *server.Hertz) {
 		}
 
 	case "external":
-		// 设置外部资源路径
-		indexPagePath := fmt.Sprintf("%s/index.html", cfg.Pages.StaticDir)
-		faviconPath := fmt.Sprintf("%s/favicon.ico", cfg.Pages.StaticDir)
-		javascriptsPath := fmt.Sprintf("%s/script.js", cfg.Pages.StaticDir)
-		stylesheetsPath := fmt.Sprintf("%s/style.css", cfg.Pages.StaticDir)
-		bootstrapPath := fmt.Sprintf("%s/bootstrap.min.css", cfg.Pages.StaticDir)
-		bootstrapBundlePath := fmt.Sprintf("%s/bootstrap.bundle.min.js", cfg.Pages.StaticDir)
-
-		// 设置外部资源路由
-		r.StaticFile("/", indexPagePath)
-		r.StaticFile("/favicon.ico", faviconPath)
-		r.StaticFile("/script.js", javascriptsPath)
-		r.StaticFile("/style.css", stylesheetsPath)
-		r.StaticFile("/bootstrap.min.css", bootstrapPath)
-		r.StaticFile("/bootstrap.bundle.min.js", bootstrapBundlePath)
+		r.SetUnMatchFS(http.Dir(cfg.Pages.StaticDir))
 
 	default:
 		// 处理无效的Pages Mode
@@ -282,13 +241,24 @@ func setupPages(cfg *config.Config, r *server.Hertz) {
 	}
 }
 
-func pageCacheHeader() func(ctx context.Context, c *app.RequestContext) {
-	return func(ctx context.Context, c *app.RequestContext) {
-		c.Header("Cache-Control", "public, max-age=3600, must-revalidate")
+var viaString string = "WJQSERVER-STUDIO/GHProxy"
+
+func pageCacheHeader() func(c *touka.Context) {
+	return func(c *touka.Context) {
+		c.AddHeader("Cache-Control", "public, max-age=3600, must-revalidate")
+		c.Next()
 	}
 }
 
-func setInternalRoute(cfg *config.Config, r *server.Hertz) error {
+func viaHeader() func(c *touka.Context) {
+	return func(c *touka.Context) {
+		protoVersion := fmt.Sprintf("%d.%d", c.Request.ProtoMajor, c.Request.ProtoMinor)
+		c.AddHeader("Via", protoVersion+" "+viaString)
+		c.Next()
+	}
+}
+
+func setInternalRoute(cfg *config.Config, r *touka.Engine) error {
 
 	// 加载嵌入式资源
 	pages, assets, err := loadEmbeddedPages(cfg)
@@ -296,69 +266,14 @@ func setInternalRoute(cfg *config.Config, r *server.Hertz) error {
 		logError("Failed when processing pages: %s", err)
 		return err
 	}
-	/*
-		// 设置嵌入式资源路由
-		r.GET("/", func(ctx context.Context, c *app.RequestContext) {
-			staticServer := http.FileServer(http.FS(pages))
-			req, err := adaptor.GetCompatRequest(&c.Request)
-			if err != nil {
-				logError("%s", err)
-				return
-			}
-			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-		})
-			r.GET("/favicon.ico", func(ctx context.Context, c *app.RequestContext) {
-				staticServer := http.FileServer(http.FS(assets))
-				req, err := adaptor.GetCompatRequest(&c.Request)
-				if err != nil {
-					logError("%s", err)
-					return
-				}
-				staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-			})
-		r.GET("/script.js", func(ctx context.Context, c *app.RequestContext) {
-			staticServer := http.FileServer(http.FS(pages))
-			req, err := adaptor.GetCompatRequest(&c.Request)
-			if err != nil {
-				logError("%s", err)
-				return
-			}
-			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-		})
-		r.GET("/style.css", func(ctx context.Context, c *app.RequestContext) {
-			staticServer := http.FileServer(http.FS(pages))
-			req, err := adaptor.GetCompatRequest(&c.Request)
-			if err != nil {
-				logError("%s", err)
-				return
-			}
-			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-		})
-		r.GET("/bootstrap.min.css", func(ctx context.Context, c *app.RequestContext) {
-			staticServer := http.FileServer(http.FS(assets))
-			req, err := adaptor.GetCompatRequest(&c.Request)
-			if err != nil {
-				logError("%s", err)
-				return
-			}
-			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-		})
-		r.GET("/bootstrap.bundle.min.js", func(ctx context.Context, c *app.RequestContext) {
-			staticServer := http.FileServer(http.FS(assets))
-			req, err := adaptor.GetCompatRequest(&c.Request)
-			if err != nil {
-				logError("%s", err)
-				return
-			}
-			staticServer.ServeHTTP(adaptor.GetCompatResponseWriter(&c.Response), req)
-		})
-	*/
-	r.GET("/", pageCacheHeader(), adaptor.HertzHandler(http.FileServer(http.FS(pages))))
-	r.GET("/favicon.ico", pageCacheHeader(), adaptor.HertzHandler(http.FileServer(http.FS(assets))))
-	r.GET("/script.js", pageCacheHeader(), adaptor.HertzHandler(http.FileServer(http.FS(pages))))
-	r.GET("/style.css", pageCacheHeader(), adaptor.HertzHandler(http.FileServer(http.FS(pages))))
-	r.GET("/bootstrap.min.css", pageCacheHeader(), adaptor.HertzHandler(http.FileServer(http.FS(assets))))
-	r.GET("/bootstrap.bundle.min.js", pageCacheHeader(), adaptor.HertzHandler(http.FileServer(http.FS(assets))))
+
+	r.HandleFunc([]string{"GET"}, "/favicon.ico", pageCacheHeader(), touka.FileServer(http.FS(assets)))
+	r.HandleFunc([]string{"GET"}, "/", pageCacheHeader(), touka.FileServer(http.FS(pages)))
+	r.HandleFunc([]string{"GET"}, "/script.js", pageCacheHeader(), touka.FileServer(http.FS(pages)))
+	r.HandleFunc([]string{"GET"}, "/style.css", pageCacheHeader(), touka.FileServer(http.FS(pages)))
+	r.HandleFunc([]string{"GET"}, "/bootstrap.min.css", pageCacheHeader(), touka.FileServer(http.FS(assets)))
+	r.HandleFunc([]string{"GET"}, "/bootstrap.bundle.min.js", pageCacheHeader(), touka.FileServer(http.FS(assets)))
+
 	return nil
 }
 
@@ -381,11 +296,9 @@ func init() {
 	loadConfig()
 	if cfg != nil { // 在setupLogger前添加空值检查
 		setupLogger(cfg)
-		setupHertZLogger(cfg)
 		InitReq(cfg)
 		setMemLimit(cfg)
 		loadlist(cfg)
-		setupRateLimit(cfg)
 		if cfg.Docker.Enabled {
 			wcache = proxy.InitWeakCache()
 		}
@@ -402,129 +315,103 @@ func init() {
 	}
 }
 
-var viaString string = "WJQSERVER-STUDIO/GHProxy"
-
-func viaHeader() app.HandlerFunc {
-	return func(ctx context.Context, c *app.RequestContext) {
-		protoVersion := "1.1"
-		c.Header("Via", protoVersion+" "+viaString)
-		c.Next(ctx)
-	}
-}
-
 func main() {
 	if showVersion || showHelp {
 		return
 	}
-	logDebug("Run Mode: %s Netlib: %s", runMode, cfg.Server.NetLib)
 
 	if cfg == nil {
 		fmt.Println("Config not loaded, exiting.")
 		return
 	}
 
-	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
-	if cfg.Server.NetLib == "std" || cfg.Server.NetLib == "standard" || cfg.Server.NetLib == "net" || cfg.Server.NetLib == "net/http" {
-		if cfg.Server.H2C {
-			r = server.New(
-				server.WithH2C(true),
-				server.WithHostPorts(addr),
-				server.WithTransport(standard.NewTransporter),
-				server.WithStreamBody(true),
-				server.WithIdleTimeout(30*time.Second),
-			)
-			r.AddProtocol("h2", factory.NewServerFactory())
-		} else {
-			r = server.New(
-				server.WithHostPorts(addr),
-				server.WithTransport(standard.NewTransporter),
-				server.WithStreamBody(true),
-				server.WithIdleTimeout(30*time.Second),
-			)
-		}
-	} else if cfg.Server.NetLib == "netpoll" || cfg.Server.NetLib == "" {
-		if cfg.Server.H2C {
-			r = server.New(
-				server.WithH2C(true),
-				server.WithHostPorts(addr),
-				server.WithSenseClientDisconnection(cfg.Server.SenseClientDisconnection),
-				server.WithStreamBody(true),
-				server.WithIdleTimeout(30*time.Second),
-			)
-			r.AddProtocol("h2", factory.NewServerFactory())
-		} else {
-			r = server.New(
-				server.WithHostPorts(addr),
-				server.WithSenseClientDisconnection(cfg.Server.SenseClientDisconnection),
-				server.WithStreamBody(true),
-				server.WithIdleTimeout(30*time.Second),
-			)
-		}
-	} else {
-		logError("Invalid NetLib: %s", cfg.Server.NetLib)
-		fmt.Printf("Invalid NetLib: %s\n", cfg.Server.NetLib)
-		os.Exit(1)
-	}
+	r := touka.Default()
+	r.SetProtocols(&touka.ProtocolsConfig{
+		Http1:           true,
+		Http2_Cleartext: true,
+	})
 
+	r.Use(touka.Recovery()) // Recovery中间件
+	r.SetLogger(logger)
+	r.Use(record.Middleware()) // log中间件
+	r.Use(viaHeader())
 	/*
-		if cfg.Server.GoPoolSize > 0 {
-			gopool.SetCap(int32(cfg.Server.GoPoolSize))
-		} else {
-			gopool.SetCap(1024)
-		}
+		r.Use(compress.Compression(compress.CompressOptions{
+			Algorithms: map[string]compress.AlgorithmConfig{
+				compress.EncodingGzip: {
+					Level:       gzip.BestCompression, // Gzip最高压缩比
+					PoolEnabled: true,                 // 启用Gzip压缩器的对象池
+				},
+				compress.EncodingDeflate: {
+					Level:       flate.DefaultCompression, // Deflate默认压缩比
+					PoolEnabled: false,                    // Deflate不启用对象池
+				},
+				compress.EncodingZstd: {
+					Level:       int(zstd.SpeedBestCompression), // Zstandard最佳压缩比
+					PoolEnabled: true,                           // 启用Zstandard压缩器的对象池
+				},
+			},
+		}))
 	*/
 
-	r.Use(recovery.Recovery()) // Recovery中间件
-	r.Use(loggin.Middleware()) // log中间件
-	r.Use(viaHeader())
+	if cfg.RateLimit.Enabled {
+		r.Use(ikumi.TokenRateLimit(ikumi.TokenRateLimiterOptions{
+			Limit: rate.Limit(cfg.RateLimit.RatePerMinute),
+			Burst: cfg.RateLimit.Burst,
+		}))
+	}
 	setupApi(cfg, r, version)
 	setupPages(cfg, r)
 
-	r.GET("/github.com/:user/:repo/releases/*filepath", func(ctx context.Context, c *app.RequestContext) {
+	r.GET("/github.com/:user/:repo/releases/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "releases")
-		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+		proxy.RoutingHandler(cfg)(c)
 	})
 
-	r.GET("/github.com/:user/:repo/archive/*filepath", func(ctx context.Context, c *app.RequestContext) {
+	r.GET("/github.com/:user/:repo/archive/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "releases")
-		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+		proxy.RoutingHandler(cfg)(c)
 	})
 
-	r.GET("/github.com/:user/:repo/blob/*filepath", func(ctx context.Context, c *app.RequestContext) {
+	r.GET("/github.com/:user/:repo/blob/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "blob")
-		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+		proxy.RoutingHandler(cfg)(c)
 	})
 
-	r.GET("/github.com/:user/:repo/raw/*filepath", func(ctx context.Context, c *app.RequestContext) {
+	r.GET("/github.com/:user/:repo/raw/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "raw")
-		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+		proxy.RoutingHandler(cfg)(c)
 	})
 
-	r.GET("/github.com/:user/:repo/info/*filepath", func(ctx context.Context, c *app.RequestContext) {
+	r.GET("/github.com/:user/:repo/info/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "clone")
-		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+		proxy.RoutingHandler(cfg)(c)
 	})
-	r.GET("/github.com/:user/:repo/git-upload-pack", func(ctx context.Context, c *app.RequestContext) {
+	r.GET("/github.com/:user/:repo/git-upload-pack", func(c *touka.Context) {
 		c.Set("matcher", "clone")
-		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+		proxy.RoutingHandler(cfg)(c)
+	})
+	r.POST("/github.com/:user/:repo/git-upload-pack", func(c *touka.Context) {
+		c.Set("matcher", "clone")
+		proxy.RoutingHandler(cfg)(c)
 	})
 
-	r.GET("/raw.githubusercontent.com/:user/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
+	r.GET("/raw.githubusercontent.com/:user/:repo/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "raw")
-		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+		proxy.RoutingHandler(cfg)(c)
 	})
 
-	r.GET("/gist.githubusercontent.com/:user/*filepath", func(ctx context.Context, c *app.RequestContext) {
+	r.GET("/gist.githubusercontent.com/:user/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "gist")
-		proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
+		proxy.NoRouteHandler(cfg)(c)
 	})
 
-	r.Any("/api.github.com/repos/:user/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
+	r.ANY("/api.github.com/repos/:user/:repo/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "api")
-		proxy.RoutingHandler(cfg, limiter, iplimiter)(ctx, c)
+		proxy.RoutingHandler(cfg)(c)
 	})
 
-	r.GET("/v2/", func(ctx context.Context, c *app.RequestContext) {
+	r.GET("/v2/", func(c *touka.Context) {
 		emptyJSON := "{}"
 		c.Header("Content-Type", "application/json")
 		c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
@@ -532,26 +419,27 @@ func main() {
 		c.Header("Docker-Distribution-API-Version", "registry/2.0")
 
 		c.Status(200)
-		c.Write([]byte(emptyJSON))
+		c.Writer.Write([]byte(emptyJSON))
 	})
 
-	r.Any("/v2/:target/:user/:repo/*filepath", func(ctx context.Context, c *app.RequestContext) {
-		proxy.GhcrWithImageRouting(cfg)(ctx, c)
+	r.ANY("/v2/:target/:user/:repo/*filepath", func(c *touka.Context) {
+		proxy.GhcrWithImageRouting(cfg)(c)
 	})
 
 	/*
-		r.Any("/v2/:target/*filepath", func(ctx context.Context, c *app.RequestContext) {
-			proxy.GhcrRouting(cfg)(ctx, c)
+		r.Any("/v2/:target/*filepath", func( c *touka.Context) {
+			proxy.GhcrRouting(cfg)(c)
 		})
 	*/
 
-	r.NoRoute(func(ctx context.Context, c *app.RequestContext) {
-		proxy.NoRouteHandler(cfg, limiter, iplimiter)(ctx, c)
+	r.NoRoute(func(c *touka.Context) {
+		proxy.NoRouteHandler(cfg)(c)
 	})
 
 	fmt.Printf("GHProxy Version: %s\n", version)
 	fmt.Printf("A Go Based High-Performance Github Proxy \n")
 	fmt.Printf("Made by WJQSERVER-STUDIO\n")
+	fmt.Printf("Power by Touka\n")
 
 	if cfg.Server.Debug {
 		go func() {
@@ -563,16 +451,13 @@ func main() {
 	}
 
 	defer logger.Close()
-	defer func() {
-		if hertZfile != nil {
-			err := hertZfile.Close()
-			if err != nil {
-				logError("Failed to close hertz log file: %v", err)
-			}
-		}
-	}()
 
-	r.Spin()
+	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
+	err := r.RunShutdown(addr)
+	if err != nil {
+		logError("Server Run Error: %v", err)
+		fmt.Printf("Server Run Error: %v\n", err)
+	}
 
 	fmt.Println("Program Exit")
 }

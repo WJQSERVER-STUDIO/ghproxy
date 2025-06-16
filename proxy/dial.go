@@ -7,6 +7,7 @@ package proxy
 
 import (
 	"ghproxy/config"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -24,7 +25,8 @@ func initTransport(cfg *config.Config, transport *http.Transport) {
 	// 如果代理 URL 未设置，使用环境变量中的代理配置
 	if cfg.Outbound.Url == "" {
 		transport.Proxy = http.ProxyFromEnvironment
-		logWarning("Outbound proxy is not set, using environment variables")
+		//logWarning("Outbound proxy is not set, using environment variables")
+		log.Printf("Outbound proxy is not set, using environment variables")
 		return
 	}
 
@@ -32,7 +34,7 @@ func initTransport(cfg *config.Config, transport *http.Transport) {
 	proxyInfo, err := url.Parse(cfg.Outbound.Url)
 	if err != nil {
 		// 如果解析失败，记录错误日志并使用环境变量中的代理配置
-		logError("Failed to parse outbound proxy URL %v", err)
+		log.Printf("Failed to parse outbound proxy URL %v", err)
 		transport.Proxy = http.ProxyFromEnvironment
 		return
 	}
@@ -41,7 +43,7 @@ func initTransport(cfg *config.Config, transport *http.Transport) {
 	switch strings.ToLower(proxyInfo.Scheme) {
 	case "http", "https": // 如果是 HTTP/HTTPS 代理
 		transport.Proxy = http.ProxyURL(proxyInfo) // 设置 HTTP(S) 代理
-		logInfo("Using HTTP(S) proxy: %s", proxyInfo.Redacted())
+		log.Printf("Using HTTP(S) proxy: %s", cfg.Outbound.Url)
 	case "socks5": // 如果是 SOCKS5 代理
 		// 调用 newProxyDial 创建 SOCKS5 代理拨号器
 		proxyDialer := newProxyDial(cfg.Outbound.Url)
@@ -53,11 +55,14 @@ func initTransport(cfg *config.Config, transport *http.Transport) {
 		} else {
 			// 如果不支持 ContextDialer，则回退到传统的 Dial 方法
 			transport.Dial = proxyDialer.Dial
-			logWarning("SOCKS5 dialer does not support ContextDialer, using legacy Dial")
+			//logWarning("SOCKS5 dialer does not support ContextDialer, using legacy Dial")
+			log.Printf("SOCKS5 dialer does not support ContextDialer, using legacy Dial")
 		}
-		logInfo("Using SOCKS5 proxy chain: %s", cfg.Outbound.Url)
+		//logInfo("Using SOCKS5 proxy chain: %s", cfg.Outbound.Url)
+		log.Printf("Using SOCKS5 proxy chain: %s", cfg.Outbound.Url)
 	default: // 如果代理协议不支持
-		logError("Unsupported proxy scheme: %s", proxyInfo.Scheme)
+		//logError("Unsupported proxy scheme: %s", proxyInfo.Scheme)
+		log.Printf("Unsupported proxy scheme: %s", proxyInfo.Scheme)
 		transport.Proxy = http.ProxyFromEnvironment // 回退到环境变量代理
 	}
 }
@@ -77,13 +82,15 @@ func newProxyDial(proxyUrls string) proxy.Dialer {
 		urlInfo, err := url.Parse(proxyUrl)
 		if err != nil {
 			// 如果 URL 解析失败，记录错误日志并跳过
-			logError("Failed to parse proxy URL %q: %v", proxyUrl, err)
+			//logError("Failed to parse proxy URL %q: %v", proxyUrl, err)
+			log.Printf("Failed to parse proxy URL %q: %v", proxyUrl, err)
 			continue
 		}
 
 		// 检查代理协议是否为 SOCKS5
 		if urlInfo.Scheme != "socks5" {
-			logWarning("Skipping non-SOCKS5 proxy: %s", urlInfo.Scheme)
+			//	logWarning("Skipping non-SOCKS5 proxy: %s", urlInfo.Scheme)
+			log.Printf("Skipping non-SOCKS5 proxy: %s", urlInfo.Scheme)
 			continue
 		}
 
@@ -94,7 +101,8 @@ func newProxyDial(proxyUrls string) proxy.Dialer {
 		dialer, err := createSocksDialer(urlInfo.Host, auth, proxyDialer)
 		if err != nil {
 			// 如果创建失败，记录错误日志并跳过
-			logError("Failed to create SOCKS5 dialer for %q: %v", proxyUrl, err)
+			//logError("Failed to create SOCKS5 dialer for %q: %v", proxyUrl, err)
+			log.Printf("Failed to create SOCKS5 dialer for %q: %v", proxyUrl, err)
 			continue
 		}
 
