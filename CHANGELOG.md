@@ -5,6 +5,7 @@
 - CHANGE: 移交到Touka框架
 - REMOVE: 移除req rate limit的total方式
 - CHANGE: 使用[reco](https://github.com/fenthope/reco)日志库, 异步使能
+- FIX: 更换HTTP框架以解决v3可能存在的内存分配与回收问题
 
 4.0.0-rc.0 - 2025-06-16
 ---
