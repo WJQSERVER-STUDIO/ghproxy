@@ -15,6 +15,8 @@ import (
 	"ghproxy/config"
 	"ghproxy/proxy"
 
+	"github.com/fenthope/bauth"
+
 	"ghproxy/weakcache"
 
 	"github.com/fenthope/ikumi"
@@ -362,6 +364,7 @@ func main() {
 	}
 	setupApi(cfg, r, version)
 	setupPages(cfg, r)
+	r.RedirectTrailingSlash = false
 
 	r.GET("/github.com/:user/:repo/releases/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "releases")
@@ -411,7 +414,7 @@ func main() {
 		proxy.RoutingHandler(cfg)(c)
 	})
 
-	r.GET("/v2/", func(c *touka.Context) {
+	r.GET("/v2/", r.UseIf(cfg.Docker.Auth, bauth.BasicAuthForStatic(cfg.Docker.Credentials, "GHProxy Docker Proxy")), func(c *touka.Context) {
 		emptyJSON := "{}"
 		c.Header("Content-Type", "application/json")
 		c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
@@ -420,6 +423,11 @@ func main() {
 
 		c.Status(200)
 		c.Writer.Write([]byte(emptyJSON))
+	})
+
+	r.GET("/v2", func(c *touka.Context) {
+		// 重定向到 /v2/
+		c.Redirect(http.StatusMovedPermanently, "/v2/")
 	})
 
 	r.ANY("/v2/:target/:user/:repo/*filepath", func(c *touka.Context) {

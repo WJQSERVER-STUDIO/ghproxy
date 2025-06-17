@@ -169,10 +169,16 @@ type OutboundConfig struct {
 [docker]
 enabled = false
 target = "ghcr" # ghcr/dockerhub
+auth = false
+[docker.credentials]
+user1 = "testpass"
+test = "test123"
 */
 type DockerConfig struct {
-	Enabled bool   `toml:"enabled"`
-	Target  string `toml:"target"`
+	Enabled     bool              `toml:"enabled"`
+	Target      string            `toml:"target"`
+	Auth        bool              `toml:"auth"`
+	Credentials map[string]string `toml:"credentials"`
 }
 
 // LoadConfig 从 TOML 配置文件加载配置
