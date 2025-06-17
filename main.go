@@ -336,7 +336,7 @@ func main() {
 	r.Use(touka.Recovery()) // Recovery中间件
 	r.SetLogger(logger)
 	r.Use(record.Middleware()) // log中间件
-	//r.Use(viaHeader())
+	r.Use(viaHeader())
 	/*
 		r.Use(compress.Compression(compress.CompressOptions{
 			Algorithms: map[string]compress.AlgorithmConfig{
@@ -468,14 +468,4 @@ func main() {
 	}
 
 	fmt.Println("Program Exit")
-}
-
-// copyHeader 将所有头部从 src 复制到 dst。
-// 对于多值头部，它会为每个值调用 Add，从而保留所有值。
-func copyHeader(dst, src http.Header) {
-	for k, vv := range src {
-		for _, v := range vv {
-			dst.Add(k, v)
-		}
-	}
 }
