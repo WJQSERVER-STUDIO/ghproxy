@@ -68,3 +68,7 @@ url = "socks5://127.0.0.1:1080" # "http://127.0.0.1:7890"
 [docker]
 enabled = false
 target = "dockerhub" # ghcr/dockerhub/ custom
+auth = false
+[docker.credentials]
+user1 = "testpass"
+test = "test123"

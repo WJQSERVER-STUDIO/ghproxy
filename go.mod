@@ -11,6 +11,7 @@ require (
 
 require (
 	github.com/WJQSERVER-STUDIO/go-utils/limitreader v0.0.2
+	github.com/fenthope/bauth v0.0.1
 	github.com/fenthope/ikumi v0.0.2
 	github.com/fenthope/reco v0.0.3
 	github.com/fenthope/record v0.0.3
@@ -24,3 +25,5 @@ require (
 	github.com/go-json-experiment/json v0.0.0-20250517221953-25912455fbc8 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 )
+
+replace github.com/infinite-iroha/touka => /data/github/WJQSERVER/touka

@@ -15,6 +15,8 @@ import (
 	"ghproxy/config"
 	"ghproxy/proxy"
 
+	"github.com/fenthope/bauth"
+
 	"ghproxy/weakcache"
 
 	"github.com/fenthope/ikumi"
@@ -334,7 +336,7 @@ func main() {
 	r.Use(touka.Recovery()) // Recovery中间件
 	r.SetLogger(logger)
 	r.Use(record.Middleware()) // log中间件
-	r.Use(viaHeader())
+	//r.Use(viaHeader())
 	/*
 		r.Use(compress.Compression(compress.CompressOptions{
 			Algorithms: map[string]compress.AlgorithmConfig{
@@ -362,6 +364,7 @@ func main() {
 	}
 	setupApi(cfg, r, version)
 	setupPages(cfg, r)
+	r.RedirectTrailingSlash = false
 
 	r.GET("/github.com/:user/:repo/releases/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "releases")
@@ -411,7 +414,7 @@ func main() {
 		proxy.RoutingHandler(cfg)(c)
 	})
 
-	r.GET("/v2/", func(c *touka.Context) {
+	r.GET("/v2/", r.UseIf(cfg.Docker.Auth, bauth.BasicAuthForStatic(cfg.Docker.Credentials, "GHProxy Docker Proxy")), func(c *touka.Context) {
 		emptyJSON := "{}"
 		c.Header("Content-Type", "application/json")
 		c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
@@ -420,6 +423,11 @@ func main() {
 
 		c.Status(200)
 		c.Writer.Write([]byte(emptyJSON))
+	})
+
+	r.GET("/v2", func(c *touka.Context) {
+		// 重定向到 /v2/
+		c.Redirect(http.StatusMovedPermanently, "/v2/")
 	})
 
 	r.ANY("/v2/:target/:user/:repo/*filepath", func(c *touka.Context) {
@@ -460,4 +468,14 @@ func main() {
 	}
 
 	fmt.Println("Program Exit")
+}
+
+// copyHeader 将所有头部从 src 复制到 dst。
+// 对于多值头部，它会为每个值调用 Add，从而保留所有值。
+func copyHeader(dst, src http.Header) {
+	for k, vv := range src {
+		for _, v := range vv {
+			dst.Add(k, v)
+		}
+	}
 }
