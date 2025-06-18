@@ -245,7 +245,7 @@ func DefaultConfig() *Config {
 		},
 		Pages: PagesConfig{
 			Mode:      "internal",
-			Theme:     "bootstrap",
+			Theme:     "hub",
 			StaticDir: "/data/www",
 		},
 		Log: LogConfig{
@@ -271,8 +271,7 @@ func DefaultConfig() *Config {
 			WhitelistFile: "/data/ghproxy/config/whitelist.json",
 		},
 		RateLimit: RateLimitConfig{
-			Enabled: false,
-			//RateMethod:    "total",
+			Enabled:       false,
 			RatePerMinute: 100,
 			Burst:         10,
 			BandwidthLimit: BandwidthLimitConfig{
@@ -289,7 +288,11 @@ func DefaultConfig() *Config {
 		},
 		Docker: DockerConfig{
 			Enabled: false,
-			Target:  "ghcr",
+			Target:  "dockerhub",
+			Auth:    false,
+			Credentials: map[string]string{
+				"testpass": "test123",
+			},
 		},
 	}
 }
