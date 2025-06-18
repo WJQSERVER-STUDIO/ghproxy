@@ -17,13 +17,6 @@ func GitReq(ctx context.Context, c *touka.Context, u string, cfg *config.Config,
 		resp *http.Response
 	)
 
-	go func() {
-		<-ctx.Done()
-		if resp != nil && resp.Body != nil {
-			resp.Body.Close()
-		}
-	}()
-
 	/*
 		fullBody, err := c.GetReqBodyFull()
 		if err != nil {

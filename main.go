@@ -414,16 +414,21 @@ func main() {
 		proxy.RoutingHandler(cfg)(c)
 	})
 
-	r.GET("/v2/", r.UseIf(cfg.Docker.Auth, bauth.BasicAuthForStatic(cfg.Docker.Credentials, "GHProxy Docker Proxy")), func(c *touka.Context) {
-		emptyJSON := "{}"
-		c.Header("Content-Type", "application/json")
-		c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
+	r.GET("/v2/",
+		r.UseIf(cfg.Docker.Auth, func() touka.HandlerFunc {
+			return bauth.BasicAuthForStatic(cfg.Docker.Credentials, "GHProxy Docker Proxy")
+		}),
+		func(c *touka.Context) {
+			emptyJSON := "{}"
+			c.Header("Content-Type", "application/json")
+			c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
 
-		c.Header("Docker-Distribution-API-Version", "registry/2.0")
+			c.Header("Docker-Distribution-API-Version", "registry/2.0")
 
-		c.Status(200)
-		c.Writer.Write([]byte(emptyJSON))
-	})
+			c.Status(200)
+			c.Writer.Write([]byte(emptyJSON))
+		},
+	)
 
 	r.GET("/v2", func(c *touka.Context) {
 		// 重定向到 /v2/
