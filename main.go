@@ -364,7 +364,8 @@ func main() {
 	}
 	setupApi(cfg, r, version)
 	setupPages(cfg, r)
-	r.RedirectTrailingSlash = false
+	//r.RedirectTrailingSlash = false
+	r.SetRedirectTrailingSlash(false)
 
 	r.GET("/github.com/:user/:repo/releases/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "releases")
