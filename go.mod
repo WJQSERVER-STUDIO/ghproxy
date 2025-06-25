@@ -4,7 +4,7 @@ go 1.24.4
 
 require (
 	github.com/BurntSushi/toml v1.5.0
-	github.com/WJQSERVER-STUDIO/httpc v0.7.0
+	github.com/WJQSERVER-STUDIO/httpc v0.7.1
 	golang.org/x/net v0.41.0
 	golang.org/x/time v0.12.0
 )
@@ -16,7 +16,7 @@ require (
 	github.com/fenthope/reco v0.0.3
 	github.com/fenthope/record v0.0.3
 	github.com/hashicorp/golang-lru/v2 v2.0.7
-	github.com/infinite-iroha/touka v0.2.6
+	github.com/infinite-iroha/touka v0.2.8
 	github.com/wjqserver/modembed v0.0.1
 )
 

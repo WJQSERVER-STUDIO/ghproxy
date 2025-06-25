@@ -4,8 +4,8 @@ github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.4 h1:JLtFd00AdFg/TP+dtvIzLkdHwKU
 github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.4/go.mod h1:FZ6XE+4TKy4MOfX1xWKe6Rwsg0ucYFCdNh1KLvyKTfc=
 github.com/WJQSERVER-STUDIO/go-utils/limitreader v0.0.2 h1:8bBkKk6E2Zr+I5szL7gyc5f0DK8N9agIJCpM1Cqw2NE=
 github.com/WJQSERVER-STUDIO/go-utils/limitreader v0.0.2/go.mod h1:yPX8xuZH+py7eLJwOYj3VVI/4/Yuy5+x8Mhq8qezcPg=
-github.com/WJQSERVER-STUDIO/httpc v0.7.0 h1:iHhqlxppJBjlmvsIjvLZKRbWXqSdbeSGGofjHGmqGJc=
-github.com/WJQSERVER-STUDIO/httpc v0.7.0/go.mod h1:M7KNUZjjhCkzzcg9lBPs9YfkImI+7vqjAyjdA19+joE=
+github.com/WJQSERVER-STUDIO/httpc v0.7.1 h1:D3NlfY52pwKIOSzkdRrLinUynyKELrcPZEO8QjlBq2M=
+github.com/WJQSERVER-STUDIO/httpc v0.7.1/go.mod h1:M7KNUZjjhCkzzcg9lBPs9YfkImI+7vqjAyjdA19+joE=
 github.com/fenthope/bauth v0.0.1 h1:+4UIQshGx3mYD4L3f2S4MLZOi5PWU7fU5GK3wsZvwzE=
 github.com/fenthope/bauth v0.0.1/go.mod h1:1fveTpgfR1p+WXQ8MXm9BfBCeNYi55j23jxCOGOvBSA=
 github.com/fenthope/ikumi v0.0.2 h1:5oaSTf/Msp7M2O3o/X20omKWEQbFhX4KV0CVF21oCdk=
@@ -18,8 +18,8 @@ github.com/go-json-experiment/json v0.0.0-20250517221953-25912455fbc8 h1:o8UqXPI
 github.com/go-json-experiment/json v0.0.0-20250517221953-25912455fbc8/go.mod h1:TiCD2a1pcmjd7YnhGH0f/zKNcCD06B029pHhzV23c2M=
 github.com/hashicorp/golang-lru/v2 v2.0.7 h1:a+bsQ5rvGLjzHuww6tVxozPZFVghXaHOwFs4luLUK2k=
 github.com/hashicorp/golang-lru/v2 v2.0.7/go.mod h1:QeFd9opnmA6QUJc5vARoKUSoFhyfM2/ZepoAG6RGpeM=
-github.com/infinite-iroha/touka v0.2.6 h1:Y2zJTklfJZYO70jF9LPKq261IMt1vV8L1JBKUquQKIk=
-github.com/infinite-iroha/touka v0.2.6/go.mod h1:2MBPtsM+5ClIZ/E1mPEKx1Rb+KIndTwZlIa2CwRPV7A=
+github.com/infinite-iroha/touka v0.2.8 h1:PH4oR0fUjNr6t+Q3xkpqK+Q+kOFk7LN3xvy81xydu7Y=
+github.com/infinite-iroha/touka v0.2.8/go.mod h1:e2LRc8FoSU8qjxSlyh3J8gGsBGKQ2VN9bQMU4sIrqnE=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/wjqserver/modembed v0.0.1 h1:8ZDz7t9M5DLrUFlYgBUUmrMzxWsZPmHvOazkr/T2jEs=
