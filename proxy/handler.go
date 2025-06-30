@@ -15,10 +15,6 @@ func NoRouteHandler(cfg *config.Config) touka.HandlerFunc {
 	return func(c *touka.Context) {
 		var ctx = c.Request.Context()
 		var shoudBreak bool
-		//	shoudBreak = rateCheck(cfg, c, limiter, iplimiter)
-		//	if shoudBreak {
-		//		return
-		//	}
 
 		var (
 			rawPath string

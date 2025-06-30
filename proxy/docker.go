@@ -119,6 +119,7 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 	}()
 
 	method = c.Request.Method
+	ghcrclient := c.GetHTTPC()
 
 	rb := ghcrclient.NewRequestBuilder(method, u)
 	rb.NoDefaultHeaders()
@@ -267,6 +268,7 @@ func ChallengeReq(target string, image *imageInfo, ctx context.Context, c *touka
 	var resp401 *http.Response
 	var req401 *http.Request
 	var err error
+	ghcrclient := c.GetHTTPC()
 
 	rb401 := ghcrclient.NewRequestBuilder("GET", "https://"+target+"/v2/")
 	rb401.NoDefaultHeaders()

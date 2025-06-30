@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"fmt"
 	"ghproxy/config"
 	"net/http"
 	"time"
@@ -12,42 +11,40 @@ import (
 var BufferSize int = 32 * 1024 // 32KB
 
 var (
-	tr         *http.Transport
-	gittr      *http.Transport
-	client     *httpc.Client
-	gitclient  *httpc.Client
-	ghcrtr     *http.Transport
-	ghcrclient *httpc.Client
+	tr        *http.Transport
+	gittr     *http.Transport
+	client    *httpc.Client
+	gitclient *httpc.Client
 )
 
-func InitReq(cfg *config.Config) error {
-	initHTTPClient(cfg)
+func InitReq(cfg *config.Config) (*httpc.Client, error) {
+	client := initHTTPClient(cfg)
 	if cfg.GitClone.Mode == "cache" {
 		initGitHTTPClient(cfg)
 	}
-	initGhcrHTTPClient(cfg)
 	err := SetGlobalRateLimit(cfg)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return client, nil
 
 }
 
-func initHTTPClient(cfg *config.Config) {
+func initHTTPClient(cfg *config.Config) *httpc.Client {
 	var proTolcols = new(http.Protocols)
 	proTolcols.SetHTTP1(true)
 	proTolcols.SetHTTP2(true)
 	proTolcols.SetUnencryptedHTTP2(true)
-	if cfg.Httpc.Mode == "auto" || cfg.Httpc.Mode == "" {
 
+	switch cfg.Httpc.Mode {
+	case "auto", "":
 		tr = &http.Transport{
 			IdleConnTimeout: 30 * time.Second,
 			WriteBufferSize: 32 * 1024, // 32KB
 			ReadBufferSize:  32 * 1024, // 32KB
 			Protocols:       proTolcols,
 		}
-	} else if cfg.Httpc.Mode == "advanced" {
+	case "advanced":
 		tr = &http.Transport{
 			MaxIdleConns:        cfg.Httpc.MaxIdleConns,
 			MaxConnsPerHost:     cfg.Httpc.MaxConnsPerHost,
@@ -56,9 +53,10 @@ func initHTTPClient(cfg *config.Config) {
 			ReadBufferSize:      32 * 1024, // 32KB
 			Protocols:           proTolcols,
 		}
-	} else {
+	default:
 		panic("unknown httpc mode: " + cfg.Httpc.Mode)
 	}
+
 	if cfg.Outbound.Enabled {
 		initTransport(cfg, tr)
 	}
@@ -72,18 +70,18 @@ func initHTTPClient(cfg *config.Config) {
 			httpc.WithTransport(tr),
 		)
 	}
-
+	return client
 }
 
 func initGitHTTPClient(cfg *config.Config) {
-
-	if cfg.Httpc.Mode == "auto" || cfg.Httpc.Mode == "" {
+	switch cfg.Httpc.Mode {
+	case "auto", "":
 		gittr = &http.Transport{
 			IdleConnTimeout: 30 * time.Second,
 			WriteBufferSize: 32 * 1024, // 32KB
 			ReadBufferSize:  32 * 1024, // 32KB
 		}
-	} else if cfg.Httpc.Mode == "advanced" {
+	case "advanced":
 		gittr = &http.Transport{
 			MaxIdleConns:        cfg.Httpc.MaxIdleConns,
 			MaxConnsPerHost:     cfg.Httpc.MaxConnsPerHost,
@@ -91,84 +89,30 @@ func initGitHTTPClient(cfg *config.Config) {
 			WriteBufferSize:     32 * 1024, // 32KB
 			ReadBufferSize:      32 * 1024, // 32KB
 		}
-	} else {
+	default:
 		panic("unknown httpc mode: " + cfg.Httpc.Mode)
 	}
+
 	if cfg.Outbound.Enabled {
 		initTransport(cfg, gittr)
 	}
-	if cfg.Server.Debug && cfg.GitClone.ForceH2C {
-		gitclient = httpc.New(
-			httpc.WithTransport(gittr),
-			httpc.WithDumpLog(),
-			httpc.WithProtocols(httpc.ProtocolsConfig{
-				ForceH2C: true,
-			}),
-		)
-	} else if !cfg.Server.Debug && cfg.GitClone.ForceH2C {
-		gitclient = httpc.New(
-			httpc.WithTransport(gittr),
-			httpc.WithProtocols(httpc.ProtocolsConfig{
-				ForceH2C: true,
-			}),
-		)
-	} else if cfg.Server.Debug && !cfg.GitClone.ForceH2C {
-		gitclient = httpc.New(
-			httpc.WithTransport(gittr),
-			httpc.WithDumpLog(),
-			httpc.WithProtocols(httpc.ProtocolsConfig{
-				Http1:           true,
-				Http2:           true,
-				Http2_Cleartext: true,
-			}),
-		)
-	} else {
-		gitclient = httpc.New(
-			httpc.WithTransport(gittr),
-			httpc.WithProtocols(httpc.ProtocolsConfig{
-				Http1:           true,
-				Http2:           true,
-				Http2_Cleartext: true,
-			}),
-		)
-	}
-}
 
-func initGhcrHTTPClient(cfg *config.Config) {
-	var proTolcols = new(http.Protocols)
-	proTolcols.SetHTTP1(true)
-	proTolcols.SetHTTP2(true)
-	if cfg.Httpc.Mode == "auto" || cfg.Httpc.Mode == "" {
+	var opts []httpc.Option // 使用切片来收集选项
+	opts = append(opts, httpc.WithTransport(gittr))
+	var protocolsConfig httpc.ProtocolsConfig
 
-		ghcrtr = &http.Transport{
-			IdleConnTimeout: 30 * time.Second,
-			WriteBufferSize: 32 * 1024, // 32KB
-			ReadBufferSize:  32 * 1024, // 32KB
-			Protocols:       proTolcols,
-		}
-	} else if cfg.Httpc.Mode == "advanced" {
-		ghcrtr = &http.Transport{
-			MaxIdleConns:        cfg.Httpc.MaxIdleConns,
-			MaxConnsPerHost:     cfg.Httpc.MaxConnsPerHost,
-			MaxIdleConnsPerHost: cfg.Httpc.MaxIdleConnsPerHost,
-			WriteBufferSize:     32 * 1024, // 32KB
-			ReadBufferSize:      32 * 1024, // 32KB
-			Protocols:           proTolcols,
-		}
+	if cfg.GitClone.ForceH2C {
+		protocolsConfig.ForceH2C = true
 	} else {
-		panic(fmt.Sprintf("unknown httpc mode: %s", cfg.Httpc.Mode))
+		protocolsConfig.Http1 = true
+		protocolsConfig.Http2 = true
+		protocolsConfig.Http2_Cleartext = true
 	}
-	if cfg.Outbound.Enabled {
-		initTransport(cfg, ghcrtr)
-	}
+	opts = append(opts, httpc.WithProtocols(protocolsConfig))
+
 	if cfg.Server.Debug {
-		ghcrclient = httpc.New(
-			httpc.WithTransport(ghcrtr),
-			httpc.WithDumpLog(),
-		)
-	} else {
-		ghcrclient = httpc.New(
-			httpc.WithTransport(ghcrtr),
-		)
+		opts = append(opts, httpc.WithDumpLog())
 	}
+
+	gitclient = httpc.New(opts...)
 }

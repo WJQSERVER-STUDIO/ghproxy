@@ -12,11 +12,6 @@ func RoutingHandler(cfg *config.Config) touka.HandlerFunc {
 
 		var shoudBreak bool
 
-		//	shoudBreak = rateCheck(cfg, c, limiter, iplimiter)
-		//	if shoudBreak {
-		//		return
-		//}
-
 		var (
 			rawPath string
 		)

@@ -1,5 +1,16 @@
 # 更新日志
 
+4.1.4 - 2025-06-30
+---
+- CHANGE: 使用`touka`框架的内建httpc统一管理, 同时对httpc相关初始化进行改进
+- CHANGE: 更新`json/v2`版本
+
+4.1.4-rc.0 - 2025-06-30
+---
+- PRE-RELEASE: v4.1.4-rc.0是v4.1.4预发布版本,请勿在生产环境中使用;
+- CHANGE: 使用`touka`框架的内建httpc统一管理, 同时对httpc相关初始化进行改进
+- CHANGE: 更新`json/v2`版本
+
 4.1.3 - 2025-06-25
 ---
 - CHANGE: 更新`touka`版本, 使用新的方式配置slash重定向功能

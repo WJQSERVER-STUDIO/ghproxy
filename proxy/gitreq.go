@@ -17,22 +17,11 @@ func GitReq(ctx context.Context, c *touka.Context, u string, cfg *config.Config,
 		resp *http.Response
 	)
 
-	/*
-		fullBody, err := c.GetReqBodyFull()
-		if err != nil {
-			HandleError(c, fmt.Sprintf("Failed to read request body: %v", err))
-			return
-		}
-		reqBodyReader := bytes.NewBuffer(fullBody)
-	*/
-
 	reqBodyReader, err := c.GetReqBodyBuffer()
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to read request body: %v", err))
 		return
 	}
-
-	//bodyReader := c.Request.BodyStream() // 不可替换为此实现
 
 	if cfg.GitClone.Mode == "cache" {
 		userPath, repoPath, remainingPath, queryParams, err := extractParts(u)
@@ -103,14 +92,6 @@ func GitReq(ctx context.Context, c *touka.Context, u string, cfg *config.Config,
 		}
 	}
 
-	/*
-		for key, values := range resp.Header {
-			for _, value := range values {
-				c.Response.Header.Add(key, value)
-			}
-		}
-	*/
-	//copyHeader( resp.Header)
 	c.SetHeaders(resp.Header)
 
 	headersToRemove := map[string]struct{}{
@@ -142,10 +123,6 @@ func GitReq(ctx context.Context, c *touka.Context, u string, cfg *config.Config,
 	}
 
 	bodyReader := resp.Body
-
-	// 读取body内容
-	//bodyContent, _ := io.ReadAll(bodyReader)
-	//	c.Infof("%s", bodyContent)
 
 	if cfg.RateLimit.BandwidthLimit.Enabled {
 		bodyReader = limitreader.NewRateLimitedReader(bodyReader, bandwidthLimit, int(bandwidthBurst), ctx)
