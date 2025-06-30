@@ -22,6 +22,6 @@ require (
 
 require (
 	github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.4 // indirect
-	github.com/go-json-experiment/json v0.0.0-20250517221953-25912455fbc8 // indirect
+	github.com/go-json-experiment/json v0.0.0-20250626171732-1a886bd29d1b // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 )

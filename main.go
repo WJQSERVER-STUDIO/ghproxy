@@ -15,6 +15,7 @@ import (
 	"ghproxy/config"
 	"ghproxy/proxy"
 
+	"github.com/WJQSERVER-STUDIO/httpc"
 	"github.com/fenthope/bauth"
 
 	"ghproxy/weakcache"
@@ -33,7 +34,7 @@ var (
 	cfg         *config.Config
 	r           *touka.Engine
 	configfile  = "/data/ghproxy/config/config.toml"
-	hertZfile   *os.File
+	httpClient  *httpc.Client
 	cfgfile     string
 	version     string
 	runMode     string
@@ -165,7 +166,8 @@ func setupApi(cfg *config.Config, r *touka.Engine, version string) {
 }
 
 func InitReq(cfg *config.Config) {
-	err := proxy.InitReq(cfg)
+	var err error
+	httpClient, err = proxy.InitReq(cfg)
 	if err != nil {
 		fmt.Printf("Failed to initialize request: %v\n", err)
 		os.Exit(1)
@@ -335,6 +337,7 @@ func main() {
 
 	r.Use(touka.Recovery()) // Recovery中间件
 	r.SetLogger(logger)
+	r.SetHTTPClient(httpClient)
 	r.Use(record.Middleware()) // log中间件
 	r.Use(viaHeader())
 	/*
