@@ -6,7 +6,7 @@
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/WJQSERVER-STUDIO/ghproxy)
 [![Go Report Card](https://goreportcard.com/badge/github.com/WJQSERVER-STUDIO/ghproxy)](https://goreportcard.com/report/github.com/WJQSERVER-STUDIO/ghproxy)
 
-GHProxy是一个基于Go的支持代理Github仓库资源和API的项目, 同时支持Docker镜像代理与脚本嵌套加速等多种功能
+一个基于Go的高性能Github资源代理程序, 同时支持Docker镜像代理与脚本嵌套加速等多种功能
 
 ## 项目说明
 
