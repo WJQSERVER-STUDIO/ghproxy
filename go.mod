@@ -4,7 +4,7 @@ go 1.24.4
 
 require (
 	github.com/BurntSushi/toml v1.5.0
-	github.com/WJQSERVER-STUDIO/httpc v0.7.1
+	github.com/WJQSERVER-STUDIO/httpc v0.7.2
 	golang.org/x/net v0.41.0
 	golang.org/x/time v0.12.0
 )
