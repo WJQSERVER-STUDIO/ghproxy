@@ -4,7 +4,7 @@ go 1.24.4
 
 require (
 	github.com/BurntSushi/toml v1.5.0
-	github.com/WJQSERVER-STUDIO/httpc v0.7.2
+	github.com/WJQSERVER-STUDIO/httpc v0.8.0
 	golang.org/x/net v0.41.0
 	golang.org/x/time v0.12.0
 )
@@ -21,7 +21,7 @@ require (
 )
 
 require (
-	github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.4 // indirect
+	github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.6 // indirect
 	github.com/go-json-experiment/json v0.0.0-20250626171732-1a886bd29d1b // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 )
