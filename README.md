@@ -32,9 +32,9 @@
 
 [TG讨论群组](https://t.me/ghproxy_go)
 
-[相关文章](https://blog.wjqserver.com/categories/my-program/)
-
 [GHProxy项目文档](https://wjqserver-docs.pages.dev/docs/ghproxy/) 感谢 [@redbunnys](https://github.com/redbunnys)的维护
+
+[相关文章](https://blog.wjqserver.com/categories/my-program/)
 
 ### 使用示例
 
@@ -95,16 +95,11 @@ wget -O install-dev.sh https://raw.githubusercontent.com/WJQSERVER-STUDIO/ghprox
 
 参看[GHProxy-Frontend](https://github.com/WJQSERVER-STUDIO/GHProxy-Frontend)
 
-## 项目简史
+## 文档
 
-本项目旨在于构建一个高效且功能多样的GHProxy
+*   [GHProxy项目文档](https://wjqserver-docs.pages.dev/docs/ghproxy/) 感谢 [@redbunnys](https://github.com/redbunnys)的维护
 
-- v4.0.0 迁移到[Touka框架](https://github.com/infinite-iroha/touka)
-- v3.0.0 迁移到HertZ框架, 进一步提升效率
-- v2.4.1 对路径匹配进行优化
-- v2.0.0 对`proxy`核心模块进行了重构,大幅优化内存占用
-- v1.0.0 迁移至本仓库,并再次重构内容实现
-- v0.2.0 重构项目实现
+*   [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/WJQSERVER-STUDIO/ghproxy) 可供参考, AI生成存在幻觉, 不完全可靠, 请注意辨别
 
 ## LICENSE
 
