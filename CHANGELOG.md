@@ -2,8 +2,8 @@
 
 4.1.6 - 2025-07-07
 ---
-- CHANGE: 更新[Touka框架]()版本到`v0.2.9`, 提升`io`相关方式的性能并降低分配
-- CHANGE: 更新[Touka HTTPC]()版本到`v0.8.0`, 使用`json/v2`的同时, 提升`io`相关操作性能并降低分配, 优化`debug`模式下打印输出性能
+- CHANGE: 更新[Touka框架](https://github.com/infinite-iroha/touka)版本到`v0.2.9`, 提升`io`相关方式的性能并降低分配
+- CHANGE: 更新[Touka HTTPC](https://github.com/WJQSERVER-STUDIO/httpc)版本到`v0.8.0`, 使用`json/v2`的同时, 提升`io`相关操作性能并降低分配, 优化`debug`模式下打印输出性能
 
 4.1.6-rc.0 - 2025-07-07
 ---
