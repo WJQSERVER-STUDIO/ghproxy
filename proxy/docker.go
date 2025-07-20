@@ -48,12 +48,12 @@ func GhcrWithImageRouting(cfg *config.Config) touka.HandlerFunc {
 		target := ""
 
 		if strings.ContainsRune(reqTarget, charToFind) {
-
-			if reqTarget == "docker.io" {
+			switch reqTarget {
+			case "docker.io":
 				target = dockerhubTarget
-			} else if reqTarget == "ghcr.io" {
+			case "ghcr.io":
 				target = ghcrTarget
-			} else {
+			default:
 				target = reqTarget
 			}
 		} else {
@@ -132,11 +132,6 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 		return
 	}
 
-	//c.Request.Header.VisitAll(func(key, value []byte) {
-	//	headerKey := string(key)
-	//	headerValue := string(value)
-	//	req.Header.Add(headerKey, headerValue)
-	//})
 	copyHeader(c.Request.Header, req.Header)
 
 	req.Header.Set("Host", target)
@@ -154,8 +149,9 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 		return
 	}
 
-	// 处理状态码
-	if resp.StatusCode == 401 {
+	switch resp.StatusCode {
+
+	case 401:
 		// 请求target /v2/路径
 		if string(c.GetRequestURIPath()) != "/v2/" {
 			resp.Body.Close()
@@ -181,13 +177,7 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 				HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
 				return
 			}
-			/*
-				c.Request.Header.VisitAll(func(key, value []byte) {
-					headerKey := string(key)
-					headerValue := string(value)
-					req.Header.Add(headerKey, headerValue)
-				})
-			*/
+
 			copyHeader(c.Request.Header, req.Header)
 
 			req.Header.Set("Host", target)
@@ -202,9 +192,20 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 			}
 		}
 
-	} else if resp.StatusCode == 404 { // 错误处理(404)
+	case 404: // 错误处理(404)
 		ErrorPage(c, NewErrorWithStatusLookup(404, "Page Not Found (From Github)"))
 		return
+	case 302, 301:
+		finalURL := resp.Header.Get("Location")
+		if finalURL != "" {
+			err = resp.Body.Close()
+			if err != nil {
+				c.Errorf("Failed to close response body: %v", err)
+			}
+			c.Infof("Internal Redirecting to %s", finalURL)
+			GhcrRequest(ctx, c, finalURL, image, cfg, target)
+			return
+		}
 	}
 
 	var (
@@ -234,14 +235,6 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 		}
 	}
 
-	// 复制响应头，排除需要移除的 header
-	/*
-		for key, values := range resp.Header {
-			for _, value := range values {
-				c.Response.Header.Add(key, value)
-			}
-		}
-	*/
 	c.SetHeaders(resp.Header)
 
 	c.Status(resp.StatusCode)

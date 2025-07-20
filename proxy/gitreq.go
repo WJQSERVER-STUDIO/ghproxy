@@ -30,7 +30,11 @@ func GitReq(ctx context.Context, c *touka.Context, u string, cfg *config.Config,
 			return
 		}
 		// 构建新url
-		u = cfg.GitClone.SmartGitAddr + userPath + repoPath + remainingPath + "?" + queryParams.Encode()
+		var paramStr string
+		if len(queryParams) > 0 {
+			paramStr = "?" + queryParams.Encode()
+		}
+		u = cfg.GitClone.SmartGitAddr + userPath + repoPath + remainingPath + paramStr
 	}
 
 	if cfg.GitClone.Mode == "cache" {

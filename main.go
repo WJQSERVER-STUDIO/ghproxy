@@ -337,6 +337,7 @@ func main() {
 
 	r.Use(touka.Recovery()) // Recovery中间件
 	r.SetLogger(logger)
+	r.SetErrorHandler(proxy.UnifiedToukaErrorHandler)
 	r.SetHTTPClient(httpClient)
 	r.Use(record.Middleware()) // log中间件
 	r.Use(viaHeader())
@@ -367,7 +368,6 @@ func main() {
 	}
 	setupApi(cfg, r, version)
 	setupPages(cfg, r)
-	//r.RedirectTrailingSlash = false
 	r.SetRedirectTrailingSlash(false)
 
 	r.GET("/github.com/:user/:repo/releases/*filepath", func(c *touka.Context) {
@@ -442,12 +442,6 @@ func main() {
 	r.ANY("/v2/:target/:user/:repo/*filepath", func(c *touka.Context) {
 		proxy.GhcrWithImageRouting(cfg)(c)
 	})
-
-	/*
-		r.Any("/v2/:target/*filepath", func( c *touka.Context) {
-			proxy.GhcrRouting(cfg)(c)
-		})
-	*/
 
 	r.NoRoute(func(c *touka.Context) {
 		proxy.NoRouteHandler(cfg)(c)

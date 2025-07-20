@@ -60,12 +60,14 @@ type HttpcConfig struct {
 [gitclone]
 mode = "bypass" # bypass / cache
 smartGitAddr = "http://127.0.0.1:8080"
+//cacheTimeout = 10
 ForceH2C = true
 */
 type GitCloneConfig struct {
 	Mode         string `toml:"mode"`
 	SmartGitAddr string `toml:"smartGitAddr"`
-	ForceH2C     bool   `toml:"ForceH2C"`
+	//CacheTimeout int    `toml:"cacheTimeout"`
+	ForceH2C bool `toml:"ForceH2C"`
 }
 
 /*
@@ -175,10 +177,11 @@ user1 = "testpass"
 test = "test123"
 */
 type DockerConfig struct {
-	Enabled     bool              `toml:"enabled"`
-	Target      string            `toml:"target"`
-	Auth        bool              `toml:"auth"`
-	Credentials map[string]string `toml:"credentials"`
+	Enabled         bool              `toml:"enabled"`
+	Target          string            `toml:"target"`
+	Auth            bool              `toml:"auth"`
+	Credentials     map[string]string `toml:"credentials"`
+	AuthPassThrough bool              `toml:"authPassThrough"`
 }
 
 // LoadConfig 从 TOML 配置文件加载配置
