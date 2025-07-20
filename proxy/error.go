@@ -109,6 +109,9 @@ func init() {
 		ErrNotFound.StatusCode:              ErrNotFound,
 		ErrTooManyRequests.StatusCode:       ErrTooManyRequests,
 		ErrInternalServerError.StatusCode:   ErrInternalServerError,
+		ErrBadGateway.StatusCode:            ErrBadGateway,
+		ErrServiceUnavailable.StatusCode:    ErrServiceUnavailable,
+		ErrGatewayTimeout.StatusCode:        ErrGatewayTimeout,
 	}
 }
 
