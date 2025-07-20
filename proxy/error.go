@@ -20,6 +20,19 @@ func HandleError(c *touka.Context, message string) {
 	c.Errorf("%s %s %s %s %s Error: %v", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.UserAgent(), c.Request.Proto, message)
 }
 
+func UnifiedToukaErrorHandler(c *touka.Context, code int, err error) {
+
+	errMsg := ""
+	if err != nil {
+		errMsg = err.Error()
+	}
+	c.Errorf("%s %s %s %s %s Error: %v", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.UserAgent(), c.Request.Proto, errMsg)
+
+	constructedGHErr := NewErrorWithStatusLookup(code, errMsg)
+
+	ErrorPage(c, constructedGHErr)
+}
+
 type GHProxyErrors struct {
 	StatusCode   int
 	StatusDesc   string
@@ -65,6 +78,25 @@ var (
 		StatusText: "服务器内部错误",
 		HelpInfo:   "服务器处理您的请求时发生错误，请稍后重试或联系管理员。",
 	}
+	// 502
+	ErrBadGateway = &GHProxyErrors{
+		StatusCode: 502,
+		StatusDesc: "Bad Gateway",
+		StatusText: "网关错误",
+		HelpInfo:   "代理服务器从上游服务器接收到无效响应。",
+	}
+	ErrServiceUnavailable = &GHProxyErrors{
+		StatusCode: 503,
+		StatusDesc: "Service Unavailable",
+		StatusText: "服务不可用",
+		HelpInfo:   "服务器目前无法处理请求，通常是由于服务器过载或停机维护。",
+	}
+	ErrGatewayTimeout = &GHProxyErrors{
+		StatusCode: 504,
+		StatusDesc: "Gateway Timeout",
+		StatusText: "网关超时",
+		HelpInfo:   "代理服务器未能及时从上游服务器接收到响应。",
+	}
 )
 
 var statusErrorMap map[int]*GHProxyErrors
@@ -77,6 +109,9 @@ func init() {
 		ErrNotFound.StatusCode:              ErrNotFound,
 		ErrTooManyRequests.StatusCode:       ErrTooManyRequests,
 		ErrInternalServerError.StatusCode:   ErrInternalServerError,
+		ErrBadGateway.StatusCode:            ErrBadGateway,
+		ErrServiceUnavailable.StatusCode:    ErrServiceUnavailable,
+		ErrGatewayTimeout.StatusCode:        ErrGatewayTimeout,
 	}
 }
 
@@ -169,11 +204,11 @@ func NewSizedLRUCache(maxBytes int64) (*SizedLRUCache, error) {
 	// 当内部 LRU 缓存因其自身的条目容量限制或 RemoveOldest 方法被调用而逐出条目时，
 	// 此回调函数会被执行，从而更新 currentBytes。
 	var err error
-	c.cache, err = lru.NewWithEvict[string, []byte](10000, func(key string, value []byte) {
+	//c.cache, err = lru.NewWithEvict[string, []byte](10000, func(key string, value []byte) {
+	c.cache, err = lru.NewWithEvict(10000, func(key string, value []byte) {
 		c.mu.Lock()
 		defer c.mu.Unlock()
 		c.currentBytes -= int64(len(value))
-		//logDebug("LRU evicted key: %s, size: %d, current total: %d", key, len(value), c.currentBytes)
 	})
 	if err != nil {
 		return nil, err
@@ -195,7 +230,6 @@ func (c *SizedLRUCache) Add(key string, value []byte) {
 
 	// 如果待添加的条目本身就大于缓存的最大容量，则不进行缓存。
 	if itemSize > c.maxBytes {
-		//c.Warnf("Item key %s (size %d) larger than cache max capacity %d. Not caching.", key, itemSize, c.maxBytes)
 		return
 	}
 
@@ -203,23 +237,19 @@ func (c *SizedLRUCache) Add(key string, value []byte) {
 	if oldVal, ok := c.cache.Get(key); ok {
 		c.currentBytes -= int64(len(oldVal))
 		c.cache.Remove(key)
-		//logDebug("Key %s exists, removed old size %d. Current total: %d", key, len(oldVal), c.currentBytes)
 	}
 
 	// 主动逐出最旧的条目，直到有足够的空间容纳新条目。
 	for c.currentBytes+itemSize > c.maxBytes && c.cache.Len() > 0 {
 		_, _, existed := c.cache.RemoveOldest()
 		if !existed {
-			//c.Warnf("Attempted to remove oldest, but item not found.")
 			break
 		}
-		//logDebug("Proactively evicted item (size %d) to free space. Current total: %d", len(oldVal), c.currentBytes)
 	}
 
 	// 添加新条目到内部 LRU 缓存。
 	c.cache.Add(key, value)
 	c.currentBytes += itemSize // 手动增加新条目的大小到 currentBytes。
-	//logDebug("Item added: key %s, size: %d, current total: %d", key, itemSize, c.currentBytes)
 }
 
 const maxErrorPageCacheBytes = 512 * 1024 // 错误页面缓存的最大容量：512KB
@@ -231,7 +261,6 @@ func init() {
 	var err error
 	errorPageCache, err = NewSizedLRUCache(maxErrorPageCacheBytes)
 	if err != nil {
-		//	logError("Failed to initialize error page LRU cache: %v", err)
 		panic(err)
 	}
 }
@@ -283,6 +312,16 @@ func htmlTemplateRender(data interface{}) ([]byte, error) {
 }
 
 func ErrorPage(c *touka.Context, errInfo *GHProxyErrors) {
+
+	select {
+	case <-c.Request.Context().Done():
+		return
+	default:
+		if c.Writer.Written() {
+			return
+		}
+	}
+
 	// 将 errInfo 转换为 ErrorPageData 结构体
 	var err error
 	var cacheKey string
