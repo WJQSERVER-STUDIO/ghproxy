@@ -130,10 +130,10 @@ type WhitelistConfig struct {
 }
 
 type IPFilterConfig struct {
-	Enabled         bool `toml:"enabled"`
-	EnableAllowList bool `toml:"enableAllowList"`
-	EnableBlockList bool `toml:"enableBlockList"`
-	IPFilterFile    string
+	Enabled         bool   `toml:"enabled"`
+	EnableAllowList bool   `toml:"enableAllowList"`
+	EnableBlockList bool   `toml:"enableBlockList"`
+	IPFilterFile    string `toml:"ipFilterFile"`
 }
 
 /*

@@ -373,6 +373,7 @@ func main() {
 		ipAllowList, ipBlockList, err := auth.ReadIPFilterList(cfg)
 		if err != nil {
 			fmt.Printf("Failed to read IP filter list: %v\n", err)
+			logger.Errorf("Failed to read IP filter list: %v", err)
 			os.Exit(1)
 		}
 		ipBlockFilter, err := ipfilter.NewIPFilter(ipfilter.IPFilterConfig{
@@ -383,6 +384,7 @@ func main() {
 		})
 		if err != nil {
 			fmt.Printf("Failed to initialize IP filter: %v\n", err)
+			logger.Errorf("Failed to initialize IP filter: %v", err)
 			os.Exit(1)
 		} else {
 			r.Use(ipBlockFilter)
