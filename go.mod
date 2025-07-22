@@ -13,6 +13,7 @@ require (
 	github.com/WJQSERVER-STUDIO/go-utils/limitreader v0.0.2
 	github.com/fenthope/bauth v0.0.1
 	github.com/fenthope/ikumi v0.0.2
+	github.com/fenthope/ipfilter v0.0.1
 	github.com/fenthope/reco v0.0.3
 	github.com/fenthope/record v0.0.3
 	github.com/hashicorp/golang-lru/v2 v2.0.7
