@@ -1,12 +1,13 @@
 package auth
 
 import (
-	"encoding/json"
 	"fmt"
 	"ghproxy/config"
 	"os"
 	"strings"
 	"sync"
+
+	"github.com/go-json-experiment/json"
 )
 
 // Whitelist 用于存储白名单信息

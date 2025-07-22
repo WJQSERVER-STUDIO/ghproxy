@@ -36,6 +36,8 @@
 
 [相关文章](https://blog.wjqserver.com/categories/my-program/)
 
+代理相关推广: [Thordata](https://www.thordata.com/?ls=github&lk=WJQserver)，市面上最具性价比的代理服务商，便宜好用，来自全球195个国家城市的6000万IP，轮换住宅/原生ISP/无限量仅从$0.65/GB 起，新用户$1=5GB .联系客户可获得免费测试.
+
 ### 使用示例
 
 ```bash 

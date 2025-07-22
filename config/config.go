@@ -7,18 +7,19 @@ import (
 )
 
 type Config struct {
-	Server    ServerConfig
-	Httpc     HttpcConfig
-	GitClone  GitCloneConfig
-	Shell     ShellConfig
-	Pages     PagesConfig
-	Log       LogConfig
-	Auth      AuthConfig
-	Blacklist BlacklistConfig
-	Whitelist WhitelistConfig
-	RateLimit RateLimitConfig
-	Outbound  OutboundConfig
-	Docker    DockerConfig
+	Server    ServerConfig    `toml:"server"`
+	Httpc     HttpcConfig     `toml:"httpc"`
+	GitClone  GitCloneConfig  `toml:"gitclone"`
+	Shell     ShellConfig     `toml:"shell"`
+	Pages     PagesConfig     `toml:"pages"`
+	Log       LogConfig       `toml:"log"`
+	Auth      AuthConfig      `toml:"auth"`
+	Blacklist BlacklistConfig `toml:"blacklist"`
+	Whitelist WhitelistConfig `toml:"whitelist"`
+	IPFilter  IPFilterConfig  `toml:"ipFilter"`
+	RateLimit RateLimitConfig `toml:"rateLimit"`
+	Outbound  OutboundConfig  `toml:"outbound"`
+	Docker    DockerConfig    `toml:"docker"`
 }
 
 /*
@@ -126,6 +127,13 @@ type BlacklistConfig struct {
 type WhitelistConfig struct {
 	Enabled       bool   `toml:"enabled"`
 	WhitelistFile string `toml:"whitelistFile"`
+}
+
+type IPFilterConfig struct {
+	Enabled         bool   `toml:"enabled"`
+	EnableAllowList bool   `toml:"enableAllowList"`
+	EnableBlockList bool   `toml:"enableBlockList"`
+	IPFilterFile    string `toml:"ipFilterFile"`
 }
 
 /*
@@ -272,6 +280,12 @@ func DefaultConfig() *Config {
 		Whitelist: WhitelistConfig{
 			Enabled:       false,
 			WhitelistFile: "/data/ghproxy/config/whitelist.json",
+		},
+		IPFilter: IPFilterConfig{
+			Enabled:         false,
+			IPFilterFile:    "/data/ghproxy/config/ipfilter.json",
+			EnableAllowList: false,
+			EnableBlockList: false,
 		},
 		RateLimit: RateLimitConfig{
 			Enabled:       false,

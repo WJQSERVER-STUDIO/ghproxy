@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"encoding/json"
+	"github.com/go-json-experiment/json"
 )
 
 type Blacklist struct {

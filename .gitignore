@@ -3,6 +3,7 @@ demo.toml
 *.log
 *.bak
 list.json
+iplist.json
 repos
 pages
 *_test

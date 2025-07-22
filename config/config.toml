@@ -49,6 +49,12 @@ enabled = false
 enabled = false
 whitelistFile = "/data/ghproxy/config/whitelist.json"
 
+[ipFilter]
+enabled = false
+enableAllowList = false
+enableBlockList = false
+ipFilterFile = "/data/ghproxy/config/ipfilter.json"
+
 [rateLimit]
 enabled = false
 ratePerMinute = 180

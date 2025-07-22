@@ -21,6 +21,7 @@ import (
 	"ghproxy/weakcache"
 
 	"github.com/fenthope/ikumi"
+	"github.com/fenthope/ipfilter"
 	"github.com/fenthope/reco"
 	"github.com/fenthope/record"
 	"github.com/infinite-iroha/touka"
@@ -365,6 +366,29 @@ func main() {
 			Limit: rate.Limit(cfg.RateLimit.RatePerMinute),
 			Burst: cfg.RateLimit.Burst,
 		}))
+	}
+
+	if cfg.IPFilter.Enabled {
+		var err error
+		ipAllowList, ipBlockList, err := auth.ReadIPFilterList(cfg)
+		if err != nil {
+			fmt.Printf("Failed to read IP filter list: %v\n", err)
+			logger.Errorf("Failed to read IP filter list: %v", err)
+			os.Exit(1)
+		}
+		ipBlockFilter, err := ipfilter.NewIPFilter(ipfilter.IPFilterConfig{
+			EnableAllowList: cfg.IPFilter.EnableAllowList,
+			EnableBlockList: cfg.IPFilter.EnableBlockList,
+			AllowList:       ipAllowList,
+			BlockList:       ipBlockList,
+		})
+		if err != nil {
+			fmt.Printf("Failed to initialize IP filter: %v\n", err)
+			logger.Errorf("Failed to initialize IP filter: %v", err)
+			os.Exit(1)
+		} else {
+			r.Use(ipBlockFilter)
+		}
 	}
 	setupApi(cfg, r, version)
 	setupPages(cfg, r)
