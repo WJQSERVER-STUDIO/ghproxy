@@ -3,9 +3,6 @@ package proxy
 import (
 	"bytes"
 	"context"
-
-	"github.com/go-json-experiment/json"
-
 	"fmt"
 	"net/http"
 	"net/url"
@@ -17,6 +14,7 @@ import (
 
 	"github.com/WJQSERVER-STUDIO/go-utils/iox"
 	"github.com/WJQSERVER-STUDIO/go-utils/limitreader"
+	"github.com/go-json-experiment/json"
 	"github.com/infinite-iroha/touka"
 )
 
@@ -129,7 +127,6 @@ func GhcrToTarget(c *touka.Context, cfg *config.Config, target string, path stri
 
 // GhcrRequest 执行对Docker注册表的HTTP请求, 处理认证和重定向
 func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageInfo, cfg *config.Config, target string) {
-
 	var (
 		method string
 		req    *http.Request
@@ -189,10 +186,10 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 		shouldRetry := string(c.GetRequestURIPath()) != "/v2/"
 		originalStatusCode := resp.StatusCode
 		c.Debugf("Initial request failed with status %d. Retry eligibility: %t", originalStatusCode, shouldRetry)
-		_ = resp.Body.Close() // 关闭当前响应体
 
 		if shouldRetry {
 			if image == nil {
+				_ = resp.Body.Close() // 终止流程, 关闭当前响应体
 				ErrorPage(c, NewErrorWithStatusLookup(originalStatusCode, "Unauthorized"))
 				return
 			}
@@ -201,6 +198,12 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 
 			if token != "" {
 				c.Debugf("Successfully obtained auth token. Retrying request.")
+				_ = resp.Body.Close() // 在发起重试请求前, 关闭旧的响应体
+
+				// 更新kv
+				c.Debugf("Update Cache Token: %s", token)
+				cache.Put(image.Image, token)
+
 				// 重新构建并发送请求
 				rb_retry := ghcrclient.NewRequestBuilder(method, u)
 				rb_retry.NoDefaultHeaders()
@@ -232,22 +235,23 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 				resp = resp_retry // 更新响应为重试后的响应
 			} else {
 				c.Warnf("Failed to obtain auth token. Cannot retry.")
+				// 获取令牌失败, 将继续处理原始的401/404响应, 其响应体仍然打开
 			}
 		}
 	}
-
-	defer resp.Body.Close()
 
 	// 透明地处理 302 Found 或 307 Temporary Redirect 重定向
 	if resp.StatusCode == http.StatusFound || resp.StatusCode == http.StatusTemporaryRedirect {
 		location := resp.Header.Get("Location")
 		if location == "" {
+			_ = resp.Body.Close() // 终止流程, 关闭当前响应体
 			HandleError(c, "Redirect response missing Location header")
 			return
 		}
 
 		redirectURL, err := url.Parse(location)
 		if err != nil {
+			_ = resp.Body.Close() // 终止流程, 关闭当前响应体
 			HandleError(c, fmt.Sprintf("Failed to parse redirect location: %v", err))
 			return
 		}
@@ -260,7 +264,7 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 		}
 
 		c.Debugf("Handling redirect. Status: %d, Final Location: %s", resp.StatusCode, redirectURL.String())
-		_ = resp.Body.Close() // 关闭当前响应体
+		_ = resp.Body.Close() // 明确关闭重定向响应的响应体, 因为我们将发起新请求
 
 		// 创建并发送重定向请求, 通常使用 GET 方法
 		redirectReq, err := http.NewRequestWithContext(ctx, "GET", redirectURL.String(), nil)
@@ -278,18 +282,17 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 		}
 		c.Debugf("Redirect request to %s completed with status %d", redirectURL.String(), redirectResp.StatusCode)
 		resp = redirectResp // 更新响应为重定向后的响应
-		defer resp.Body.Close()
 	}
 
 	// 如果最终响应是 404, 则读取响应体并返回自定义错误页面
 	if resp.StatusCode == 404 {
+		defer resp.Body.Close() // 使用defer确保在函数返回前关闭响应体
 		bodyBytes, err := iox.ReadAll(resp.Body)
 		if err != nil {
 			c.Warnf("Failed to read upstream 404 response body: %v", err)
 		} else {
 			c.Warnf("Upstream 404 response body: %s", string(bodyBytes))
 		}
-		_ = resp.Body.Close()
 		ErrorPage(c, NewErrorWithStatusLookup(404, "Page Not Found (From Upstream)"))
 		return
 	}
@@ -313,7 +316,7 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 		// 如果内容大小超出限制, 返回 301 重定向到原始上游URL
 		if err == nil && bodySize > sizelimit {
 			finalURL := resp.Request.URL.String()
-			_ = resp.Body.Close() // 关闭响应体
+			_ = resp.Body.Close() // 明确关闭响应体, 因为我们将重定向而不是流式传输
 			c.Redirect(301, finalURL)
 			c.Warnf("%s %s %s %s %s Final-URL: %s Size-Limit-Exceeded: %d", c.ClientIP(), c.Request.Method, c.Request.URL.Path, c.UserAgent(), c.Request.Proto, finalURL, bodySize)
 			return
@@ -324,6 +327,7 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 	c.SetHeaders(resp.Header)
 	// 设置客户端响应状态码
 	c.Status(resp.StatusCode)
+	// bodyReader 的所有权将转移给 SetBodyStream, 不再由此函数管理关闭
 	bodyReader := resp.Body
 
 	// 如果启用了带宽限制, 则使用限速读取器
@@ -355,7 +359,6 @@ func ChallengeReq(target string, image *imageInfo, ctx context.Context, c *touka
 	rb401 := ghcrclient.NewRequestBuilder("GET", "https://"+target+"/v2/")
 	rb401.NoDefaultHeaders()
 	rb401.WithContext(ctx)
-	//rb401.AddHeader("User-Agent", "docker/28.1.1 go/go1.23.8 git-commit/01f442b kernel/6.12.25-amd64 os/linux arch/amd64 UpstreamClient(Docker-Client/28.1.1 ")
 	req401, err = rb401.Build()
 	if err != nil {
 		HandleError(c, fmt.Sprintf("Failed to create request: %v", err))
@@ -368,7 +371,6 @@ func ChallengeReq(target string, image *imageInfo, ctx context.Context, c *touka
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
 	}
-
 	defer resp401.Body.Close() // 确保响应体关闭
 
 	// 解析 Www-Authenticate 头部, 获取认证领域和参数
@@ -385,7 +387,6 @@ func ChallengeReq(target string, image *imageInfo, ctx context.Context, c *touka
 	getAuthRB := ghcrclient.NewRequestBuilder("GET", bearer.Realm).
 		NoDefaultHeaders().
 		WithContext(ctx).
-		//AddHeader("User-Agent", "docker/28.1.1 go/go1.23.8 git-commit/01f442b kernel/6.12.25-amd64 os/linux arch/amd64 UpstreamClient(Docker-Client/28.1.1 ").
 		SetHeader("Host", bearer.Service).
 		AddQueryParam("service", bearer.Service).
 		AddQueryParam("scope", scope)
@@ -401,9 +402,7 @@ func ChallengeReq(target string, image *imageInfo, ctx context.Context, c *touka
 		c.Errorf("Failed to send request: %v", err)
 		return
 	}
-	defer func() {
-		_ = authResp.Body.Close() // 确保响应体关闭
-	}()
+	defer authResp.Body.Close() // 确保响应体关闭
 
 	// 读取认证响应体
 	bodyBytes, err := iox.ReadAll(authResp.Body)
