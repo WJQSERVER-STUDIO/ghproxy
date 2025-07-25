@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"bytes"
 	"context"
 
 	"github.com/go-json-experiment/json"
@@ -149,12 +150,17 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 
 	method = c.Request.Method
 	ghcrclient := c.GetHTTPC()
+	bodyByte, err := c.GetReqBodyFull()
+	if err != nil {
+		HandleError(c, fmt.Sprintf("Failed to read request body: %v", err))
+		return
+	}
 
 	// 构建初始请求
 	rb := ghcrclient.NewRequestBuilder(method, u)
-	rb.NoDefaultHeaders()      // 不使用默认头部, 以便完全控制
-	rb.SetBody(c.Request.Body) // 设置请求体
-	rb.WithContext(ctx)        // 设置请求上下文
+	rb.NoDefaultHeaders()                 // 不使用默认头部, 以便完全控制
+	rb.SetBody(bytes.NewBuffer(bodyByte)) // 设置请求体
+	rb.WithContext(ctx)                   // 设置请求上下文
 
 	req, err = rb.Build()
 	if err != nil {
@@ -209,7 +215,7 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 				// 重新构建并发送请求
 				rb_retry := ghcrclient.NewRequestBuilder(method, u)
 				rb_retry.NoDefaultHeaders()
-				rb_retry.SetBody(c.Request.Body)
+				rb_retry.SetBody(bytes.NewBuffer(bodyByte))
 				rb_retry.WithContext(ctx)
 
 				req_retry, err_retry := rb_retry.Build()
