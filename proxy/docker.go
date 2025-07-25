@@ -137,17 +137,6 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 		err    error
 	)
 
-	// 当请求上下文被取消时, 确保关闭响应和请求体
-	go func() {
-		<-ctx.Done()
-		if resp != nil && resp.Body != nil {
-			_ = resp.Body.Close()
-		}
-		if req != nil && req.Body != nil {
-			_ = req.Body.Close()
-		}
-	}()
-
 	method = c.Request.Method
 	ghcrclient := c.GetHTTPC()
 	bodyByte, err := c.GetReqBodyFull()
@@ -247,6 +236,8 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 		}
 	}
 
+	defer resp.Body.Close()
+
 	// 透明地处理 302 Found 或 307 Temporary Redirect 重定向
 	if resp.StatusCode == http.StatusFound || resp.StatusCode == http.StatusTemporaryRedirect {
 		location := resp.Header.Get("Location")
@@ -287,6 +278,7 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 		}
 		c.Debugf("Redirect request to %s completed with status %d", redirectURL.String(), redirectResp.StatusCode)
 		resp = redirectResp // 更新响应为重定向后的响应
+		defer resp.Body.Close()
 	}
 
 	// 如果最终响应是 404, 则读取响应体并返回自定义错误页面
@@ -344,7 +336,7 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 		c.SetBodyStream(bodyReader, bodySize)
 		return
 	}
-	c.SetBodyStream(bodyReader, -1) // Content-Length 未知
+	c.SetBodyStream(bodyReader, -1)
 }
 
 // AuthToken 用于解析认证响应中的令牌
@@ -376,9 +368,8 @@ func ChallengeReq(target string, image *imageInfo, ctx context.Context, c *touka
 		HandleError(c, fmt.Sprintf("Failed to send request: %v", err))
 		return
 	}
-	defer func() {
-		_ = resp401.Body.Close() // 确保响应体关闭
-	}()
+
+	defer resp401.Body.Close() // 确保响应体关闭
 
 	// 解析 Www-Authenticate 头部, 获取认证领域和参数
 	bearer, err := parseBearerWWWAuthenticateHeader(resp401.Header.Get("Www-Authenticate"))
