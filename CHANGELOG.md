@@ -1,8 +1,13 @@
 # 更新日志
 
+4.2.3 - 2025-07-27
+---
+- CHANGE: 改进错误页面加载器, 避免在选择`external`模式时错误页面渲染回退到json输出
+- CHANGE: 完善OCI(Docker)镜像代理默认target逻辑
+
 4.2.3-rc.0 - 2025-07-27
 ---
-- PRE-RELEASE: v4.2.2-rc.0是v4.2.2预发布版本,请勿在生产环境中使用;
+- PRE-RELEASE: v4.2.3-rc.0是v4.2.3预发布版本,请勿在生产环境中使用;
 - CHANGE: 改进错误页面加载器, 避免在选择`external`模式时错误页面渲染回退到json输出
 - CHANGE: 完善OCI(Docker)镜像代理默认target逻辑
 
