@@ -53,12 +53,21 @@ var (
 )
 
 var (
-	logger     *reco.Logger
-	logDump    = logger.Debugf
-	logDebug   = logger.Debugf
-	logInfo    = logger.Infof
-	logWarning = logger.Warnf
-	logError   = logger.Errorf
+	// supportedThemes 定义了所有支持的主题, 用于验证配置和动态加载
+	supportedThemes = map[string]struct{}{
+		"bootstrap": {},
+		"nebula":    {},
+		"design":    {},
+		"metro":     {},
+		"classic":   {},
+		"mino":      {},
+		"hub":       {},
+		"free":      {},
+	}
+)
+
+var (
+	logger *reco.Logger
 )
 
 func readFlag() {
@@ -111,7 +120,7 @@ func loadConfig() {
 	cfg, err = config.LoadConfig(cfgfile)
 	if err != nil {
 		fmt.Printf("Failed to load config: %v\n", err)
-		// 如果配置文件加载失败，也显示帮助信息并退出
+		// 如果配置文件加载失败, 也显示帮助信息并退出
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -150,7 +159,7 @@ func setupLogger(cfg *config.Config) {
 func setMemLimit(cfg *config.Config) {
 	if cfg.Server.MemLimit > 0 {
 		debug.SetMemoryLimit((cfg.Server.MemLimit) * 1024 * 1024)
-		logInfo("Set Memory Limit to %d MB", cfg.Server.MemLimit)
+		logger.Infof("Set Memory Limit to %d MB", cfg.Server.MemLimit)
 	}
 }
 
@@ -175,60 +184,52 @@ func InitReq(cfg *config.Config) {
 	}
 }
 
-// loadEmbeddedPages 加载嵌入式页面资源
+// initializeErrorPages 初始化嵌入的错误页面资源
+// 无论页面模式(internal/external)如何, 都应执行此操作, 以确保统一的错误页面处理
+func initializeErrorPages() {
+	pageFS := modembed.NewModTimeFS(pagesFS, time.Now())
+	if err := proxy.InitErrPagesFS(pageFS); err != nil {
+		// 这是一个警告而不是致命错误, 因为即使没有自定义错误页面, 服务器也能运行
+		logger.Warnf("failed to initialize embedded error pages: %v", err)
+	}
+}
+
+// loadEmbeddedPages 使用 map 替代 switch, 动态加载嵌入式页面和资源文件系统
 func loadEmbeddedPages(cfg *config.Config) (fs.FS, fs.FS, error) {
 	pageFS := modembed.NewModTimeFS(pagesFS, time.Now())
-	var pages fs.FS
-	var err error
-	switch cfg.Pages.Theme {
-	case "bootstrap":
-		pages, err = fs.Sub(pageFS, "pages/bootstrap")
-	case "nebula":
-		pages, err = fs.Sub(pageFS, "pages/nebula")
-	case "design":
-		pages, err = fs.Sub(pageFS, "pages/design")
-	case "metro":
-		pages, err = fs.Sub(pageFS, "pages/metro")
-	case "classic":
-		pages, err = fs.Sub(pageFS, "pages/classic")
-	case "mino":
-		pages, err = fs.Sub(pageFS, "pages/mino")
-	case "hub":
-		pages, err = fs.Sub(pageFS, "pages/hub")
-	case "free":
-		pages, err = fs.Sub(pageFS, "pages/free")
-	default:
-		pages, err = fs.Sub(pageFS, "pages/design") // 默认主题
-		logWarning("Invalid Pages Theme: %s, using default theme 'design'", cfg.Pages.Theme)
+	theme := cfg.Pages.Theme
+
+	// 检查主题是否受支持, 如果不支持则使用默认主题
+	if _, ok := supportedThemes[theme]; !ok {
+		logger.Warnf("Invalid Pages Theme: %s, using default theme 'design'", theme)
+		theme = "design" // 默认主题
 	}
 
+	// 从嵌入式文件系统中获取主题子目录
+	themePath := fmt.Sprintf("pages/%s", theme)
+	pages, err := fs.Sub(pageFS, themePath)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to load embedded pages: %w", err)
+		return nil, nil, fmt.Errorf("failed to load embedded theme '%s': %w", theme, err)
 	}
 
-	// 初始化errPagesFs
-	errPagesInitErr := proxy.InitErrPagesFS(pageFS)
-	if errPagesInitErr != nil {
-		logWarning("errPagesInitErr: %s", errPagesInitErr)
-	}
-
-	var assets fs.FS
-	assets, err = fs.Sub(pageFS, "pages/assets")
+	// 加载共享资源文件
+	assets, err := fs.Sub(pageFS, "pages/assets")
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to load embedded assets: %w", err)
 	}
+
 	return pages, assets, nil
 }
 
-// setupPages 设置页面路由
+// setupPages 设置页面路由, 增强了错误处理
 func setupPages(cfg *config.Config, r *touka.Engine) {
 	switch cfg.Pages.Mode {
 	case "internal":
 		err := setInternalRoute(cfg, r)
 		if err != nil {
-			logError("Failed when processing internal pages: %s", err)
-			fmt.Println(err.Error())
-			return
+			logger.Errorf("Failed to set up internal pages, server cannot start: %s", err)
+			fmt.Printf("Failed to set up internal pages, server cannot start: %s", err)
+			os.Exit(1)
 		}
 
 	case "external":
@@ -236,15 +237,13 @@ func setupPages(cfg *config.Config, r *touka.Engine) {
 
 	default:
 		// 处理无效的Pages Mode
-		logWarning("Invalid Pages Mode: %s, using default embedded theme", cfg.Pages.Mode)
-
+		logger.Warnf("Invalid Pages Mode: %s, using default embedded theme", cfg.Pages.Mode)
 		err := setInternalRoute(cfg, r)
 		if err != nil {
-			logError("Failed when processing internal pages: %s", err)
-			fmt.Println(err.Error())
-			return
+			logger.Errorf("Failed to set up internal pages, server cannot start: %s", err)
+			fmt.Printf("Failed to set up internal pages, server cannot start: %s", err)
+			os.Exit(1)
 		}
-
 	}
 }
 
@@ -266,11 +265,9 @@ func viaHeader() func(c *touka.Context) {
 }
 
 func setInternalRoute(cfg *config.Config, r *touka.Engine) error {
-
 	// 加载嵌入式资源
 	pages, assets, err := loadEmbeddedPages(cfg)
 	if err != nil {
-		logError("Failed when processing pages: %s", err)
 		return err
 	}
 
@@ -288,13 +285,13 @@ func init() {
 	readFlag()
 	flag.Parse()
 
-	// 如果设置了 -h，则显示帮助信息并退出
+	// 如果设置了 -h, 则显示帮助信息并退出
 	if showHelp {
 		flag.Usage()
 		os.Exit(0)
 	}
 
-	// 如果设置了 -v，则显示版本号并退出
+	// 如果设置了 -v, 则显示版本号并退出
 	if showVersion {
 		fmt.Printf("GHProxy Version: %s \n", version)
 		os.Exit(0)
@@ -303,6 +300,7 @@ func init() {
 	loadConfig()
 	if cfg != nil { // 在setupLogger前添加空值检查
 		setupLogger(cfg)
+		initializeErrorPages()
 		InitReq(cfg)
 		setMemLimit(cfg)
 		loadlist(cfg)
@@ -317,7 +315,7 @@ func init() {
 		}
 
 		if cfg.Server.Debug {
-			version = "Dev" // 如果是Debug模式，版本设置为"Dev"
+			version = "Dev" // 如果是Debug模式, 版本设置为"Dev"
 		}
 	}
 }
@@ -492,7 +490,7 @@ func main() {
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 	err := r.RunShutdown(addr)
 	if err != nil {
-		logError("Server Run Error: %v", err)
+		logger.Errorf("Server Run Error: %v", err)
 		fmt.Printf("Server Run Error: %v\n", err)
 	}
 

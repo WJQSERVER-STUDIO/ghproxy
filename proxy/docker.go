@@ -43,42 +43,57 @@ func InitWeakCache() *weakcache.Cache[string] {
 // GhcrWithImageRouting 处理带有镜像路由的请求, 根据目标路由到不同的Docker注册表
 func GhcrWithImageRouting(cfg *config.Config) touka.HandlerFunc {
 	return func(c *touka.Context) {
-		reqTarget := c.Param("target")     // 请求中指定的目标 (如 docker.io, ghcr.io, gcr.io)
-		reqImageUser := c.Param("user")    // 镜像用户
-		reqImageName := c.Param("repo")    // 镜像仓库名
-		reqFilePath := c.Param("filepath") // 镜像文件路径
+		// 从 main.go 中固定的路由 "/v2/:target/:user/:repo/*filepath" 获取参数
+		reqTarget := c.Param("target")
+		reqImageUser := c.Param("user")
+		reqImageName := c.Param("repo")
+		reqFilePath := c.Param("filepath")
 
-		// 构造完整的镜像路径
-		path := fmt.Sprintf("%s/%s%s", reqImageUser, reqImageName, reqFilePath)
-		var target string
+		var upstreamTarget string
+		var requestPath string
+		var imageNameForAuth string
 
-		// 根据 reqTarget 智能判断实际的目标注册表
-		switch {
-		case reqTarget == "docker.io":
-			target = dockerhubTarget // Docker Hub
-		case reqTarget == "ghcr.io":
-			target = ghcrTarget // GitHub Container Registry
-		case strings.HasSuffix(reqTarget, ".gcr.io"), reqTarget == "gcr.io":
-			target = reqTarget // Google Container Registry 及其子域名
-		default:
-			// 如果 reqTarget 包含点, 则假定它是一个完整的域名
-			for _, r := range reqTarget {
-				if r == '.' {
-					target = reqTarget
-					break
-				}
+		// 关键逻辑: 判断 reqTarget 是真实主机名还是镜像名的一部分
+		// 依据: 真实主机名/IP通常包含'.'或':'
+		if strings.Contains(reqTarget, ".") || strings.Contains(reqTarget, ":") {
+			// 情况 A: reqTarget 是一个显式指定的主机名 (例如 "ghcr.io", "my-registry.com", "127.0.0.1:5000")
+			c.Debugf("Request target '%s' identified as an explicit hostname.", reqTarget)
+			upstreamTarget = reqTarget
+			// 上游请求的路径是主机名之后的部分
+			requestPath = fmt.Sprintf("%s/%s%s", reqImageUser, reqImageName, reqFilePath)
+			// 用于认证的镜像名是 user/repo
+			imageNameForAuth = fmt.Sprintf("%s/%s", reqImageUser, reqImageName)
+		} else {
+			// 情况 B: reqTarget 是镜像名的一部分 (例如 "wjqserver", "library")
+			c.Debugf("Request target '%s' identified as part of an image name. Using default registry.", reqTarget)
+			// 使用配置文件中的默认目标
+			switch cfg.Docker.Target {
+			case "ghcr":
+				upstreamTarget = ghcrTarget
+			case "dockerhub":
+				upstreamTarget = dockerhubTarget
+			case "":
+				ErrorPage(c, NewErrorWithStatusLookup(500, "Default Docker Target is not configured in config file"))
+				return
+			default:
+				upstreamTarget = cfg.Docker.Target
 			}
+			// 必须将路由错误分割的所有部分重新组合成完整的镜像路径
+			requestPath = fmt.Sprintf("%s/%s/%s%s", reqTarget, reqImageUser, reqImageName, reqFilePath)
+			// 用于认证的镜像名是 target/user (例如 "wjqserver/ghproxy", "library/ubuntu")
+			imageNameForAuth = fmt.Sprintf("%s/%s", reqTarget, reqImageUser)
 		}
 
-		// 封装镜像信息
+		// 清理路径, 防止出现 "//"
+		requestPath = strings.TrimPrefix(requestPath, "/")
+
+		// 为认证和缓存准备镜像信息
 		image := &imageInfo{
-			User:  reqImageUser,
-			Repo:  reqImageName,
-			Image: fmt.Sprintf("%s/%s", reqImageUser, reqImageName),
+			Image: imageNameForAuth,
 		}
 
 		// 调用 GhcrToTarget 处理实际的代理请求
-		GhcrToTarget(c, cfg, target, path, image)
+		GhcrToTarget(c, cfg, upstreamTarget, requestPath, image)
 	}
 }
 
@@ -90,39 +105,17 @@ func GhcrToTarget(c *touka.Context, cfg *config.Config, target string, path stri
 		return
 	}
 
-	var destUrl string        // 最终代理的目标URL
-	var upstreamTarget string // 实际的上游目标域名
 	var ctx = c.Request.Context()
 
-	// 根据是否指定 target 来确定上游目标和目标URL
-	if target != "" {
-		upstreamTarget = target
-		// 构造目标URL, 拼接 v2/ 路径和原始查询参数
-		destUrl = "https://" + upstreamTarget + "/v2/" + path
-		if query := c.GetReqQueryString(); query != "" {
-			destUrl += "?" + query
-		}
-		c.Debugf("Proxying to target %s: %s", upstreamTarget, destUrl)
-	} else {
-		// 如果未指定 target, 则根据配置的默认目标进行代理
-		switch cfg.Docker.Target {
-		case "ghcr":
-			upstreamTarget = ghcrTarget
-		case "dockerhub":
-			upstreamTarget = dockerhubTarget
-		case "":
-			ErrorPage(c, NewErrorWithStatusLookup(403, "Docker Target is not set"))
-			return
-		default:
-			upstreamTarget = cfg.Docker.Target
-		}
-		// 使用原始请求URI构建目标URL
-		destUrl = "https://" + upstreamTarget + c.GetRequestURI()
-		c.Debugf("Proxying to default target %s: %s", upstreamTarget, destUrl)
+	// 构造目标URL. 这里的target和path都是由GhcrWithImageRouting正确解析得来的.
+	destUrl := "https://" + target + "/v2/" + path
+	if query := c.GetReqQueryString(); query != "" {
+		destUrl += "?" + query
 	}
+	c.Debugf("Proxying to target '%s' with path '%s'. Final URL: %s", target, path, destUrl)
 
 	// 执行实际的代理请求
-	GhcrRequest(ctx, c, destUrl, image, cfg, upstreamTarget)
+	GhcrRequest(ctx, c, destUrl, image, cfg, target)
 }
 
 // GhcrRequest 执行对Docker注册表的HTTP请求, 处理认证和重定向
@@ -166,7 +159,7 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 	req.Header.Set("Host", target)
 
 	// 尝试从缓存中获取并使用认证令牌
-	if image != nil {
+	if image != nil && image.Image != "" {
 		token, exist := cache.Get(image.Image)
 		if exist {
 			req.Header.Set("Authorization", "Bearer "+token)
@@ -188,7 +181,7 @@ func GhcrRequest(ctx context.Context, c *touka.Context, u string, image *imageIn
 		c.Debugf("Initial request failed with status %d. Retry eligibility: %t", originalStatusCode, shouldRetry)
 
 		if shouldRetry {
-			if image == nil {
+			if image == nil || image.Image == "" {
 				_ = resp.Body.Close() // 终止流程, 关闭当前响应体
 				ErrorPage(c, NewErrorWithStatusLookup(originalStatusCode, "Unauthorized"))
 				return
