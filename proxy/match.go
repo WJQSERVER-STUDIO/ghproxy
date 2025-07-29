@@ -10,11 +10,6 @@ import (
 )
 
 var (
-	githubPrefix         = "https://github.com/"
-	rawPrefix            = "https://raw.githubusercontent.com/"
-	gistPrefix           = "https://gist.github.com/"
-	gistContentPrefix    = "https://gist.githubusercontent.com/"
-	apiPrefix            = "https://api.github.com/"
 	githubPrefixLen      int
 	rawPrefixLen         int
 	gistPrefixLen        int
@@ -22,8 +17,13 @@ var (
 	apiPrefixLen         int
 )
 
-var (
-	releasesDownloadSinnipt = "releases/download/"
+const (
+	githubPrefix            = "https://github.com/"
+	rawPrefix               = "https://raw.githubusercontent.com/"
+	gistPrefix              = "https://gist.github.com/"
+	gistContentPrefix       = "https://gist.githubusercontent.com/"
+	apiPrefix               = "https://api.github.com/"
+	releasesDownloadSnippet = "releases/download/"
 )
 
 func init() {
@@ -66,7 +66,7 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 		var matcher string
 		switch action {
 		case "releases":
-			if strings.HasPrefix(remaining, releasesDownloadSinnipt) {
+			if strings.HasPrefix(remaining, releasesDownloadSnippet) {
 				matcher = "releases"
 			} else {
 				return "", "", "", NewErrorWithStatusLookup(400, "malformed github path: not a releases download url")
