@@ -1,13 +1,11 @@
 github.com/BurntSushi/toml v1.5.0 h1:W5quZX/G/csjUnuI8SUYlsHs9M38FC7znL0lIO+DvMg=
 github.com/BurntSushi/toml v1.5.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
-github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.6 h1:/50VJYXd6jcu+p5BnEBDyiX0nAyGxas1W3DCnrYMxMY=
-github.com/WJQSERVER-STUDIO/go-utils/copyb v0.0.6/go.mod h1:FZ6XE+4TKy4MOfX1xWKe6Rwsg0ucYFCdNh1KLvyKTfc=
 github.com/WJQSERVER-STUDIO/go-utils/iox v0.0.2 h1:AiIHXP21LpK7pFfqUlUstgQEWzjbekZgxOuvVwiMfyM=
 github.com/WJQSERVER-STUDIO/go-utils/iox v0.0.2/go.mod h1:mCLqYU32bTmEE6dpj37MKKiZgz70Jh/xyK9vVbq6pok=
 github.com/WJQSERVER-STUDIO/go-utils/limitreader v0.0.2 h1:8bBkKk6E2Zr+I5szL7gyc5f0DK8N9agIJCpM1Cqw2NE=
 github.com/WJQSERVER-STUDIO/go-utils/limitreader v0.0.2/go.mod h1:yPX8xuZH+py7eLJwOYj3VVI/4/Yuy5+x8Mhq8qezcPg=
-github.com/WJQSERVER-STUDIO/httpc v0.8.1 h1:/eG8aYKL3WfQILIRbG+cbzQjPkNHEPTqfGUdQS5rtI4=
-github.com/WJQSERVER-STUDIO/httpc v0.8.1/go.mod h1:mxXBf2hqbQGNHkVy/7wfU7Xi2s09MyZpbY2hyR+4uD4=
+github.com/WJQSERVER-STUDIO/httpc v0.8.2 h1:PFPLodV0QAfGEP6915J57vIqoKu9cGuuiXG/7C9TNUk=
+github.com/WJQSERVER-STUDIO/httpc v0.8.2/go.mod h1:8WhHVRO+olDFBSvL5PC/bdMkb6U3vRdPJ4p4pnguV5Y=
 github.com/fenthope/bauth v0.0.1 h1:+4UIQshGx3mYD4L3f2S4MLZOi5PWU7fU5GK3wsZvwzE=
 github.com/fenthope/bauth v0.0.1/go.mod h1:1fveTpgfR1p+WXQ8MXm9BfBCeNYi55j23jxCOGOvBSA=
 github.com/fenthope/ikumi v0.0.2 h1:5oaSTf/Msp7M2O3o/X20omKWEQbFhX4KV0CVF21oCdk=
