@@ -394,7 +394,7 @@ func main() {
 	setupPages(cfg, r)
 	r.SetRedirectTrailingSlash(false)
 
-	r.GET("/github.com/:user/:repo/releases/*filepath", func(c *touka.Context) {
+	r.GET("/github.com/:user/:repo/releases/download/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "releases")
 		proxy.RoutingHandler(cfg)(c)
 	})

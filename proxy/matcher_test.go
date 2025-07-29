@@ -39,6 +39,18 @@ func TestMatcher_Compatibility(t *testing.T) {
 			expectedUser: "owner", expectedRepo: "repo", expectedMatcher: "releases",
 		},
 		{
+			name:        "GH Releases Path Page",
+			rawPath:     "https://github.com/owner/repo/releases",
+			config:      cfgWithAuth,
+			expectError: true, expectedErrCode: 400,
+		},
+		{
+			name:        "GH Releases Path Tag Page",
+			rawPath:     "https://github.com/owner/repo/releases/tag/v0.0.1",
+			config:      cfgWithAuth,
+			expectError: true, expectedErrCode: 400,
+		},
+		{
 			name:         "GH Archive Path",
 			rawPath:      "https://github.com/owner/repo.git/archive/main.zip",
 			config:       cfgWithAuth,

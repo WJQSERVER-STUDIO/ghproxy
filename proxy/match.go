@@ -22,6 +22,10 @@ var (
 	apiPrefixLen         int
 )
 
+var (
+	releasesDownloadSinnipt = "releases/download/"
+)
+
 func init() {
 	githubPrefixLen = len(githubPrefix)
 	rawPrefixLen = len(rawPrefix)
@@ -61,7 +65,13 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 		}
 		var matcher string
 		switch action {
-		case "releases", "archive":
+		case "releases":
+			if strings.HasPrefix(remaining, releasesDownloadSinnipt) {
+				matcher = "releases"
+			} else {
+				return "", "", "", NewErrorWithStatusLookup(400, "malformed github path: not a releases download url")
+			}
+		case "archive":
 			matcher = "releases"
 		case "blob":
 			matcher = "blob"
