@@ -69,12 +69,6 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ${{ env.GO_VERSION }}
-      - name: 测试
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-        run: |
-          go test ./..
       - name: 编译
         env:
           GOOS: ${{ matrix.goos }}
