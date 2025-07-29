@@ -21,7 +21,6 @@ func HandleError(c *touka.Context, message string) {
 }
 
 func UnifiedToukaErrorHandler(c *touka.Context, code int, err error) {
-
 	errMsg := ""
 	if err != nil {
 		errMsg = err.Error()
