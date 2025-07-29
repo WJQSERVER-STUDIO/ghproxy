@@ -15,9 +15,9 @@ require (
 	github.com/fenthope/bauth v0.0.1
 	github.com/fenthope/ikumi v0.0.2
 	github.com/fenthope/ipfilter v0.0.1
-	github.com/fenthope/reco v0.0.3
+	github.com/fenthope/reco v0.0.4
 	github.com/fenthope/record v0.0.3
-	github.com/go-json-experiment/json v0.0.0-20250714165856-be8212f5270d
+	github.com/go-json-experiment/json v0.0.0-20250725192818-e39067aee2d2
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/infinite-iroha/touka v0.3.3
 	github.com/wjqserver/modembed v0.0.1
