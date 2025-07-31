@@ -399,6 +399,11 @@ func main() {
 		proxy.RoutingHandler(cfg)(c)
 	})
 
+	r.GET("/github.com/:user/:repo/releases/:tag/download/*filepath", func(c *touka.Context) {
+		c.Set("matcher", "releases")
+		proxy.RoutingHandler(cfg)(c)
+	})
+
 	r.GET("/github.com/:user/:repo/archive/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "releases")
 		proxy.RoutingHandler(cfg)(c)
