@@ -42,37 +42,62 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 
 	// 匹配 "https://github.com/"
 	if strings.HasPrefix(rawPath, githubPrefix) {
-		remaining := rawPath[githubPrefixLen:]
-		i := strings.IndexByte(remaining, '/')
+		pathAfterDomain := rawPath[githubPrefixLen:]
+
+		// 解析 user
+		i := strings.IndexByte(pathAfterDomain, '/')
 		if i <= 0 {
 			return "", "", "", NewErrorWithStatusLookup(400, "malformed github path: missing user")
 		}
-		user := remaining[:i]
-		remaining = remaining[i+1:]
-		i = strings.IndexByte(remaining, '/')
+		user := pathAfterDomain[:i]
+		pathAfterUser := pathAfterDomain[i+1:]
+
+		// 解析 repo
+		i = strings.IndexByte(pathAfterUser, '/')
 		if i <= 0 {
-			return "", "", "", NewErrorWithStatusLookup(400, "malformed github path: missing repo")
-		}
-		repo := remaining[:i]
-		remaining = remaining[i+1:]
-		if len(remaining) == 0 {
 			return "", "", "", NewErrorWithStatusLookup(400, "malformed github path: missing action")
 		}
-		i = strings.IndexByte(remaining, '/')
-		action := remaining
-		if i != -1 {
-			action = remaining[:i]
+		repo := pathAfterUser[:i]
+		pathAfterRepo := pathAfterUser[i+1:]
+
+		if len(pathAfterRepo) == 0 {
+			return "", "", "", NewErrorWithStatusLookup(400, "malformed github path: missing action")
 		}
+
+		// 优先处理所有 "releases" 相关的下载路径
+		if strings.HasPrefix(pathAfterRepo, "releases/") {
+			// 情况 A: "releases/download/..."
+			if strings.HasPrefix(pathAfterRepo, "releases/download/") {
+				return user, repo, "releases", nil
+			}
+			// 情况 B: "releases/:tag/download/..."
+			pathAfterReleases := pathAfterRepo[len("releases/"):]
+			slashIndex := strings.IndexByte(pathAfterReleases, '/')
+			if slashIndex > 0 { // 确保tag不为空
+				pathAfterTag := pathAfterReleases[slashIndex+1:]
+				if strings.HasPrefix(pathAfterTag, "download/") {
+					return user, repo, "releases", nil
+				}
+			}
+			// 如果不满足上述下载链接的结构, 则为网页浏览路径, 予以拒绝
+			return "", "", "", NewErrorWithStatusLookup(400, "unsupported releases page, only download links are allowed")
+		}
+
+		// 检查 "archive/" 路径
+		if strings.HasPrefix(pathAfterRepo, "archive/") {
+			// 根据测试用例, archive路径的matcher也应为releases
+			return user, repo, "releases", nil
+		}
+
+		// 如果不是下载路径, 则解析action并进行分类
+		i = strings.IndexByte(pathAfterRepo, '/')
+		action := pathAfterRepo
+		if i != -1 {
+			action = pathAfterRepo[:i]
+		}
+
 		var matcher string
 		switch action {
-		case "releases":
-			if strings.HasPrefix(remaining, releasesDownloadSnippet) {
-				matcher = "releases"
-			} else {
-				return "", "", "", NewErrorWithStatusLookup(400, "malformed github path: not a releases download url")
-			}
-		case "archive":
-			matcher = "releases"
 		case "blob":
 			matcher = "blob"
 		case "raw":
@@ -88,59 +113,27 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 	// 匹配 "https://raw.githubusercontent.com/"
 	if strings.HasPrefix(rawPath, rawPrefix) {
 		remaining := rawPath[rawPrefixLen:]
-		// 这里的逻辑与 github.com 的类似, 需要提取 user, repo, branch, file...
-		// 我们只需要 user 和 repo
-		i := strings.IndexByte(remaining, '/')
-		if i <= 0 {
-			return "", "", "", NewErrorWithStatusLookup(400, "malformed raw url: missing user")
+		parts := strings.SplitN(remaining, "/", 3)
+		if len(parts) < 3 {
+			return "", "", "", NewErrorWithStatusLookup(400, "malformed raw url: path too short")
 		}
-		user := remaining[:i]
-		remaining = remaining[i+1:]
-		i = strings.IndexByte(remaining, '/')
-		if i <= 0 {
-			return "", "", "", NewErrorWithStatusLookup(400, "malformed raw url: missing repo")
-		}
-		repo := remaining[:i]
-		// raw 链接至少需要 user/repo/branch 三部分
-		remaining = remaining[i+1:]
-		if len(remaining) == 0 {
-			return "", "", "", NewErrorWithStatusLookup(400, "malformed raw url: missing branch/commit")
-		}
-		return user, repo, "raw", nil
+		return parts[0], parts[1], "raw", nil
 	}
 
-	// 匹配 "https://gist.github.com/"
-	if strings.HasPrefix(rawPath, gistPrefix) {
-		remaining := rawPath[gistPrefixLen:]
-		i := strings.IndexByte(remaining, '/')
-		if i <= 0 {
-			// case: https://gist.github.com/user
-			// 这种情况下, gist_id 缺失, 但我们仍然可以认为 user 是有效的
-			if len(remaining) > 0 {
-				return remaining, "", "gist", nil
-			}
+	// 匹配 "https://gist.github.com/" 或 "https://gist.githubusercontent.com/"
+	isGist := strings.HasPrefix(rawPath, gistPrefix)
+	if isGist || strings.HasPrefix(rawPath, gistContentPrefix) {
+		var remaining string
+		if isGist {
+			remaining = rawPath[gistPrefixLen:]
+		} else {
+			remaining = rawPath[gistContentPrefixLen:]
+		}
+		parts := strings.SplitN(remaining, "/", 2)
+		if len(parts) == 0 || parts[0] == "" {
 			return "", "", "", NewErrorWithStatusLookup(400, "malformed gist url: missing user")
 		}
-		// case: https://gist.github.com/user/gist_id...
-		user := remaining[:i]
-		return user, "", "gist", nil
-	}
-
-	// 匹配 "https://gist.githubusercontent.com/"
-	if strings.HasPrefix(rawPath, gistContentPrefix) {
-		remaining := rawPath[gistContentPrefixLen:]
-		i := strings.IndexByte(remaining, '/')
-		if i <= 0 {
-			// case: https://gist.githubusercontent.com/user
-			// 这种情况下, gist_id 缺失, 但我们仍然可以认为 user 是有效的
-			if len(remaining) > 0 {
-				return remaining, "", "gist", nil
-			}
-			return "", "", "", NewErrorWithStatusLookup(400, "malformed gist url: missing user")
-		}
-		// case: https://gist.githubusercontent.com/user/gist_id...
-		user := remaining[:i]
-		return user, "", "gist", nil
+		return parts[0], "", "gist", nil
 	}
 
 	// 匹配 "https://api.github.com/"

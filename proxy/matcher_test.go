@@ -33,8 +33,14 @@ func TestMatcher_Compatibility(t *testing.T) {
 		expectedErrCode int
 	}{
 		{
-			name:         "GH Releases Path",
+			name:         "GH Releases Path 1",
 			rawPath:      "https://github.com/owner/repo/releases/download/v1.0/asset.zip",
+			config:       cfgWithAuth,
+			expectedUser: "owner", expectedRepo: "repo", expectedMatcher: "releases",
+		},
+		{
+			name:         "GH Releases Path 2",
+			rawPath:      "https://github.com/owner/repo/releases/v1.0/download/asset.zip",
 			config:       cfgWithAuth,
 			expectedUser: "owner", expectedRepo: "repo", expectedMatcher: "releases",
 		},
