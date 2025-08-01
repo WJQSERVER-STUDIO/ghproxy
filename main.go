@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"runtime/debug"
+	"strings"
 	"time"
 
 	"ghproxy/api"
@@ -394,14 +395,40 @@ func main() {
 	setupPages(cfg, r)
 	r.SetRedirectTrailingSlash(false)
 
-	r.GET("/github.com/:user/:repo/releases/download/*filepath", func(c *touka.Context) {
-		c.Set("matcher", "releases")
-		proxy.RoutingHandler(cfg)(c)
-	})
+	r.GET("/github.com/:user/:repo/releases/*filepath", func(c *touka.Context) {
+		// 规范化路径: 移除前导斜杠, 简化后续处理
+		filepath := c.Param("filepath")
+		if len(filepath) > 0 && filepath[0] == '/' {
+			filepath = filepath[1:]
+		}
 
-	r.GET("/github.com/:user/:repo/releases/:tag/download/*filepath", func(c *touka.Context) {
-		c.Set("matcher", "releases")
-		proxy.RoutingHandler(cfg)(c)
+		isValidDownload := false
+
+		// 检查两种合法的下载链接格式
+		// 情况 A: "download/..."
+		if strings.HasPrefix(filepath, "download/") {
+			isValidDownload = true
+		} else {
+			// 情况 B: ":tag/download/..."
+			slashIndex := strings.IndexByte(filepath, '/')
+			// 确保 tag 部分存在 (slashIndex > 0)
+			if slashIndex > 0 {
+				pathAfterTag := filepath[slashIndex+1:]
+				if strings.HasPrefix(pathAfterTag, "download/") {
+					isValidDownload = true
+				}
+			}
+		}
+
+		// 根据匹配结果执行最终操作
+		if isValidDownload {
+			c.Set("matcher", "releases")
+			proxy.RoutingHandler(cfg)(c)
+		} else {
+			// 任何不符合下载链接格式的 'releases' 路径都被视为浏览页面并拒绝
+			proxy.ErrorPage(c, proxy.NewErrorWithStatusLookup(400, "unsupported releases page, only download links are allowed"))
+			return
+		}
 	})
 
 	r.GET("/github.com/:user/:repo/archive/*filepath", func(c *touka.Context) {
