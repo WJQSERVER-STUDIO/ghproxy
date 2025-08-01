@@ -19,7 +19,7 @@ require (
 	github.com/fenthope/record v0.0.4
 	github.com/go-json-experiment/json v0.0.0-20250725192818-e39067aee2d2
 	github.com/hashicorp/golang-lru/v2 v2.0.7
-	github.com/infinite-iroha/touka v0.3.4
+	github.com/infinite-iroha/touka v0.3.6
 	github.com/wjqserver/modembed v0.0.1
 )
 
