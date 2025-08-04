@@ -1,5 +1,10 @@
 # 更新日志
 
+4.2.7 - 2025-08-04
+---
+- CHANGE: 在OCI镜像(docker)代理部分增加特殊处理, 保证可用性 参看[#159](https://github.com/WJQSERVER-STUDIO/ghproxy/issues/159)
+- CHANGE: 更新Touka框架, 同步解决部分日志过多问题
+
 4.2.6 - 2025-08-01
 ---
 - CHANGE: 修正匹配器

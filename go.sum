@@ -20,8 +20,8 @@ github.com/go-json-experiment/json v0.0.0-20250725192818-e39067aee2d2 h1:iizUGZ9
 github.com/go-json-experiment/json v0.0.0-20250725192818-e39067aee2d2/go.mod h1:TiCD2a1pcmjd7YnhGH0f/zKNcCD06B029pHhzV23c2M=
 github.com/hashicorp/golang-lru/v2 v2.0.7 h1:a+bsQ5rvGLjzHuww6tVxozPZFVghXaHOwFs4luLUK2k=
 github.com/hashicorp/golang-lru/v2 v2.0.7/go.mod h1:QeFd9opnmA6QUJc5vARoKUSoFhyfM2/ZepoAG6RGpeM=
-github.com/infinite-iroha/touka v0.3.4 h1:vYDjfXTkjpTe7tasSVbPeVAPSXzd/wS1T2tkiMx/Wwk=
-github.com/infinite-iroha/touka v0.3.4/go.mod h1:xOKkEKTWYLHIBW6qbL2O6nSAO0RyDLsVXPtJxFYg/YM=
+github.com/infinite-iroha/touka v0.3.6 h1:SkpM/VFGCWOFQP3RRuoWdX/Q4zafPngG1VMwkrLwtkw=
+github.com/infinite-iroha/touka v0.3.6/go.mod h1:XW7a3fpLAjJfylSmdNuDQ8wGKkKmLVi9V/89sT1d7uw=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/wjqserver/modembed v0.0.1 h1:8ZDz7t9M5DLrUFlYgBUUmrMzxWsZPmHvOazkr/T2jEs=

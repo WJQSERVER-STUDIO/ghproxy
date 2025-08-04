@@ -58,7 +58,13 @@ func GhcrWithImageRouting(cfg *config.Config) touka.HandlerFunc {
 		if strings.Contains(reqTarget, ".") || strings.Contains(reqTarget, ":") {
 			// 情况 A: reqTarget 是一个显式指定的主机名 (例如 "ghcr.io", "my-registry.com", "127.0.0.1:5000")
 			c.Debugf("Request target '%s' identified as an explicit hostname.", reqTarget)
-			upstreamTarget = reqTarget
+
+			// https://github.com/WJQSERVER-STUDIO/ghproxy/issues/159
+			if reqTarget == "docker.io" {
+				upstreamTarget = dockerhubTarget
+			} else {
+				upstreamTarget = reqTarget
+			}
 			// 上游请求的路径是主机名之后的部分
 			requestPath = fmt.Sprintf("%s/%s%s", reqImageUser, reqImageName, reqFilePath)
 			// 用于认证的镜像名是 user/repo
