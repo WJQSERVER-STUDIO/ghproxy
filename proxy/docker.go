@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -54,6 +53,10 @@ var (
 // 处理路径各种情况
 func OciWithImageRouting(cfg *config.Config) touka.HandlerFunc {
 	return func(c *touka.Context) {
+		if !cfg.Docker.Enabled {
+			ErrorPage(c, NewErrorWithStatusLookup(403, "Docker proxy is not enabled"))
+			return
+		}
 		var (
 			p1               string
 			p2               string
@@ -83,13 +86,10 @@ func OciWithImageRouting(cfg *config.Config) touka.HandlerFunc {
 		}
 
 		// 根据/分割 /:target/:user/:repo/*ext
-		log.Print(ociPath)
-
 		ociPath = ociPath[1:]
 		i := strings.IndexByte(ociPath, '/')
 		if i <= 0 {
 			ErrorPage(c, NewErrorWithStatusLookup(404, "Not Found"))
-			log.Print(1)
 			return
 		}
 		p1 = ociPath[:i]
@@ -120,7 +120,6 @@ func OciWithImageRouting(cfg *config.Config) touka.HandlerFunc {
 		i = strings.IndexByte(ociPath, '/')
 		if i <= 0 {
 			ErrorPage(c, NewErrorWithStatusLookup(404, "Not Found"))
-			log.Print(2)
 			return
 		}
 		p2 = ociPath[:i]
@@ -151,7 +150,6 @@ func OciWithImageRouting(cfg *config.Config) touka.HandlerFunc {
 			i = strings.IndexByte(ociPath, '/')
 			if i <= 0 {
 				ErrorPage(c, NewErrorWithStatusLookup(404, "Not Found"))
-				log.Print(3)
 				return
 			}
 			p3 = ociPath[:i]

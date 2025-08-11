@@ -1,8 +1,6 @@
 package config
 
 import (
-	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -224,7 +222,6 @@ func LoadConfig(filePath string) (*Config, error) {
 	}
 	var config Config
 	ext := filepath.Ext(filePath)
-	log.Printf("Loading config from %s with extension %s", filePath, ext)
 	if ext == ".wanf" {
 		if err := wanf.DecodeFile(filePath, &config); err != nil {
 			return nil, err
@@ -247,7 +244,6 @@ func (c *Config) WriteConfig(filePath string) error {
 	defer file.Close()
 
 	ext := filepath.Ext(filePath)
-	fmt.Printf("%s", ext)
 	if ext == ".wanf" {
 		err := wanf.NewStreamEncoder(file).Encode(c)
 		if err != nil {
