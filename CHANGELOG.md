@@ -1,5 +1,11 @@
 # 更新日志
 
+4.3.0 - 2025-08-11
+---
+- CHANGE: 为OCI镜像(Docker)代理带来自动library附加功能
+- CHANGE(refactor): 改进OCI镜像(Docker)代理路径组成流程
+- ADD: 新增[WANF](https://github.com/WJQSERVER/wanf)配置文件格式支持
+
 4.3.0-rc.0 - 2025-08-11
 ---
 - PRE-RELEASE: v4.3.0-rc.0是v4.3.0发布版本,请勿在生产环境中使用;
