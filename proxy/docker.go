@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -40,88 +41,166 @@ func InitWeakCache() *weakcache.Cache[string] {
 	return cache
 }
 
-// GhcrWithImageRouting 处理带有镜像路由的请求, 根据目标路由到不同的Docker注册表
-func GhcrWithImageRouting(cfg *config.Config) touka.HandlerFunc {
+var (
+	authEndpoint = "/"
+	passTypeMap  = map[string]struct{}{
+		"manifests": {},
+		"blobs":     {},
+		"tags":      {},
+		"index":     {},
+	}
+)
+
+// 处理路径各种情况
+func OciWithImageRouting(cfg *config.Config) touka.HandlerFunc {
 	return func(c *touka.Context) {
-		// 从 main.go 中固定的路由 "/v2/:target/:user/:repo/*filepath" 获取参数
-		reqTarget := c.Param("target")
-		reqImageUser := c.Param("user")
-		reqImageName := c.Param("repo")
-		reqFilePath := c.Param("filepath")
+		var (
+			p1               string
+			p2               string
+			p3               string
+			p4               string
+			target           string
+			user             string
+			repo             string
+			extpath          string
+			p1IsTarget       bool
+			ignorep3         bool
+			imageNameForAuth string
+			finalreqUrl      string
+			iInfo            *imageInfo
+		)
+		ociPath := c.Param("path")
+		if ociPath == authEndpoint {
+			emptyJSON := "{}"
+			c.Header("Content-Type", "application/json")
+			c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
 
-		var upstreamTarget string
-		var requestPath string
-		var imageNameForAuth string
+			c.Header("Docker-Distribution-API-Version", "registry/2.0")
 
-		// 关键逻辑: 判断 reqTarget 是真实主机名还是镜像名的一部分
-		// 依据: 真实主机名/IP通常包含'.'或':'
-		if strings.Contains(reqTarget, ".") || strings.Contains(reqTarget, ":") {
-			// 情况 A: reqTarget 是一个显式指定的主机名 (例如 "ghcr.io", "my-registry.com", "127.0.0.1:5000")
-			c.Debugf("Request target '%s' identified as an explicit hostname.", reqTarget)
+			c.Status(200)
+			c.Writer.Write([]byte(emptyJSON))
+			return
+		}
 
-			// https://github.com/WJQSERVER-STUDIO/ghproxy/issues/159
-			if reqTarget == "docker.io" {
-				upstreamTarget = dockerhubTarget
+		// 根据/分割 /:target/:user/:repo/*ext
+		log.Print(ociPath)
+
+		ociPath = ociPath[1:]
+		i := strings.IndexByte(ociPath, '/')
+		if i <= 0 {
+			ErrorPage(c, NewErrorWithStatusLookup(404, "Not Found"))
+			log.Print(1)
+			return
+		}
+		p1 = ociPath[:i]
+
+		// 开始判断p1是否为target
+		if strings.Contains(p1, ".") || strings.Contains(p1, ":") {
+			p1IsTarget = true
+			if p1 == "docker.io" {
+				target = dockerhubTarget
 			} else {
-				upstreamTarget = reqTarget
+				target = p1
 			}
-			// 上游请求的路径是主机名之后的部分
-			requestPath = fmt.Sprintf("%s/%s%s", reqImageUser, reqImageName, reqFilePath)
-			// 用于认证的镜像名是 user/repo
-			imageNameForAuth = fmt.Sprintf("%s/%s", reqImageUser, reqImageName)
 		} else {
-			// 情况 B: reqTarget 是镜像名的一部分 (例如 "wjqserver", "library")
-			c.Debugf("Request target '%s' identified as part of an image name. Using default registry.", reqTarget)
-			// 使用配置文件中的默认目标
 			switch cfg.Docker.Target {
 			case "ghcr":
-				upstreamTarget = ghcrTarget
+				target = ghcrTarget
 			case "dockerhub":
-				upstreamTarget = dockerhubTarget
+				target = dockerhubTarget
 			case "":
 				ErrorPage(c, NewErrorWithStatusLookup(500, "Default Docker Target is not configured in config file"))
 				return
 			default:
-				upstreamTarget = cfg.Docker.Target
+				target = cfg.Docker.Target
 			}
-			// 必须将路由错误分割的所有部分重新组合成完整的镜像路径
-			requestPath = fmt.Sprintf("%s/%s/%s%s", reqTarget, reqImageUser, reqImageName, reqFilePath)
-			// 用于认证的镜像名是 target/user (例如 "wjqserver/ghproxy", "library/ubuntu")
-			imageNameForAuth = fmt.Sprintf("%s/%s", reqTarget, reqImageUser)
 		}
 
-		// 清理路径, 防止出现 "//"
-		requestPath = strings.TrimPrefix(requestPath, "/")
+		ociPath = ociPath[i+1:]
+		i = strings.IndexByte(ociPath, '/')
+		if i <= 0 {
+			ErrorPage(c, NewErrorWithStatusLookup(404, "Not Found"))
+			log.Print(2)
+			return
+		}
+		p2 = ociPath[:i]
+		ociPath = ociPath[i+1:]
 
-		// 为认证和缓存准备镜像信息
-		image := &imageInfo{
+		// 若p2和passTypeMap匹配
+		if !p1IsTarget {
+			if _, ok := passTypeMap[p2]; ok {
+				ignorep3 = true
+				switch cfg.Docker.Target {
+				case "ghcr":
+					target = ghcrTarget
+				case "dockerhub":
+					target = dockerhubTarget
+				case "":
+					ErrorPage(c, NewErrorWithStatusLookup(500, "Default Docker Target is not configured in config file"))
+					return
+				default:
+					target = cfg.Docker.Target
+				}
+				user = "library"
+				repo = p1
+				extpath = "/" + p2 + "/" + ociPath
+			}
+		}
+
+		if !ignorep3 {
+			i = strings.IndexByte(ociPath, '/')
+			if i <= 0 {
+				ErrorPage(c, NewErrorWithStatusLookup(404, "Not Found"))
+				log.Print(3)
+				return
+			}
+			p3 = ociPath[:i]
+
+			ociPath = ociPath[i+1:]
+			p4 = ociPath
+
+			if p1IsTarget {
+				if _, ok := passTypeMap[p3]; ok {
+					user = "library"
+					repo = p2
+					extpath = "/" + p3 + "/" + p4
+				} else {
+					user = p2
+					repo = p3
+					extpath = "/" + p4
+				}
+			} else {
+				switch cfg.Docker.Target {
+				case "ghcr":
+					target = ghcrTarget
+				case "dockerhub":
+					target = dockerhubTarget
+				case "":
+					ErrorPage(c, NewErrorWithStatusLookup(500, "Default Docker Target is not configured in config file"))
+					return
+				default:
+					target = cfg.Docker.Target
+				}
+				user = p1
+				repo = p2
+				extpath = "/" + p3 + "/" + p4
+			}
+		}
+
+		imageNameForAuth = user + "/" + repo
+		finalreqUrl = "https://" + target + "/v2/" + imageNameForAuth + extpath
+		if query := c.GetReqQueryString(); query != "" {
+			finalreqUrl += "?" + query
+		}
+
+		iInfo = &imageInfo{
+			User:  user,
+			Repo:  repo,
 			Image: imageNameForAuth,
 		}
 
-		// 调用 GhcrToTarget 处理实际的代理请求
-		GhcrToTarget(c, cfg, upstreamTarget, requestPath, image)
+		GhcrRequest(c.Request.Context(), c, finalreqUrl, iInfo, cfg, target)
 	}
-}
-
-// GhcrToTarget 根据配置和目标信息将请求代理到上游Docker注册表
-func GhcrToTarget(c *touka.Context, cfg *config.Config, target string, path string, image *imageInfo) {
-	// 检查Docker代理是否启用
-	if !cfg.Docker.Enabled {
-		ErrorPage(c, NewErrorWithStatusLookup(403, "Docker is not Allowed"))
-		return
-	}
-
-	var ctx = c.Request.Context()
-
-	// 构造目标URL. 这里的target和path都是由GhcrWithImageRouting正确解析得来的.
-	destUrl := "https://" + target + "/v2/" + path
-	if query := c.GetReqQueryString(); query != "" {
-		destUrl += "?" + query
-	}
-	c.Debugf("Proxying to target '%s' with path '%s'. Final URL: %s", target, path, destUrl)
-
-	// 执行实际的代理请求
-	GhcrRequest(ctx, c, destUrl, image, cfg, target)
 }
 
 // GhcrRequest 执行对Docker注册表的HTTP请求, 处理认证和重定向

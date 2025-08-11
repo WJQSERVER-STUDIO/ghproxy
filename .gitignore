@@ -1,5 +1,6 @@
 demo
 demo.toml
+demo.wanf
 *.log
 *.bak
 list.json
