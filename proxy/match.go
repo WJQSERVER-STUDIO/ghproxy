@@ -23,6 +23,7 @@ const (
 	gistPrefix              = "https://gist.github.com/"
 	gistContentPrefix       = "https://gist.githubusercontent.com/"
 	apiPrefix               = "https://api.github.com/"
+	ociv2Prefix             = "https://v2/"
 	releasesDownloadSnippet = "releases/download/"
 )
 
@@ -36,9 +37,11 @@ func init() {
 
 // Matcher 从原始URL路径中高效地解析并匹配代理规则.
 func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHProxyErrors) {
-	if len(rawPath) < 18 {
-		return "", "", "", NewErrorWithStatusLookup(404, "path too short")
-	}
+	/*
+		if len(rawPath) < 18 {
+			return "", "", "", NewErrorWithStatusLookup(404, "path too short")
+		}
+	*/
 
 	// 匹配 "https://github.com/"
 	if strings.HasPrefix(rawPath, githubPrefix) {

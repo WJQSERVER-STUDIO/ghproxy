@@ -474,29 +474,16 @@ func main() {
 		proxy.RoutingHandler(cfg)(c)
 	})
 
-	r.GET("/v2/",
+	r.ANY("/v2/*path",
 		r.UseIf(cfg.Docker.Auth, func() touka.HandlerFunc {
 			return bauth.BasicAuthForStatic(cfg.Docker.Credentials, "GHProxy Docker Proxy")
 		}),
-		func(c *touka.Context) {
-			emptyJSON := "{}"
-			c.Header("Content-Type", "application/json")
-			c.Header("Content-Length", fmt.Sprint(len(emptyJSON)))
-
-			c.Header("Docker-Distribution-API-Version", "registry/2.0")
-
-			c.Status(200)
-			c.Writer.Write([]byte(emptyJSON))
-		},
+		proxy.OciWithImageRouting(cfg),
 	)
 
 	r.GET("/v2", func(c *touka.Context) {
 		// 重定向到 /v2/
 		c.Redirect(http.StatusMovedPermanently, "/v2/")
-	})
-
-	r.ANY("/v2/:target/:user/:repo/*filepath", func(c *touka.Context) {
-		proxy.GhcrWithImageRouting(cfg)(c)
 	})
 
 	r.NoRoute(func(c *touka.Context) {
