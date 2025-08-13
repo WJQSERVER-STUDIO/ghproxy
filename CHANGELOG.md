@@ -1,5 +1,9 @@
 # 更新日志
 
+4.3.1 - 2025-08-13
+---
+- CHANGE: 更新至[Go 1.25](https://tip.golang.org/doc/go1.25)
+
 4.3.0 - 2025-08-11
 ---
 - CHANGE: 为OCI镜像(Docker)代理带来自动library附加功能
