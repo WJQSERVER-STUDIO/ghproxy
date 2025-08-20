@@ -234,8 +234,18 @@ func setupPages(cfg *config.Config, r *touka.Engine) {
 		}
 
 	case "external":
-		r.SetUnMatchFS(http.Dir(cfg.Pages.StaticDir))
-
+		if cfg.Pages.StaticDir == "" {
+			logger.Errorf("Pages Mode is 'external' but StaticDir is empty. Using embedded pages instead.")
+			err := setInternalRoute(cfg, r)
+			if err != nil {
+				logger.Errorf("Failed to load embedded pages: %s", err)
+				fmt.Printf("Failed to load embedded pages: %s", err)
+				os.Exit(1)
+			}
+		} else {
+			extPageFS := os.DirFS(cfg.Pages.StaticDir)
+			r.SetUnMatchFS(http.FS(extPageFS))
+		}
 	default:
 		// 处理无效的Pages Mode
 		logger.Warnf("Invalid Pages Mode: %s, using default embedded theme", cfg.Pages.Mode)
