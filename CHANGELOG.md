@@ -1,5 +1,9 @@
 # 更新日志
 
+4.3.2 - 2025-08-20
+---
+- FIX: 修正`cfg.Pages.StaticDir`为空时的处置
+
 4.3.1 - 2025-08-13
 ---
 - CHANGE: 更新至[Go 1.25](https://tip.golang.org/doc/go1.25)
