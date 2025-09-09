@@ -1,12 +1,12 @@
 module ghproxy
 
-go 1.25
+go 1.25.1
 
 require (
 	github.com/BurntSushi/toml v1.5.0
 	github.com/WJQSERVER-STUDIO/httpc v0.8.2
-	golang.org/x/net v0.43.0
-	golang.org/x/time v0.12.0
+	golang.org/x/net v0.44.0
+	golang.org/x/time v0.13.0
 )
 
 require (
@@ -18,9 +18,9 @@ require (
 	github.com/fenthope/ipfilter v0.0.1
 	github.com/fenthope/reco v0.0.4
 	github.com/fenthope/record v0.0.4
-	github.com/go-json-experiment/json v0.0.0-20250813024750-ebf49471dced
+	github.com/go-json-experiment/json v0.0.0-20250813233538-9b1f9ea2e11b
 	github.com/hashicorp/golang-lru/v2 v2.0.7
-	github.com/infinite-iroha/touka v0.3.6
+	github.com/infinite-iroha/touka v0.3.7
 	github.com/wjqserver/modembed v0.0.1
 )
 

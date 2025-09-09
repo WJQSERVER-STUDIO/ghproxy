@@ -1,5 +1,10 @@
 # 更新日志
 
+4.3.3 - 2025-09-10
+---
+- CHANGE: 增强对[wanf](https://github.com/WJQSERVER/wanf)的支持
+- CHANGE: 更新包括Touka框架在内的各个依赖版本
+
 4.3.2 - 2025-08-20
 ---
 - FIX: 修正`cfg.Pages.StaticDir`为空时的处置
