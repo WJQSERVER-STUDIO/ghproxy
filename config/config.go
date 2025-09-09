@@ -1,8 +1,10 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 
@@ -212,7 +214,8 @@ type DockerConfig struct {
 
 // LoadConfig 从配置文件加载配置
 func LoadConfig(filePath string) (*Config, error) {
-	if !FileExists(filePath) {
+	exist, filePath2read := FileExists(filePath)
+	if !exist {
 		// 楔入配置文件
 		err := DefaultConfig().WriteConfig(filePath)
 		if err != nil {
@@ -221,15 +224,15 @@ func LoadConfig(filePath string) (*Config, error) {
 		return DefaultConfig(), nil
 	}
 	var config Config
-	ext := filepath.Ext(filePath)
+	ext := filepath.Ext(filePath2read)
 	if ext == ".wanf" {
-		if err := wanf.DecodeFile(filePath, &config); err != nil {
+		if err := wanf.DecodeFile(filePath2read, &config); err != nil {
 			return nil, err
 		}
 		return &config, nil
 	}
 
-	if _, err := toml.DecodeFile(filePath, &config); err != nil {
+	if _, err := toml.DecodeFile(filePath2read, &config); err != nil {
 		return nil, err
 	}
 	return &config, nil
@@ -257,9 +260,37 @@ func (c *Config) WriteConfig(filePath string) error {
 }
 
 // FileExists 检测文件是否存在
-func FileExists(filename string) bool {
+func FileExists(filename string) (bool, string) {
 	_, err := os.Stat(filename)
-	return !os.IsNotExist(err)
+	if err == nil {
+		return true, filename
+	}
+	if os.IsNotExist(err) {
+		// 获取文件名（不包含路径）
+		base := filepath.Base(filename)
+		dir := filepath.Dir(filename)
+
+		// 获取扩展名
+		fileNameBody := strings.TrimSuffix(base, filepath.Ext(base))
+
+		// 重新组合路径, 扩展名改为.wanf, 确认是否存在
+		wanfFilename := filepath.Join(dir, fileNameBody+".wanf")
+
+		_, err = os.Stat(wanfFilename)
+		if err == nil {
+			// .wanf 文件存在
+			fmt.Printf("\n Found .wanf file: %s\n", wanfFilename)
+			return true, wanfFilename
+		} else if os.IsNotExist(err) {
+			// .wanf 文件不存在
+			return false, ""
+		} else {
+			// 其他错误
+			return false, ""
+		}
+	} else {
+		return false, filename
+	}
 }
 
 // DefaultConfig 返回默认配置结构体
