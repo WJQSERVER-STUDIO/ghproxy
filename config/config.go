@@ -289,7 +289,7 @@ func FileExists(filename string) (bool, string) {
 			return false, ""
 		}
 	} else {
-		return true, filename
+		return false, filename
 	}
 }
 
