@@ -4,9 +4,46 @@ import (
 	"fmt"
 	"ghproxy/auth"
 	"ghproxy/config"
+	"io"
 
 	"github.com/infinite-iroha/touka"
 )
+
+// CountingReader is a reader that counts the number of bytes read.
+// CountingReader 是一个计算已读字节数的读取器.
+type CountingReader struct {
+	reader    io.Reader
+	bytesRead int64
+}
+
+// NewCountingReader creates a new CountingReader.
+// NewCountingReader 创建一个新的 CountingReader.
+func NewCountingReader(reader io.Reader) *CountingReader {
+	return &CountingReader{
+		reader: reader,
+	}
+}
+
+func (cr *CountingReader) Read(p []byte) (n int, err error) {
+	n, err = cr.reader.Read(p)
+	cr.bytesRead += int64(n)
+	return n, err
+}
+
+// BytesRead returns the number of bytes read.
+// BytesRead 返回已读字节数.
+func (cr *CountingReader) BytesRead() int64 {
+	return cr.bytesRead
+}
+
+// Close closes the underlying reader if it implements io.Closer.
+// 如果底层读取器实现了 io.Closer, 则关闭它.
+func (cr *CountingReader) Close() error {
+	if closer, ok := cr.reader.(io.Closer); ok {
+		return closer.Close()
+	}
+	return nil
+}
 
 func listCheck(cfg *config.Config, c *touka.Context, user string, repo string, rawPath string) bool {
 	if cfg.Auth.ForceAllowApi && cfg.Auth.ForceAllowApiPassList {

@@ -3,6 +3,7 @@ package api
 import (
 	"ghproxy/config"
 	"ghproxy/middleware/nocache"
+	"ghproxy/stats"
 
 	"github.com/infinite-iroha/touka"
 )
@@ -46,7 +47,15 @@ func InitHandleRouter(cfg *config.Config, r *touka.Engine, version string) {
 		apiRouter.GET("/oci_proxy/status", func(c *touka.Context) {
 			ociProxyStatusHandler(cfg, c)
 		})
+		apiRouter.GET("/stats", func(c *touka.Context) {
+			StatsHandler(c)
+		})
 	}
+}
+
+func StatsHandler(c *touka.Context) {
+	c.SetHeader("Content-Type", "application/json")
+	c.JSON(200, stats.GetStats())
 }
 
 func SizeLimitHandler(cfg *config.Config, c *touka.Context) {

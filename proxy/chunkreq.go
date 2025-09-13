@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"ghproxy/config"
+	"ghproxy/stats"
 	"io"
 	"net/http"
 	"strconv"
@@ -124,7 +125,11 @@ func ChunkedProxyRequest(ctx context.Context, c *touka.Context, u string, cfg *c
 		bodyReader = limitreader.NewRateLimitedReader(bodyReader, bandwidthLimit, int(bandwidthBurst), ctx)
 	}
 
-	defer bodyReader.Close()
+	countingReader := NewCountingReader(bodyReader)
+	defer countingReader.Close()
+	defer func() {
+		stats.Record(c.ClientIP(), countingReader.BytesRead())
+	}()
 
 	if MatcherShell(u) && matchString(matcher) && cfg.Shell.Editor {
 		// 判断body是不是gzip
@@ -138,7 +143,7 @@ func ChunkedProxyRequest(ctx context.Context, c *touka.Context, u string, cfg *c
 
 		var reader io.Reader
 
-		reader, _, err = processLinks(bodyReader, compress, c.Request.Host, cfg, c)
+		reader, _, err = processLinks(countingReader, compress, c.Request.Host, cfg, c)
 		c.WriteStream(reader)
 		if err != nil {
 			c.Errorf("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), c.Request.Method, u, c.UserAgent(), c.Request.Proto, err)
@@ -149,10 +154,10 @@ func ChunkedProxyRequest(ctx context.Context, c *touka.Context, u string, cfg *c
 
 		if contentLength != "" {
 			c.SetHeader("Content-Length", contentLength)
-			c.WriteStream(bodyReader)
+			c.WriteStream(countingReader)
 			return
 		}
-		c.WriteStream(bodyReader)
+		c.WriteStream(countingReader)
 	}
 
 }

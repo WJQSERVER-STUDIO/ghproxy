@@ -47,6 +47,8 @@ var (
 var (
 	//go:embed pages/*
 	pagesFS embed.FS
+	//go:embed backend/*
+	backendFS embed.FS
 )
 
 var (
@@ -342,6 +344,7 @@ func main() {
 	}
 
 	r := touka.Default()
+	var err error
 	r.SetProtocols(&touka.ProtocolsConfig{
 		Http1:           true,
 		Http2_Cleartext: true,
@@ -380,14 +383,15 @@ func main() {
 	}
 
 	if cfg.IPFilter.Enabled {
-		var err error
-		ipAllowList, ipBlockList, err := auth.ReadIPFilterList(cfg)
+		var ipAllowList, ipBlockList []string
+		ipAllowList, ipBlockList, err = auth.ReadIPFilterList(cfg)
 		if err != nil {
 			fmt.Printf("Failed to read IP filter list: %v\n", err)
 			logger.Errorf("Failed to read IP filter list: %v", err)
 			os.Exit(1)
 		}
-		ipBlockFilter, err := ipfilter.NewIPFilter(ipfilter.IPFilterConfig{
+		var ipBlockFilter *ipfilter.IPFilter
+		ipBlockFilter, err = ipfilter.NewIPFilter(ipfilter.IPFilterConfig{
 			EnableAllowList: cfg.IPFilter.EnableAllowList,
 			EnableBlockList: cfg.IPFilter.EnableBlockList,
 			AllowList:       ipAllowList,
@@ -403,6 +407,7 @@ func main() {
 	}
 	setupApi(cfg, r, version)
 	setupPages(cfg, r)
+	setBackendRoute(r)
 	r.SetRedirectTrailingSlash(false)
 
 	r.GET("/github.com/:user/:repo/releases/*filepath", func(c *touka.Context) {
@@ -517,11 +522,22 @@ func main() {
 	defer logger.Close()
 
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
-	err := r.RunShutdown(addr)
+	err = r.RunShutdown(addr)
 	if err != nil {
 		logger.Errorf("Server Run Error: %v", err)
 		fmt.Printf("Server Run Error: %v\n", err)
 	}
 
 	fmt.Println("Program Exit")
+}
+
+func setBackendRoute(r *touka.Engine) {
+	backend, err := fs.Sub(backendFS, "backend")
+	if err != nil {
+		logger.Errorf("Failed to load embedded backend pages: %s", err)
+		fmt.Printf("Failed to load embedded backend pages: %s", err)
+		os.Exit(1)
+	}
+	r.HandleFunc([]string{"GET"}, "/admin", pageCacheHeader(), touka.FileServer(http.FS(backend)))
+	r.HandleFunc([]string{"GET"}, "/admin/script.js", pageCacheHeader(), touka.FileServer(http.FS(backend)))
 }

@@ -25,10 +25,10 @@ rewriteAPI = false
 [pages]
 mode = "internal" # "internal" or "external"
 theme = "bootstrap" # "bootstrap" or "nebula"
-staticDir = "/data/www" 
+staticDir = "pages"
 
 [log]
-logFilePath = "/data/ghproxy/log/ghproxy.log" 
+logFilePath = "ghproxy.log"
 maxLogSize = 5 # MB
 level = "info" # debug, info, warn, error, none
 
@@ -42,18 +42,18 @@ ForceAllowApi = false
 ForceAllowApiPassList = false
 
 [blacklist]
-blacklistFile = "/data/ghproxy/config/blacklist.json"
+blacklistFile = "blacklist.json"
 enabled = false
 
 [whitelist]
 enabled = false
-whitelistFile = "/data/ghproxy/config/whitelist.json"
+whitelistFile = "whitelist.json"
 
 [ipFilter]
 enabled = false
 enableAllowList = false
 enableBlockList = false
-ipFilterFile = "/data/ghproxy/config/ipfilter.json"
+ipFilterFile = "ipfilter.json"
 
 [rateLimit]
 enabled = false
