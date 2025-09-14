@@ -390,8 +390,7 @@ func main() {
 			logger.Errorf("Failed to read IP filter list: %v", err)
 			os.Exit(1)
 		}
-		var ipBlockFilter *ipfilter.IPFilter
-		ipBlockFilter, err = ipfilter.NewIPFilter(ipfilter.IPFilterConfig{
+		ipBlockFilter, err := ipfilter.NewIPFilter(ipfilter.IPFilterConfig{
 			EnableAllowList: cfg.IPFilter.EnableAllowList,
 			EnableBlockList: cfg.IPFilter.EnableBlockList,
 			AllowList:       ipAllowList,
@@ -532,12 +531,13 @@ func main() {
 }
 
 func setBackendRoute(r *touka.Engine) {
+
 	backend, err := fs.Sub(backendFS, "backend")
 	if err != nil {
 		logger.Errorf("Failed to load embedded backend pages: %s", err)
 		fmt.Printf("Failed to load embedded backend pages: %s", err)
 		os.Exit(1)
 	}
-	r.HandleFunc([]string{"GET"}, "/admin", pageCacheHeader(), touka.FileServer(http.FS(backend)))
-	r.HandleFunc([]string{"GET"}, "/admin/script.js", pageCacheHeader(), touka.FileServer(http.FS(backend)))
+
+	r.StaticFS("/backend", http.FS(backend))
 }
