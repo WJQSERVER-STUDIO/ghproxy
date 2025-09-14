@@ -134,7 +134,7 @@ func ChunkedProxyRequest(ctx context.Context, c *touka.Context, u string, cfg *c
 
 		var reader io.Reader
 
-		reader, _, err = processLinks(bodyReader, c.Request.Host, cfg, c)
+		reader, _, err = processLinks(bodyReader, c.Request.Host, cfg, c, bodySize)
 		c.WriteStream(reader)
 		if err != nil {
 			c.Errorf("%s %s %s %s %s Failed to copy response body: %v", c.ClientIP(), c.Request.Method, u, c.UserAgent(), c.Request.Proto, err)

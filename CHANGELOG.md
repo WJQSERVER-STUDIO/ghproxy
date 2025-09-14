@@ -1,5 +1,12 @@
 # 更新日志
 
+4.3.5-rc.0 - 2025-09-14
+---
+- PRE-RELEASE: v4.3.5-rc.0是v4.3.5的预发布版本,请勿在生产环境中使用;
+- CHANGE: 改进`nest`实现, 减少内存分配`10371 B/op -> 1852 B/op` `43 allocs/op -> 14 allocs/op`
+- CHANGE: 为`nest`加入`dispatcher`实现, 为不同情况分配适合的处理器以保证性能与兼容性
+- CHANGE: 改进路径匹配热点的内存分配
+
 4.3.4 - 2025-09-14
 ---
 - CHANGE: 改进嵌套加速实现, 增强稳定性
@@ -25,7 +32,7 @@
 
 4.3.0-rc.0 - 2025-08-11
 ---
-- PRE-RELEASE: v4.3.0-rc.0是v4.3.0发布版本,请勿在生产环境中使用;
+- PRE-RELEASE: v4.3.0-rc.0是v4.3.0的预布版本,请勿在生产环境中使用;
 - CHANGE: 为OCI镜像(Docker)代理带来自动library附加功能
 - CHANGE(refactor): 改进OCI镜像(Docker)代理路径组成流程
 - ADD: 新增[WANF](https://github.com/WJQSERVER/wanf)配置文件格式支持

@@ -9,6 +9,32 @@ import (
 	"github.com/infinite-iroha/touka"
 )
 
+// buildHandlerPath 使用 strings.Builder 来高效地构建最终的 URL.
+// 这避免了使用标准字符串拼接时发生的多次内存分配.
+func buildHandlerPath(path, matcher string) string {
+	var sb strings.Builder
+	sb.Grow(len(path) + 50)
+
+	if matcher == "blob" && strings.HasPrefix(path, "github.com") {
+		sb.WriteString("https://raw.githubusercontent.com")
+		if len(path) > 10 { // len("github.com")
+			pathSegment := path[10:] // skip "github.com"
+			if i := strings.Index(pathSegment, "/blob/"); i != -1 {
+				sb.WriteString(pathSegment[:i])
+				sb.WriteString("/")
+				sb.WriteString(pathSegment[i+len("/blob/"):])
+			} else {
+				sb.WriteString(pathSegment)
+			}
+		}
+	} else {
+		sb.WriteString("https://")
+		sb.WriteString(path)
+	}
+
+	return sb.String()
+}
+
 var re = regexp.MustCompile(`^(http:|https:)?/?/?(.*)`) // 匹配http://或https://开头的路径
 
 func NoRouteHandler(cfg *config.Config) touka.HandlerFunc {
@@ -32,20 +58,15 @@ func NoRouteHandler(cfg *config.Config) touka.HandlerFunc {
 		}
 
 		// 制作url
-		rawPath = "https://" + matches[2]
-
-		var (
-			user    string
-			repo    string
-			matcher string
-		)
-
+		path := matches[2]
 		var matcherErr *GHProxyErrors
-		user, repo, matcher, matcherErr = Matcher(rawPath, cfg)
+		user, repo, matcher, matcherErr := Matcher("https://"+path, cfg)
 		if matcherErr != nil {
 			ErrorPage(c, matcherErr)
 			return
 		}
+
+		rawPath = buildHandlerPath(path, matcher)
 
 		shoudBreak = listCheck(cfg, c, user, repo, rawPath)
 		if shoudBreak {
@@ -57,11 +78,7 @@ func NoRouteHandler(cfg *config.Config) touka.HandlerFunc {
 			return
 		}
 
-		// 处理blob/raw路径
 		if matcher == "blob" {
-			rawPath = rawPath[18:]
-			rawPath = "https://raw.githubusercontent.com" + rawPath
-			rawPath = strings.Replace(rawPath, "/blob/", "/", 1)
 			matcher = "raw"
 		}
 
