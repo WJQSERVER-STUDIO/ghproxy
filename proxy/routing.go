@@ -7,6 +7,33 @@ import (
 	"github.com/infinite-iroha/touka"
 )
 
+// buildRoutingPath 使用 strings.Builder 来高效地构建最终的 URL.
+// 这避免了使用标准字符串拼接时发生的多次内存分配.
+func buildRoutingPath(rawPath, matcher string) string {
+	var sb strings.Builder
+	// 预分配内存以提高性能
+	// (This comment is in Chinese as requested by the user)
+	sb.Grow(len(rawPath) + 30)
+	sb.WriteString("https://")
+
+	if matcher == "blob" {
+		sb.WriteString("raw.githubusercontent.com")
+		if len(rawPath) > 10 { // len("github.com")
+			pathSegment := rawPath[10:]
+			if i := strings.Index(pathSegment, "/blob/"); i != -1 {
+				sb.WriteString(pathSegment[:i])
+				sb.WriteString("/")
+				sb.WriteString(pathSegment[i+len("/blob/"):])
+			} else {
+				sb.WriteString(pathSegment)
+			}
+		}
+	} else {
+		sb.WriteString(rawPath)
+	}
+	return sb.String()
+}
+
 func RoutingHandler(cfg *config.Config) touka.HandlerFunc {
 	return func(c *touka.Context) {
 
@@ -44,16 +71,10 @@ func RoutingHandler(cfg *config.Config) touka.HandlerFunc {
 			return
 		}
 
-		// 处理blob/raw路径
+		rawPath = buildRoutingPath(rawPath, matcher)
 		if matcher == "blob" {
-			rawPath = rawPath[10:]
-			rawPath = "raw.githubusercontent.com" + rawPath
-			rawPath = strings.Replace(rawPath, "/blob/", "/", 1)
 			matcher = "raw"
 		}
-
-		// 为rawpath加入https:// 头
-		rawPath = "https://" + rawPath
 
 		switch matcher {
 		case "releases", "blob", "raw", "gist", "api":
