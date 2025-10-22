@@ -12,7 +12,7 @@ require (
 require (
 	github.com/WJQSERVER-STUDIO/go-utils/iox v0.0.2
 	github.com/WJQSERVER-STUDIO/go-utils/limitreader v0.0.2
-	github.com/WJQSERVER/wanf v0.0.0-20250810023226-e51d9d0737ee
+	github.com/WJQSERVER/wanf v0.0.2
 	github.com/fenthope/bauth v0.0.1
 	github.com/fenthope/ikumi v0.0.2
 	github.com/fenthope/ipfilter v0.0.1
