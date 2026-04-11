@@ -19,12 +19,11 @@ require (
 	github.com/fenthope/record v0.0.4
 	github.com/go-json-experiment/json v0.0.0-20260214004413-d219187c3433
 	github.com/hashicorp/golang-lru/v2 v2.0.7
-	github.com/infinite-iroha/touka v0.5.1-0.20260409232140-271e54eb4d44
+	github.com/infinite-iroha/touka v0.5.1
 	github.com/wjqserver/modembed v0.0.1
 )
 
 require (
 	github.com/WJQSERVER-STUDIO/go-utils/iox v0.0.3 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	golang.org/x/text v0.36.0 // indirect
 )
