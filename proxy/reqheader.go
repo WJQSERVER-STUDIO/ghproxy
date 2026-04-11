@@ -60,6 +60,26 @@ func copyHeader(dst, src http.Header) {
 	}
 }
 
+func canonicalizeHeaderSet(headers map[string]struct{}) map[string]struct{} {
+	canonicalized := make(map[string]struct{}, len(headers))
+	for key := range headers {
+		canonicalized[http.CanonicalHeaderKey(key)] = struct{}{}
+	}
+	return canonicalized
+}
+
+func init() {
+	reqHeadersToRemove = canonicalizeHeaderSet(reqHeadersToRemove)
+	cloneHeadersToRemove = canonicalizeHeaderSet(cloneHeadersToRemove)
+	respHeadersToRemove = canonicalizeHeaderSet(respHeadersToRemove)
+	defaultHeaders = map[string]string{
+		"Accept":            "*/*",
+		"Accept-Encoding":   "",
+		"Transfer-Encoding": "chunked",
+		"User-Agent":        "GHProxy/1.0",
+	}
+}
+
 func copyHeaderFiltered(dst, src http.Header, denylist map[string]struct{}) {
 	for k, vv := range src {
 		if _, denied := denylist[k]; denied {

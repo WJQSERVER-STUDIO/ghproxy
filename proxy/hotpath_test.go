@@ -65,6 +65,31 @@ func TestCopyHeaderFiltered(t *testing.T) {
 	}
 }
 
+func TestCopyHeaderFiltered_CanonicalizesDenylist(t *testing.T) {
+	src := http.Header{
+		"Cf-Ipcountry":    {"CN"},
+		"Cf-Ray":          {"abc123"},
+		"Cf-Ew-Via":       {"edge"},
+		"X-Forwarded-For": {"127.0.0.1"},
+	}
+	dst := make(http.Header)
+
+	copyHeaderFiltered(dst, src, reqHeadersToRemove)
+
+	if got := dst.Values("Cf-Ipcountry"); len(got) != 0 {
+		t.Fatalf("Cf-Ipcountry should be filtered, got %v", got)
+	}
+	if got := dst.Values("Cf-Ray"); len(got) != 0 {
+		t.Fatalf("Cf-Ray should be filtered, got %v", got)
+	}
+	if got := dst.Values("Cf-Ew-Via"); len(got) != 0 {
+		t.Fatalf("Cf-Ew-Via should be filtered, got %v", got)
+	}
+	if got := dst.Values("X-Forwarded-For"); !reflect.DeepEqual(got, []string{"127.0.0.1"}) {
+		t.Fatalf("X-Forwarded-For = %v, want [127.0.0.1]", got)
+	}
+}
+
 func TestCopyHeaderFiltered_AllowsAllWhenDenylistEmpty(t *testing.T) {
 	src := http.Header{
 		"X-Test": {"one", "two"},

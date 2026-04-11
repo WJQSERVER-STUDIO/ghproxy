@@ -161,21 +161,28 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 		var user, repo string
 		if strings.HasPrefix(remaining, "repos/") {
 			remaining = remaining[6:]
+			if q := strings.IndexByte(remaining, '?'); q != -1 {
+				remaining = remaining[:q]
+			}
+			if remaining != "" && !strings.ContainsRune(remaining, '/') {
+				user = remaining
+				return user, "", "api", nil
+			}
 			i := strings.IndexByte(remaining, '/')
 			if i > 0 {
-				userCandidate := remaining[:i]
+				user = remaining[:i]
 				rest := remaining[i+1:]
-				if rest != "" {
-					if j := strings.IndexByte(rest, '/'); j != -1 {
-						repo = rest[:j]
-					} else {
-						repo = rest
-					}
-					user = userCandidate
+				if j := strings.IndexByte(rest, '/'); j != -1 {
+					repo = rest[:j]
+				} else {
+					repo = rest
 				}
 			}
 		} else if strings.HasPrefix(remaining, "users/") {
 			remaining = remaining[6:]
+			if q := strings.IndexByte(remaining, '?'); q != -1 {
+				remaining = remaining[:q]
+			}
 			if remaining != "" {
 				if i := strings.IndexByte(remaining, '/'); i != -1 {
 					user = remaining[:i]

@@ -151,7 +151,19 @@ func TestMatcher_Compatibility(t *testing.T) {
 			name:         "API Repos Path (missing repo)",
 			rawPath:      "https://api.github.com/repos/owner",
 			config:       cfgWithAuth,
-			expectedUser: "", expectedRepo: "", expectedMatcher: "api",
+			expectedUser: "owner", expectedRepo: "", expectedMatcher: "api",
+		},
+		{
+			name:         "API Repos Path (trailing slash)",
+			rawPath:      "https://api.github.com/repos/owner/",
+			config:       cfgWithAuth,
+			expectedUser: "owner", expectedRepo: "", expectedMatcher: "api",
+		},
+		{
+			name:         "API Repos Path (missing repo with query)",
+			rawPath:      "https://api.github.com/repos/owner?per_page=1",
+			config:       cfgWithAuth,
+			expectedUser: "owner", expectedRepo: "", expectedMatcher: "api",
 		},
 		{
 			name:         "API Users Path (exact user)",
