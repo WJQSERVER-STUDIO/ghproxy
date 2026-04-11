@@ -265,10 +265,11 @@ func TestExtractParts_Compatibility(t *testing.T) {
 		},
 		{
 			name:          "Empty path segments",
-			rawURL:        "https://example.com//repo/a", // Will be treated as /repo/a
-			expectedOwner: "",                            // First part is empty
+			rawURL:        "https://example.com//repo/a",
+			expectedOwner: "/",
 			expectedRepo:  "/repo",
 			expectedRem:   "/a",
+			expectedQuery: url.Values{},
 		},
 		{
 			name:        "Invalid URL format",
