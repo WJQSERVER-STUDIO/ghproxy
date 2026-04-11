@@ -39,10 +39,13 @@ func initHTTPClient(cfg *config.Config) *httpc.Client {
 	switch cfg.Httpc.Mode {
 	case "auto", "":
 		tr = &http.Transport{
-			IdleConnTimeout: 30 * time.Second,
-			WriteBufferSize: 32 * 1024, // 32KB
-			ReadBufferSize:  32 * 1024, // 32KB
-			Protocols:       proTolcols,
+			MaxIdleConns:        cfg.Httpc.MaxIdleConns,
+			MaxConnsPerHost:     cfg.Httpc.MaxConnsPerHost,
+			MaxIdleConnsPerHost: cfg.Httpc.MaxIdleConnsPerHost,
+			IdleConnTimeout:     30 * time.Second,
+			WriteBufferSize:     32 * 1024, // 32KB
+			ReadBufferSize:      32 * 1024, // 32KB
+			Protocols:           proTolcols,
 		}
 	case "advanced":
 		tr = &http.Transport{
@@ -77,9 +80,12 @@ func initGitHTTPClient(cfg *config.Config) {
 	switch cfg.Httpc.Mode {
 	case "auto", "":
 		gittr = &http.Transport{
-			IdleConnTimeout: 30 * time.Second,
-			WriteBufferSize: 32 * 1024, // 32KB
-			ReadBufferSize:  32 * 1024, // 32KB
+			MaxIdleConns:        cfg.Httpc.MaxIdleConns,
+			MaxConnsPerHost:     cfg.Httpc.MaxConnsPerHost,
+			MaxIdleConnsPerHost: cfg.Httpc.MaxIdleConnsPerHost,
+			IdleConnTimeout:     30 * time.Second,
+			WriteBufferSize:     32 * 1024, // 32KB
+			ReadBufferSize:      32 * 1024, // 32KB
 		}
 	case "advanced":
 		gittr = &http.Transport{

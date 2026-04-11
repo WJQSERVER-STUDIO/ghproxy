@@ -116,11 +116,19 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 	// 匹配 "https://raw.githubusercontent.com/"
 	if strings.HasPrefix(rawPath, rawPrefix) {
 		remaining := rawPath[rawPrefixLen:]
-		parts := strings.SplitN(remaining, "/", 3)
-		if len(parts) < 3 {
+		i := strings.IndexByte(remaining, '/')
+		if i <= 0 {
 			return "", "", "", NewErrorWithStatusLookup(400, "malformed raw url: path too short")
 		}
-		return parts[0], parts[1], "raw", nil
+		user := remaining[:i]
+		remaining = remaining[i+1:]
+
+		i = strings.IndexByte(remaining, '/')
+		if i <= 0 || i == len(remaining)-1 {
+			return "", "", "", NewErrorWithStatusLookup(400, "malformed raw url: path too short")
+		}
+
+		return user, remaining[:i], "raw", nil
 	}
 
 	// 匹配 "https://gist.github.com/" 或 "https://gist.githubusercontent.com/"
@@ -132,11 +140,16 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 		} else {
 			remaining = rawPath[gistContentPrefixLen:]
 		}
-		parts := strings.SplitN(remaining, "/", 2)
-		if len(parts) == 0 || parts[0] == "" {
+		if remaining == "" {
 			return "", "", "", NewErrorWithStatusLookup(400, "malformed gist url: missing user")
 		}
-		return parts[0], "", "gist", nil
+		if i := strings.IndexByte(remaining, '/'); i != -1 {
+			if i == 0 {
+				return "", "", "", NewErrorWithStatusLookup(400, "malformed gist url: missing user")
+			}
+			remaining = remaining[:i]
+		}
+		return remaining, "", "gist", nil
 	}
 
 	// 匹配 "https://api.github.com/"
@@ -147,15 +160,28 @@ func Matcher(rawPath string, cfg *config.Config) (string, string, string, *GHPro
 		remaining := rawPath[apiPrefixLen:]
 		var user, repo string
 		if strings.HasPrefix(remaining, "repos/") {
-			parts := strings.SplitN(remaining[6:], "/", 3)
-			if len(parts) >= 2 {
-				user = parts[0]
-				repo = parts[1]
+			remaining = remaining[6:]
+			i := strings.IndexByte(remaining, '/')
+			if i > 0 {
+				userCandidate := remaining[:i]
+				rest := remaining[i+1:]
+				if rest != "" {
+					if j := strings.IndexByte(rest, '/'); j != -1 {
+						repo = rest[:j]
+					} else {
+						repo = rest
+					}
+					user = userCandidate
+				}
 			}
 		} else if strings.HasPrefix(remaining, "users/") {
-			parts := strings.SplitN(remaining[6:], "/", 2)
-			if len(parts) >= 1 {
-				user = parts[0]
+			remaining = remaining[6:]
+			if remaining != "" {
+				if i := strings.IndexByte(remaining, '/'); i != -1 {
+					user = remaining[:i]
+				} else {
+					user = remaining
+				}
 			}
 		}
 		return user, repo, "api", nil

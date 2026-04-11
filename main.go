@@ -404,6 +404,8 @@ func main() {
 	setupApi(cfg, r, version)
 	setupPages(cfg, r)
 	r.SetRedirectTrailingSlash(false)
+	routingHandler := proxy.RoutingHandler(cfg)
+	noRouteHandler := proxy.NoRouteHandler(cfg)
 
 	r.GET("/github.com/:user/:repo/releases/*filepath", func(c *touka.Context) {
 		// 规范化路径: 移除前导斜杠, 简化后续处理
@@ -433,7 +435,7 @@ func main() {
 		// 根据匹配结果执行最终操作
 		if isValidDownload {
 			c.Set("matcher", "releases")
-			proxy.RoutingHandler(cfg)(c)
+			routingHandler(c)
 		} else {
 			// 任何不符合下载链接格式的 'releases' 路径都被视为浏览页面并拒绝
 			proxy.ErrorPage(c, proxy.NewErrorWithStatusLookup(400, "unsupported releases page, only download links are allowed"))
@@ -443,45 +445,45 @@ func main() {
 
 	r.GET("/github.com/:user/:repo/archive/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "releases")
-		proxy.RoutingHandler(cfg)(c)
+		routingHandler(c)
 	})
 
 	r.GET("/github.com/:user/:repo/blob/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "blob")
-		proxy.RoutingHandler(cfg)(c)
+		routingHandler(c)
 	})
 
 	r.GET("/github.com/:user/:repo/raw/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "raw")
-		proxy.RoutingHandler(cfg)(c)
+		routingHandler(c)
 	})
 
 	r.GET("/github.com/:user/:repo/info/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "clone")
-		proxy.RoutingHandler(cfg)(c)
+		routingHandler(c)
 	})
 	r.GET("/github.com/:user/:repo/git-upload-pack", func(c *touka.Context) {
 		c.Set("matcher", "clone")
-		proxy.RoutingHandler(cfg)(c)
+		routingHandler(c)
 	})
 	r.POST("/github.com/:user/:repo/git-upload-pack", func(c *touka.Context) {
 		c.Set("matcher", "clone")
-		proxy.RoutingHandler(cfg)(c)
+		routingHandler(c)
 	})
 
 	r.GET("/raw.githubusercontent.com/:user/:repo/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "raw")
-		proxy.RoutingHandler(cfg)(c)
+		routingHandler(c)
 	})
 
 	r.GET("/gist.githubusercontent.com/:user/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "gist")
-		proxy.NoRouteHandler(cfg)(c)
+		noRouteHandler(c)
 	})
 
 	r.ANY("/api.github.com/repos/:user/:repo/*filepath", func(c *touka.Context) {
 		c.Set("matcher", "api")
-		proxy.RoutingHandler(cfg)(c)
+		routingHandler(c)
 	})
 
 	r.ANY("/v2/*path",
@@ -497,7 +499,7 @@ func main() {
 	})
 
 	r.NoRoute(func(c *touka.Context) {
-		proxy.NoRouteHandler(cfg)(c)
+		noRouteHandler(c)
 	})
 
 	fmt.Printf("GHProxy Version: %s\n", version)
