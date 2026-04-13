@@ -44,16 +44,11 @@ func RoutingHandler(cfg *config.Config) touka.HandlerFunc {
 			return
 		}
 
-		// 处理blob/raw路径
+		rawPath = buildProxyPath(rawPath, matcher)
+
 		if matcher == "blob" {
-			rawPath = rawPath[10:]
-			rawPath = "raw.githubusercontent.com" + rawPath
-			rawPath = strings.Replace(rawPath, "/blob/", "/", 1)
 			matcher = "raw"
 		}
-
-		// 为rawpath加入https:// 头
-		rawPath = "https://" + rawPath
 
 		switch matcher {
 		case "releases", "blob", "raw", "gist", "api":
