@@ -100,8 +100,20 @@ func TestMatcher_Compatibility(t *testing.T) {
 			expectedUser: "owner", expectedRepo: "repo", expectedMatcher: "raw",
 		},
 		{
+			name:        "Malformed Raw Path (missing branch)",
+			rawPath:     "https://raw.githubusercontent.com/owner/repo",
+			config:      cfgWithAuth,
+			expectError: true, expectedErrCode: 400,
+		},
+		{
 			name:         "Gist Path",
 			rawPath:      "https://gist.github.com/user/abcdef1234567890",
+			config:       cfgWithAuth,
+			expectedUser: "user", expectedRepo: "", expectedMatcher: "gist",
+		},
+		{
+			name:         "Gist Path (user only)",
+			rawPath:      "https://gist.github.com/user",
 			config:       cfgWithAuth,
 			expectedUser: "user", expectedRepo: "", expectedMatcher: "gist",
 		},
@@ -134,6 +146,30 @@ func TestMatcher_Compatibility(t *testing.T) {
 			rawPath:      "https://api.github.com/repos/owner/repo",
 			config:       cfgApiForceAllowed, // Auth disabled, but force allowed
 			expectedUser: "owner", expectedRepo: "repo", expectedMatcher: "api",
+		},
+		{
+			name:         "API Repos Path (missing repo)",
+			rawPath:      "https://api.github.com/repos/owner",
+			config:       cfgWithAuth,
+			expectedUser: "owner", expectedRepo: "", expectedMatcher: "api",
+		},
+		{
+			name:         "API Repos Path (trailing slash)",
+			rawPath:      "https://api.github.com/repos/owner/",
+			config:       cfgWithAuth,
+			expectedUser: "owner", expectedRepo: "", expectedMatcher: "api",
+		},
+		{
+			name:         "API Repos Path (missing repo with query)",
+			rawPath:      "https://api.github.com/repos/owner?per_page=1",
+			config:       cfgWithAuth,
+			expectedUser: "owner", expectedRepo: "", expectedMatcher: "api",
+		},
+		{
+			name:         "API Users Path (exact user)",
+			rawPath:      "https://api.github.com/users/someuser",
+			config:       cfgWithAuth,
+			expectedUser: "someuser", expectedRepo: "", expectedMatcher: "api",
 		},
 		{
 			name:        "Malformed GH Path (no repo)",

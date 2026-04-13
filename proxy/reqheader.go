@@ -60,6 +60,37 @@ func copyHeader(dst, src http.Header) {
 	}
 }
 
+func canonicalizeHeaderSet(headers map[string]struct{}) map[string]struct{} {
+	canonicalized := make(map[string]struct{}, len(headers))
+	for key := range headers {
+		canonicalized[http.CanonicalHeaderKey(key)] = struct{}{}
+	}
+	return canonicalized
+}
+
+func init() {
+	reqHeadersToRemove = canonicalizeHeaderSet(reqHeadersToRemove)
+	cloneHeadersToRemove = canonicalizeHeaderSet(cloneHeadersToRemove)
+	respHeadersToRemove = canonicalizeHeaderSet(respHeadersToRemove)
+	defaultHeaders = map[string]string{
+		"Accept":            "*/*",
+		"Accept-Encoding":   "",
+		"Transfer-Encoding": "chunked",
+		"User-Agent":        "GHProxy/1.0",
+	}
+}
+
+func copyHeaderFiltered(dst, src http.Header, denylist map[string]struct{}) {
+	for k, vv := range src {
+		if _, denied := denylist[k]; denied {
+			continue
+		}
+		for _, v := range vv {
+			dst.Add(k, v)
+		}
+	}
+}
+
 func setRequestHeaders(c *touka.Context, req *http.Request, cfg *config.Config, matcher string) {
 	if matcher == "raw" && cfg.Httpc.UseCustomRawHeaders {
 		// 使用预定义Header
@@ -67,14 +98,8 @@ func setRequestHeaders(c *touka.Context, req *http.Request, cfg *config.Config, 
 			req.Header.Set(key, value)
 		}
 	} else if matcher == "clone" {
-		copyHeader(req.Header, c.Request.Header)
-		for key := range cloneHeadersToRemove {
-			req.Header.Del(key)
-		}
+		copyHeaderFiltered(req.Header, c.Request.Header, cloneHeadersToRemove)
 	} else {
-		copyHeader(req.Header, c.Request.Header)
-		for key := range reqHeadersToRemove {
-			req.Header.Del(key)
-		}
+		copyHeaderFiltered(req.Header, c.Request.Header, reqHeadersToRemove)
 	}
 }
