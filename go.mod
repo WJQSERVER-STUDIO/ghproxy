@@ -13,13 +13,13 @@ require (
 	github.com/WJQSERVER-STUDIO/go-utils/limitreader v0.0.2
 	github.com/WJQSERVER/wanf v0.0.8
 	github.com/fenthope/bauth v0.0.1
-	github.com/fenthope/ikumi v0.0.2
+	github.com/fenthope/ikumi v0.1.0
 	github.com/fenthope/ipfilter v0.0.1
 	github.com/fenthope/reco v0.0.5
 	github.com/fenthope/record v0.0.4
 	github.com/go-json-experiment/json v0.0.0-20260214004413-d219187c3433
 	github.com/hashicorp/golang-lru/v2 v2.0.7
-	github.com/infinite-iroha/touka v0.5.1-0.20260409232140-271e54eb4d44
+	github.com/infinite-iroha/touka v1.0.0
 	github.com/wjqserver/modembed v0.0.1
 )
 
