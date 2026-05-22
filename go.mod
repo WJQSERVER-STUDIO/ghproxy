@@ -5,7 +5,7 @@ go 1.26
 require (
 	github.com/BurntSushi/toml v1.6.0
 	github.com/WJQSERVER-STUDIO/httpc v0.9.0
-	golang.org/x/net v0.53.0
+	golang.org/x/net v0.55.0
 	golang.org/x/time v0.15.0
 )
 
@@ -26,5 +26,5 @@ require (
 require (
 	github.com/WJQSERVER-STUDIO/go-utils/iox v0.0.3 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	golang.org/x/text v0.36.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 )
